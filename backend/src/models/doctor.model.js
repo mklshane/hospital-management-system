@@ -17,16 +17,35 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    age: {
+      type: Number,
+    },
+    gender: {
+      type: String,
+    },
+    contact: {
+      type: String,
+    },
     specialization: {
       type: String,
-      required: true,
+      enum: [
+        "Cardiology",
+        "Neurology",
+        "Pediatrics",
+        "Orthopedics",
+        "Dermatology",
+        "General Medicine",
+        "Ophthalmology",
+        "Psychiatry",
+        "ENT",
+        "Radiology",
+      ],
     },
     schedule_time: {
       type: [String],
-      required: true,
     },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
 const Doctor = mongoose.model("Doctor", doctorSchema);
