@@ -1,4 +1,3 @@
-import express from "express"
 import Doctor from "../models/doctor.model.js"
 
 export const fetchAllDoctors = async (req, res) => {
