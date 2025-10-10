@@ -1,30 +1,25 @@
-/* import express from "express";
+import express from "express";
+import verifyToken from "../middleware/verifyToken.js";
+import authorizeRoles from "../middleware/authorizeRoles.js";
+import { createAppointment, deleteAppointment, getAppointment, updateAppointment } from "../controller/appointment.controller.js";
 
 const router = express.Router();
 
-// Patient books an appointment
-router.post("/");
+// Patient creates an appointment
+router.post("/", verifyToken, authorizeRoles("patient"), createAppointment);
 
 // Get appointments
 // - Patient: only their own
 // - Doctor: appointments assigned to them
 // - Admin: all appointments
-router.get("/");
+router.get("/", verifyToken, authorizeRoles("admin", "patient", "doctor"), getAppointment);
 
-// Patient cancels an appointment
-router.put("/:id/cancel");
 
-// Patient reschedules an appointment
-router.put("/:id/reschedule");
+// Update appointment
+// Patient: Cancel, Reschedule
+// Doctor: Accept, Reject, Complete
+router.put("/:id", verifyToken, authorizeRoles("doctor", "patient"), updateAppointment);
 
-// Doctor accepts an appointment
-router.put("/:id/accept");
-
-// Doctor rejects an appointment
-router.put("/:id/reject");
-
-// Doctor marks as completed
-router.put("/:id/complete");
+router.delete("/:id", verifyToken, authorizeRoles("admin"), deleteAppointment)
 
 export default router;
- */
