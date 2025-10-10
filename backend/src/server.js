@@ -4,6 +4,8 @@ import cors from "cors"
 import { connectDB } from "./config/db.js";
 //import adminRoutes from "./routes/admin.route.js"
 import authRoutes from "./routes/auth.route.js"
+import docRoutes from "./routes/doctor.route.js"
+import cookieParser from "cookie-parser"
 
 dotenv.config();
 
@@ -12,9 +14,12 @@ const PORT = process.env.PORT;
 
 
 app.use(express.json());
+app.use(cookieParser());
+
 
 //app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/doc", docRoutes)
 
 app.listen(PORT, () => {
     connectDB();

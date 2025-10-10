@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Doctor from "../models/doctor.model.js";
-import Patient from "../models/patient.model.js"
+import Patient from "../models/patient.model.js";
+import generateTokenAndSetCookie from "../utils/generateTokenAndSetCookie.js";
 
 dotenv.config();
 
@@ -21,16 +21,7 @@ export const adminLogin = async (req, res) => {
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
-      const token = jwt.sign({ role: "admin", email }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-      });
-
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: false,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
+      generateTokenAndSetCookie({ role: "admin", email }, res);
       return res.status(200).json({ message: "Successfully logged in." });
     }
 
@@ -110,22 +101,10 @@ export const doctorLogin = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      {
-        id: doctor._id,
-        email: doctor.email,
-        role: "doctor",
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+    generateTokenAndSetCookie(
+      { id: doctor._id, email: doctor.email, role: "doctor" },
+      res
     );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false, // change to true in production
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
 
     const { password: _, ...doctorData } = doctor._doc;
 
@@ -139,18 +118,9 @@ export const doctorLogin = async (req, res) => {
   }
 };
 
-
 export const patientRegister = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      password,
-      age,
-      gender,
-      contact,
-      address
-    } = req.body;
+    const { name, email, password, age, gender, contact, address } = req.body;
 
     if (!name || !email || !password) {
       return res
@@ -173,7 +143,7 @@ export const patientRegister = async (req, res) => {
       age,
       gender,
       contact,
-      address
+      address,
     });
 
     await newUser.save();
@@ -205,22 +175,10 @@ export const patientLogin = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-        role: "patient",
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+    generateTokenAndSetCookie(
+      { id: user._id, email: user.email, role: "patient" },
+      res
     );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false, // change to true in production
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
 
     const { password: _, ...patientData } = user._doc;
 
@@ -238,7 +196,7 @@ export const logout = (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false, // set to true in production 
+      secure: false, // set to true in production
       sameSite: "strict",
     });
 
