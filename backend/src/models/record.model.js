@@ -17,6 +17,9 @@ const recordSchema = new mongoose.Schema(
       ref: "Appointment",
       required: true, 
     },
+    symptoms: {
+      type: String,
+    },
     diagnosis: {
       type: String,
       required: true,
@@ -29,10 +32,6 @@ const recordSchema = new mongoose.Schema(
         duration: { type: String, required: true },
       },
     ],
-    notes: {
-      type: String,
-      default: "",
-    },
   },
   { timestamps: true }
 );
