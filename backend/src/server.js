@@ -7,12 +7,18 @@ import docRoutes from "./routes/doctor.route.js"
 import patientRoutes from "./routes/patient.route.js"
 import aptRoutes from "./routes/appointment.route.js"
 import cookieParser from "cookie-parser"
-
+import recRoutes from "./routes/record.route.js"
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT;
+
+app.use(cors({
+    origin: "https://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+}));
 
 
 app.use(express.json());
@@ -22,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/doc", docRoutes)
 app.use("/api/patient", patientRoutes)
 app.use("/api/appointment", aptRoutes)
+app.use("/api/record", recRoutes)
 
 app.listen(PORT, () => {
     connectDB();
