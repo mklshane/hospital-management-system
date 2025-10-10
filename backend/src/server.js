@@ -8,6 +8,8 @@ import patientRoutes from "./routes/patient.route.js"
 import aptRoutes from "./routes/appointment.route.js"
 import cookieParser from "cookie-parser"
 import recRoutes from "./routes/record.route.js"
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 dotenv.config();
 
@@ -20,9 +22,11 @@ app.use(cors({
     credentials: true,
 }));
 
-
 app.use(express.json());
 app.use(cookieParser());
+
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/doc", docRoutes)

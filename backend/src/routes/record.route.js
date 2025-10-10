@@ -5,11 +5,86 @@ import { addRecord, getRecords } from "../controller/record.controller.js";
 
 const router = express.Router();
 
-router.post("/:appointmentId", verifyToken, authorizeRoles("doctor"), addRecord);
+/**
+ * @swagger
+ * /api/record/{appointmentId}:
+ *   post:
+ *     summary: Add a medical record for an appointment
+ *     tags: [Record]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: appointmentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               symptoms:
+ *                 type: string
+ *               diagnosis:
+ *                 type: string
+ *               prescriptions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     medicine:
+ *                       type: string
+ *                     dosage:
+ *                       type: string
+ *                     duration:
+ *                       type: string
+ *     responses:
+ *       201:
+ *         description: Record added successfully
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Appointment not found
+ */
+router.post(
+  "/:appointmentId",
+  verifyToken,
+  authorizeRoles("doctor"),
+  addRecord
+);
 
-// Get medical records of a patient
-// Doctor: only for their assigned patients
-// Patient: only their own records
-router.get("/:patientId", verifyToken, authorizeRoles("patient", "doctor", "admin"), getRecords);
+/**
+ * @swagger
+ * /api/record/{patientId}:
+ *   get:
+ *     summary: Get medical records of a patient
+ *     tags: [Record]
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: patientId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Patient ID
+ *     responses:
+ *       200:
+ *         description: List of medical records
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Records not found
+ */
+router.get(
+  "/:patientId",
+  verifyToken,
+  authorizeRoles("patient", "doctor", "admin"),
+  getRecords
+);
 
 export default router;
