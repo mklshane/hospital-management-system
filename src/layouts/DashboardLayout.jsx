@@ -8,8 +8,23 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardLayout({ children }) {
+  const { user, logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+      
+    }
+  };
+
   const links = [
     {
       label: "Dashboard",
@@ -34,14 +49,13 @@ export default function DashboardLayout({ children }) {
     },
     {
       label: "Logout",
-      href: "/logout",
+      href: "#",
       icon: (
         <IconArrowLeft className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
+      onClick: handleLogout,
     },
   ];
-
-  const [open, setOpen] = useState(false);
 
   return (
     <div
@@ -63,7 +77,13 @@ export default function DashboardLayout({ children }) {
                 <SidebarLink
                   key={idx}
                   link={link}
-                  className="px-1 py-3 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200"
+                  onClick={link.onClick}
+                  className={cn(
+                    "px-1 py-3 rounded-lg transition-colors duration-200",
+                    link.onClick
+                      ? "hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+                      : "hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                  )}
                 />
               ))}
             </div>
@@ -73,13 +93,18 @@ export default function DashboardLayout({ children }) {
           <div className="pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700">
             <SidebarLink
               link={{
-                label: "Manu Arora",
+                label: user?.name || user?.username || "User",
                 href: "/profile",
                 icon: (
                   <img
-                    src="https://assets.aceternity.com/manu.png"
+                    src={
+                      user?.avatar || "https://assets.aceternity.com/manu.png"
+                    }
                     className="h-8 w-8 min-w-8 shrink-0 rounded-full ring-2 ring-neutral-200 dark:ring-neutral-700 object-cover"
                     alt="Avatar"
+                    onError={(e) => {
+                      e.target.src = "https://assets.aceternity.com/manu.png";
+                    }}
                   />
                 ),
               }}

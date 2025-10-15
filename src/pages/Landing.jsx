@@ -27,8 +27,8 @@ const Landing = () => {
 
       <div className="relative z-10 flex h-full items-center justify-center text-white pt-8">
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-full max-w-6xl mx-auto px-8 gap-10 items-center">
-          <div className="text-white space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-full max-w-7xl mx-auto px-8 gap-10 items-center">
+          <div className="text-white space-y-6 pt-10">
             <h1 className="font-montserrat text-4xl lg:text-7xl font-bold leading-tight">
               Medisys
             </h1>
@@ -78,13 +78,10 @@ const Landing = () => {
               <img
                 src="/doctor.png"
                 alt="Doctor"
-                className="relative h-full w-auto object-contain lg:max-h-120 bottom-8"
+                className=" h-full w-auto object-contain lg:max-h-126"
               />
-             < div className="absolute bottom-0 -left-1.75 right-15 h-15 bg-blue-200 border rounded-t-[1.75rem]"></div>
 
-                            
-
-              <div className="absolute bottom-96 left-0 bg-green-400/15 backdrop-blur-lg rounded-2xl p-5 border border-white/25 shadow-2xl max-w-sm">
+              <div className="absolute bottom-90 -left-8 bg-green-400/15 backdrop-blur-lg rounded-2xl p-5 border border-white/25 shadow-2xl max-w-sm">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white font-montserrat">
                     150+
@@ -96,7 +93,7 @@ const Landing = () => {
                 <div className="absolute -top-3 -right-3 w-5 h-5 bg-green-400 rounded-full animate-pulse"></div>
               </div>
 
-              <div className="absolute bottom-76 right-20 bg-white/15 backdrop-blur-lg rounded-2xl p-5 border border-white/25 shadow-2xl max-w-sm">
+              <div className="absolute bottom-76 right-10 bg-white/15 backdrop-blur-lg rounded-2xl p-5 border border-white/25 shadow-2xl max-w-sm">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white font-montserrat">
                     40
@@ -105,10 +102,11 @@ const Landing = () => {
                     Available Doctors
                   </div>
                 </div>
-                <div className="absolute -bottom-3 -left-3 w-5 h-5 bg-blue-400 rounded-full"></div>
+                <div className="absolute -top-2 -right-1 w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                <div className="absolute -bottom-2 -left-2 w-5 h-5 bg-blue-400 rounded-full"></div>
               </div>
 
-              <div className="absolute bottom-12 left-[-4rem] bg-white/15 backdrop-blur-lg rounded-2xl p-5 border border-white/25 shadow-2xl max-w-sm transform -translate-y-1/2">
+              <div className="absolute bottom-12 -left-25 bg-white/15 backdrop-blur-lg rounded-2xl p-5 border border-white/25 shadow-2xl max-w-sm transform -translate-y-1/2">
                 <div className="text-center">
                   <div className="text-white font-figtree font-semibold text-sm">
                     Ease in
@@ -120,9 +118,10 @@ const Landing = () => {
                     Quick & Simple
                   </div>
                 </div>
+                <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white rounded-full animate-ping"></div>
               </div>
 
-              <div className="absolute bottom-24 right-6 bg-green-500/20 backdrop-blur-lg rounded-2xl p-5 border border-green-400/30 shadow-2xl max-w-sm">
+              <div className="absolute bottom-20 right-1 bg-green-500/20 backdrop-blur-lg rounded-2xl p-5 border border-green-400/30 shadow-2xl max-w-sm">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-green-400 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-lg">✓</span>
@@ -138,9 +137,6 @@ const Landing = () => {
                 </div>
                 <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-400 rounded-full animate-ping"></div>
               </div>
-
-              <div className="absolute top-1/3 right-12 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-              <div className="absolute bottom-26 left-[-4rem] w-3 h-3 bg-white rounded-full animate-ping"></div>
             </div>
           </div>
         </div>

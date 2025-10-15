@@ -14,7 +14,8 @@ const Navbar = () => {
 
   return (
     <div className="w-[90%] px-10 py-3 flex justify-between items-center z-50 rounded-2xl ">
-      <div>
+      <div className="flex gap-2 items-center">
+        <img src="/medlogo.png" alt="" className="w-10 h-10 shadow-2xl" />
         <h2 className="font-bold text-lg text-white shadow">MEDISYS</h2>
       </div>
       <div className="flex gap-2">
