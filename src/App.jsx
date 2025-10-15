@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
@@ -7,6 +6,10 @@ import Settings from "./pages/Settings.jsx";
 import DashboardLayout from "./layouts/DashboardLayout";
 import "./index.css";
 import Landing from "./pages/Landing";
+import PatientLogin from "./pages/Authentication/PatientLogin";
+import DoctorLogin from "./pages/Authentication/DoctorLogin";
+import AdminLogin from "./pages/Authentication/AdminLogin";
+import SignUp from "./pages/Authentication/SignUp";
 
 function App() {
   return (
@@ -15,8 +18,10 @@ function App() {
         {/* Public routes */}
 
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<PatientLogin />} />
+        <Route path="/doctor/login" element={<DoctorLogin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/signup" element={<SignUp />} />
 
         {/* Protected routes with sidebar */}
         <Route
