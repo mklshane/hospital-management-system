@@ -6,12 +6,15 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings.jsx";
 import DashboardLayout from "./layouts/DashboardLayout";
 import "./index.css";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
+
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
