@@ -1,10 +1,10 @@
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
+import Dashboard from "./pages/Patient/PatientDashboard";
+import Profile from "./pages/Patient/PatientProfile";
 import Settings from "./pages/Settings.jsx";
-import DashboardLayout from "./layouts/DashboardLayout";
+import DashboardLayout from "./layouts/PatientLayout";
 import "./index.css";
 import Landing from "./pages/Landing";
 import PatientLogin from "./pages/Authentication/PatientLogin";
@@ -16,6 +16,8 @@ import {
   PublicRoute,
 } from "./components/ui/guards/ProtectedRoutes";
 import { Navigate } from "react-router-dom";
+import DoctorLayout from "./layouts/DoctorLayout";
+import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 
 function App() {
   return (
@@ -76,9 +78,9 @@ function App() {
           path="/doctor/dashboard"
           element={
             <ProtectedRoute allowedUserTypes={["doctor"]}>
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
+              <DoctorLayout>
+                <DoctorDashboard />
+              </DoctorLayout>
             </ProtectedRoute>
           }
         />

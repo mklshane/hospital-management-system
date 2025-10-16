@@ -20,10 +20,16 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem("user");
     const storedUserType = localStorage.getItem("userType");
 
+   
+
     if (storedUser && storedUserType) {
       try {
         setUser(JSON.parse(storedUser));
         setUserType(storedUserType);
+        console.log(
+          "✅ AuthContext initialized with user:",
+          JSON.parse(storedUser)
+        );
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("user");
@@ -34,13 +40,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData, type) => {
+
     setUser(userData);
     setUserType(type);
 
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("userType", type);
-  };
 
+  };
   const logout = async () => {
     try {
       await axiosHeader.post(

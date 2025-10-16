@@ -8,11 +8,10 @@ import { Eye, EyeOff } from "lucide-react";
 
 const DoctorLogin = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useAuth(); 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,11 +22,9 @@ const DoctorLogin = () => {
     if (error) setError("");
   };
 
-  
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,22 +33,35 @@ const DoctorLogin = () => {
 
     try {
       const res = await api.post("/auth/doctor/login", formData);
-      await login(res.data.user, "doctor");
+      console.log("Full API response:", res.data);
+
+      if (!res.data.user) {
+        console.warn("No user data in response. Full response:", res.data);
+
+        const userData = res.data.user || res.data.doctor || res.data;
+        console.log("Trying to extract user data:", userData);
+
+        if (!userData || typeof userData !== "object") {
+          throw new Error("Invalid user data in response");
+        }
+
+        await login(userData, "doctor");
+      } else {
+        await login(res.data.user, "doctor");
+      }
+
       navigate("/doctor/dashboard");
     } catch (error) {
-      const errorMessage = error.message || "Login failed. Please try again.";
+      console.error("Login error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Login failed. Please try again.";
       setError(errorMessage);
-
-      if (error.isNetworkError) {
-        setError(
-          "Unable to connect to server. Please check your internet connection."
-        );
-      }
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Navbar */}
@@ -80,8 +90,8 @@ const DoctorLogin = () => {
           <div className="p-10 w-[100%] mx-auto border-2 rounded-2xl">
             <h2 className="text-2xl font-semibold mb-1">Doctor Login</h2>
             <p className="text-gray-600 mb-6 text-sm">
-              Access your patients' medical records, appointments, and hospital services
-              securely.
+              Access your patients' medical records, appointments, and hospital
+              services securely.
             </p>
 
             <form className="space-y-2" onSubmit={handleSubmit}>
@@ -108,35 +118,35 @@ const DoctorLogin = () => {
                   />
                 </div>
 
+                <div className="relative">
+                  <label className="text-sm font-medium text-gray-700">
+                    Password
+                  </label>
                   <div className="relative">
-                                  <label className="text-sm font-medium text-gray-700">
-                                    Password
-                                  </label>
-                                  <div className="relative">
-                                    <input
-                                      name="password"
-                                      type={showPassword ? "text" : "password"}
-                                      required
-                                      placeholder="********"
-                                      value={formData.password}
-                                      onChange={handleChange}
-                                      disabled={loading}
-                                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={togglePasswordVisibility}
-                                      className="absolute inset-y-0 right-0 pr-3 flex items-center mt-1"
-                                      disabled={loading}
-                                    >
-                                      {showPassword ? (
-                                        <Eye className="h-5 w-5 text-gray-500" />
-                                      ) : (
-                                        <EyeOff className="h-5 w-5 text-gray-500" />
-                                      )}
-                                    </button>
-                                  </div>
-                                </div>
+                    <input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="********"
+                      value={formData.password}
+                      onChange={handleChange}
+                      disabled={loading}
+                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center mt-1"
+                      disabled={loading}
+                    >
+                      {showPassword ? (
+                        <Eye className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <EyeOff className="h-5 w-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <button
@@ -170,8 +180,6 @@ const DoctorLogin = () => {
                 Patient
               </button>
             </div>
-
-           
           </div>
         </div>
       </div>
