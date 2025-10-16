@@ -3,12 +3,14 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/axiosHeader";
 import AuthNav from "./Nav";
+import { Eye, EyeOff } from "lucide-react";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,15 +21,19 @@ const AdminLogin = () => {
     if (error) setError("");
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const res = await api.post("/auth/patient/login", formData);
-      await login(res.data.user, "patient");
-      navigate("/dashboard");
+      const res = await api.post("/auth/admin/login", formData);
+      await login(res.data.user, "admin");
+      navigate("/admin/dashboard");
     } catch (error) {
       const errorMessage = error.message || "Login failed. Please try again.";
       setError(errorMessage);
@@ -97,20 +103,34 @@ const AdminLogin = () => {
                   />
                 </div>
 
-                <div>
+                <div className="relative">
                   <label className="text-sm font-medium text-gray-700">
                     Password
                   </label>
-                  <input
-                    name="password"
-                    type="password"
-                    required
-                    placeholder="********"
-                    value={formData.password}
-                    onChange={handleChange}
-                    disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="********"
+                      value={formData.password}
+                      onChange={handleChange}
+                      disabled={loading}
+                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center mt-1"
+                      disabled={loading}
+                    >
+                      {showPassword ? (
+                        <Eye className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <EyeOff className="h-5 w-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
