@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/axiosHeader";
-import AuthNav from "./Nav";
+import AuthNav from "../../components/Authentication/Nav";
 
 import { Eye, EyeOff } from "lucide-react";
 
