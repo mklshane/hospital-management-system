@@ -1,53 +1,123 @@
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
+
+import Dashboard from "./pages/Patient/PatientDashboard";
+import Profile from "./pages/Patient/PatientProfile";
 import Settings from "./pages/Settings.jsx";
-import DashboardLayout from "./layouts/DashboardLayout";
+import DashboardLayout from "./layouts/PatientLayout";
 import "./index.css";
 import Landing from "./pages/Landing";
 import PatientLogin from "./pages/Authentication/PatientLogin";
 import DoctorLogin from "./pages/Authentication/DoctorLogin";
 import AdminLogin from "./pages/Authentication/AdminLogin";
 import SignUp from "./pages/Authentication/SignUp";
+import {
+  ProtectedRoute,
+  PublicRoute,
+} from "./components/ui/guards/ProtectedRoutes";
+import { Navigate } from "react-router-dom";
+import DoctorLayout from "./layouts/DoctorLayout";
+import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Landing />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute restrictedTo={["patient"]}>
+              <PatientLogin />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/doctor/login"
+          element={
+            <PublicRoute restrictedTo={["doctor"]}>
+              <DoctorLogin />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/admin/login"
+          element={
+            <PublicRoute restrictedTo={["admin"]}>
+              <AdminLogin />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <SignUp />
+            </PublicRoute>
+          }
+        />
 
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<PatientLogin />} />
-        <Route path="/doctor/login" element={<DoctorLogin />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/signup" element={<SignUp />} />
-
-        {/* Protected routes with sidebar */}
         <Route
           path="/dashboard"
           element={
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
+            <ProtectedRoute allowedUserTypes={["patient"]}>
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/dashboard"
+          element={
+            <ProtectedRoute allowedUserTypes={["doctor"]}>
+              <DoctorLayout>
+                <DoctorDashboard />
+              </DoctorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedUserTypes={["admin"]}>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/profile"
           element={
-            <DashboardLayout>
-              <Profile />
-            </DashboardLayout>
+            <ProtectedRoute allowedUserTypes={["patient", "doctor", "admin"]}>
+              <DashboardLayout>
+                <Profile />
+              </DashboardLayout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/settings"
           element={
-            <DashboardLayout>
-              <Settings />
-            </DashboardLayout>
+            <ProtectedRoute allowedUserTypes={["patient", "doctor", "admin"]}>
+              <DashboardLayout>
+                <Settings />
+              </DashboardLayout>
+            </ProtectedRoute>
           }
         />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

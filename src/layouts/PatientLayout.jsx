@@ -6,10 +6,40 @@ import {
   IconSettings,
   IconUserBolt,
 } from "@tabler/icons-react";
-import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Logo, LogoIcon } from "./Logo";
 
 export default function DashboardLayout({ children }) {
+  const { user, logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+    const getUserInitials = () => {
+      if (!user) return "U";
+
+      if (user.name) {
+        const names = user.name.split(" ");
+        if (names.length === 1) {
+          return names[0].charAt(0).toUpperCase();
+        }
+        return (
+          names[0].charAt(0) + names[names.length - 1].charAt(0)
+        ).toUpperCase();
+      }
+
+      return "A";
+    };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   const links = [
     {
       label: "Dashboard",
@@ -34,14 +64,13 @@ export default function DashboardLayout({ children }) {
     },
     {
       label: "Logout",
-      href: "/logout",
+      href: "#",
       icon: (
         <IconArrowLeft className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
+      onClick: handleLogout,
     },
   ];
-
-  const [open, setOpen] = useState(false);
 
   return (
     <div
@@ -63,7 +92,13 @@ export default function DashboardLayout({ children }) {
                 <SidebarLink
                   key={idx}
                   link={link}
-                  className="px-1 py-3 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200"
+                  onClick={link.onClick}
+                  className={cn(
+                    "px-1 py-3 rounded-lg transition-colors duration-200",
+                    link.onClick
+                      ? "hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+                      : "hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                  )}
                 />
               ))}
             </div>
@@ -73,14 +108,16 @@ export default function DashboardLayout({ children }) {
           <div className="pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700">
             <SidebarLink
               link={{
-                label: "Manu Arora",
+                label: user?.name || user?.username || "Admin",
                 href: "/profile",
                 icon: (
-                  <img
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-8 w-8 min-w-8 shrink-0 rounded-full ring-2 ring-neutral-200 dark:ring-neutral-700 object-cover"
-                    alt="Avatar"
-                  />
+                  <div
+                    className={cn(
+                      "h-8 w-8 bg-blue-600 min-w-8 shrink-0 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-neutral-200 dark:ring-neutral-700"
+                    )}
+                  >
+                    {getUserInitials()}
+                  </div>
                 ),
               }}
               className="py-3 px-1 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200"
@@ -98,22 +135,3 @@ export default function DashboardLayout({ children }) {
     </div>
   );
 }
-
-const Logo = () => (
-  <a className="flex items-center space-x-3 text-neutral-900 dark:text-white font-semibold text-lg cursor-pointer group">
-    <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-neutral-900 to-neutral-700 dark:from-white dark:to-neutral-300 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow" />
-    <motion.span
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="tracking-tight"
-    >
-      Acet Labs
-    </motion.span>
-  </a>
-);
-
-const LogoIcon = () => (
-  <a className="flex items-center justify-center text-neutral-900 dark:text-white cursor-pointer group">
-    <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-neutral-900 to-neutral-700 dark:from-white dark:to-neutral-300 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow" />
-  </a>
-);
