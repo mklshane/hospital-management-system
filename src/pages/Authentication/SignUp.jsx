@@ -92,14 +92,12 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
       <div className="w-full">
         <AuthNav />
       </div>
 
       <div className="flex flex-1 items-center justify-center py-8 px-4 mt-5">
         <div className="max-w-xl w-full flex flex-col bg-gray-50">
- 
           <div className="w-full flex items-center justify-center p-6 rounded-2xl bg-gradient-to-br from-blue-800 via-blue-600 to-blue-400 mb-6">
             <div className="text-white text-center max-w-lg">
               <h2 className="text-lg font-semibold">
@@ -165,11 +163,12 @@ const SignUp = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      Age
+                      Age *
                     </label>
                     <input
                       name="age"
                       type="text"
+                      required
                       inputMode="numeric"
                       pattern="[0-9]*"
                       placeholder="Enter age"
@@ -186,11 +185,12 @@ const SignUp = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      Gender
+                      Gender *
                     </label>
                     <select
                       name="gender"
                       value={formData.gender}
+                      required
                       onChange={handleChange}
                       disabled={loading}
                       className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -209,12 +209,13 @@ const SignUp = () => {
                 {/* Contact Field */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    Contact Number
+                    Contact Number *
                   </label>
                   <input
                     name="contact"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    required
+                    placeholder="09123456789"
                     value={formData.contact}
                     onChange={handleChange}
                     disabled={loading}
@@ -225,16 +226,17 @@ const SignUp = () => {
                 {/* Address Field */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    Address
+                    Address *
                   </label>
                   <textarea
                     name="address"
+                    required
                     placeholder="Enter your full address"
                     value={formData.address}
                     onChange={handleChange}
                     disabled={loading}
                     rows={3}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
+                    className="w-full mt-1 px-4 py-2 border rounded-lg max-h-18 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
                   />
                 </div>
 
@@ -310,7 +312,6 @@ const SignUp = () => {
               </button>
             </form>
 
-            
             {/* Login Link */}
             <p className="text-center text-sm text-gray-600 mt-6">
               Already have an account?{" "}

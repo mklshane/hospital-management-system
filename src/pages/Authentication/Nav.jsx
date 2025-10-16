@@ -6,7 +6,7 @@ const AuthNav = () => {
   return (
     <div className="absolute w-[90%] px-5 flex justify-items-start items-start z-50 rounded-2xl top-5 left-10">
       <div
-        className="flex gap-2 items-center"
+        className="flex gap-2 items-center transition-all duration-300 hover:scale-105"
         onClick={() => {
           navigate("/");
         }}
