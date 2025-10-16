@@ -18,6 +18,8 @@ import {
 import { Navigate } from "react-router-dom";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
 
 function App() {
   return (
@@ -88,9 +90,9 @@ function App() {
           path="/admin/dashboard"
           element={
             <ProtectedRoute allowedUserTypes={["admin"]}>
-              <DashboardLayout>
-                <Dashboard />
-              </DashboardLayout>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
             </ProtectedRoute>
           }
         />

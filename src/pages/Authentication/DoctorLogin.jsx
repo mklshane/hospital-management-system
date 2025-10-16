@@ -8,7 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 const DoctorLogin = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); 
+  const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -33,13 +33,9 @@ const DoctorLogin = () => {
 
     try {
       const res = await api.post("/auth/doctor/login", formData);
-      console.log("Full API response:", res.data);
 
       if (!res.data.user) {
-        console.warn("No user data in response. Full response:", res.data);
-
         const userData = res.data.user || res.data.doctor || res.data;
-        console.log("Trying to extract user data:", userData);
 
         if (!userData || typeof userData !== "object") {
           throw new Error("Invalid user data in response");

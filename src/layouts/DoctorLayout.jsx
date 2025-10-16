@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Logo, LogoIcon } from "./Logo";
 
 export default function DoctorLayout({ children }) {
   const { user, logout } = useAuth();
@@ -22,6 +23,22 @@ export default function DoctorLayout({ children }) {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  const getUserInitials = () => {
+    if (!user) return "U";
+
+    if (user.name) {
+      const names = user.name.split(" ");
+      if (names.length === 1) {
+        return names[0].charAt(0).toUpperCase();
+      }
+      return (
+        names[0].charAt(0) + names[names.length - 1].charAt(0)
+      ).toUpperCase();
+    }
+
+    return "A";
   };
 
   const links = [
@@ -92,19 +109,16 @@ export default function DoctorLayout({ children }) {
           <div className="pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700">
             <SidebarLink
               link={{
-                label: user?.name || user?.username || "User",
+                label: user?.name || user?.username || "Admin",
                 href: "/profile",
                 icon: (
-                  <img
-                    src={
-                      user?.avatar || "https://assets.aceternity.com/manu.png"
-                    }
-                    className="h-8 w-8 min-w-8 shrink-0 rounded-full ring-2 ring-neutral-200 dark:ring-neutral-700 object-cover"
-                    alt="Avatar"
-                    onError={(e) => {
-                      e.target.src = "https://assets.aceternity.com/manu.png";
-                    }}
-                  />
+                  <div
+                    className={cn(
+                      "h-8 w-8 bg-blue-600 min-w-8 shrink-0 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-neutral-200 dark:ring-neutral-700"
+                    )}
+                  >
+                    {getUserInitials()}
+                  </div>
                 ),
               }}
               className="py-3 px-1 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200"
@@ -122,22 +136,3 @@ export default function DoctorLayout({ children }) {
     </div>
   );
 }
-
-const Logo = () => (
-  <a className="flex items-center space-x-3 text-neutral-900 dark:text-white font-semibold text-lg cursor-pointer group">
-    <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-neutral-900 to-neutral-700 dark:from-white dark:to-neutral-300 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow" />
-    <motion.span
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="tracking-tight"
-    >
-      Acet Labs
-    </motion.span>
-  </a>
-);
-
-const LogoIcon = () => (
-  <a className="flex items-center justify-center text-neutral-900 dark:text-white cursor-pointer group">
-    <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-neutral-900 to-neutral-700 dark:from-white dark:to-neutral-300 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow" />
-  </a>
-);
