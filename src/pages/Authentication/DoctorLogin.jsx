@@ -1,9 +1,158 @@
-import React from 'react'
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/axiosHeader";
+import AuthNav from "./Nav";
 
 const DoctorLogin = () => {
-  return (
-    <div>DoctorLogin</div>
-  )
-}
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-export default DoctorLogin
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError("");
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await api.post("/auth/patient/login", formData);
+      await login(res.data.user, "patient");
+      navigate("/dashboard");
+    } catch (error) {
+      const errorMessage = error.message || "Login failed. Please try again.";
+      setError(errorMessage);
+
+      if (error.isNetworkError) {
+        setError(
+          "Unable to connect to server. Please check your internet connection."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Navbar */}
+      <div className="w-full">
+        <AuthNav />
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-1 items-center justify-center py-8 px-4 mt-5">
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50">
+          {/* Left Section */}
+          <div className=" hidden w-[85%] mx-auto lg:flex items-start justify-center p-10 relative rounded-2xl bg-gradient-to-br from-blue-400 via-blue-700 to-blue-200">
+            <div className="text-white max-w-sm z-10 ">
+              <h2 className="text-lg">Welcome, Doctor!</h2>
+              <h1 className="text-xl font-semibold mt-2">
+                Manage appointments, patient records, and updates all in one
+                secure space
+              </h1>
+            </div>
+            <div className="absolute left-22 bottom-0">
+              <img src="/doctor1.png" alt="" className="w-auto h-80" />
+            </div>
+          </div>
+
+          {/* Right Section */}
+          <div className="p-10 w-[100%] mx-auto border-2 rounded-2xl">
+            <h2 className="text-2xl font-semibold mb-1">Doctor Login</h2>
+            <p className="text-gray-600 mb-6 text-sm">
+              Access your patients' medical records, appointments, and hospital services
+              securely.
+            </p>
+
+            <form className="space-y-2" onSubmit={handleSubmit}>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Email Address
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    placeholder="********"
+                    value={formData.password}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
+              >
+                {loading ? "Signing in..." : "Login"}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="flex items-center my-6">
+              <div className="flex-grow border-t"></div>
+              <span className="px-4 text-sm text-gray-500">or login as</span>
+              <div className="flex-grow border-t"></div>
+            </div>
+
+            {/* Admin / Doctor Buttons */}
+            <div className="flex gap-3">
+              <button
+                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                onClick={() => navigate("/admin/login")}
+              >
+                Admin
+              </button>
+              <button
+                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                onClick={() => navigate("/login")}
+              >
+                Patient
+              </button>
+            </div>
+
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DoctorLogin;
