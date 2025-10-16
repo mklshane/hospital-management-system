@@ -11,10 +11,7 @@ import PatientLogin from "./pages/Authentication/PatientLogin";
 import DoctorLogin from "./pages/Authentication/DoctorLogin";
 import AdminLogin from "./pages/Authentication/AdminLogin";
 import SignUp from "./pages/Authentication/SignUp";
-import {
-  ProtectedRoute,
-  PublicRoute,
-} from "./components/ui/guards/ProtectedRoutes";
+import { ProtectedRoute, PublicRoute } from "./components/guards/ProtectedRoutes";
 import { Navigate } from "react-router-dom";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";

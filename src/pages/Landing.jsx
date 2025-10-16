@@ -1,4 +1,4 @@
-import Navbar from "@/components/ui/Landing/Navbar";
+import Navbar from "@/components/Landing/Navbar";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
