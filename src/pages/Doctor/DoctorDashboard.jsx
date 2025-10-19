@@ -79,7 +79,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Upper Right - Calendar Section */}
-      <div className="col-span-3 row-span-1 bg-white rounded-2xl p-6 shadow-sm border border-ui-border overflow-hidden">
+      <div className="col-span-3 row-span-1 rounded-2xl p-6 overflow-hidden">
         <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2>
         <div className="bg-ui-muted rounded-lg p-8 text-center">
           <p className="text-muted-foreground font-figtree">Calendar view will be implemented here</p>
@@ -110,7 +110,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Lower Right - Appointment Requests */}
-      <div className="col-span-3 row-span-1 bg-white rounded-2xl shadow-sm border border-ui-border overflow-y-auto">
+      <div className="col-span-3 row-span-1 rounded-2xl overflow-y-auto">
         <div className="p-6 border-b border-ui-border">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
         </div>
