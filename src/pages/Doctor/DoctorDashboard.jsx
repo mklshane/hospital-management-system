@@ -58,7 +58,7 @@ const DoctorDashboard = () => {
   ];
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-6 overflow-hidden">
+    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden">
       
       {/* Upper Left - Blue Background Section */}
       <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col">
