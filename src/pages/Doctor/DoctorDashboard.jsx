@@ -61,7 +61,7 @@ const DoctorDashboard = () => {
     <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden">
       
       {/* Upper Left - Blue Background Section */}
-      <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col">
+      <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
         {/* Doctor Info */}
         <div>
           <h1 className="text-2xl font-bold font-montserrat">{doctorData.name}</h1>
@@ -87,8 +87,8 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Lower Left - Appointments Card with Search */}
-      <div className="col-span-9 row-span-1 bg-white rounded-2xl shadow-sm border border-ui-border overflow-y-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-20">
+      <div className="col-span-9 row-span-1 bg-white rounded-2xl shadow-sm border border-ui-border overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Today's Appointment</h2>
         
         {/* Search Bar */}
@@ -107,12 +107,21 @@ const DoctorDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Appointment List */}
+        <div className="flex-1 overflow-y-auto p-6">
+          
+        </div>
       </div>
 
       {/* Lower Right - Appointment Requests */}
-      <div className="col-span-3 row-span-1 rounded-2xl overflow-y-auto">
+      <div className="col-span-3 row-span-1 rounded-2xl flex flex-col overflow-hidden">
         <div className="p-6 border-b border-ui-border">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* requests list goes here */}
         </div>
       </div>
 

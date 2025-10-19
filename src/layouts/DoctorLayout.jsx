@@ -128,7 +128,7 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content with refined styling */}
-      <main className="flex-1 overflow-y-auto px-8 py-5">
+      <main className="flex-1 overflow-hidden px-8 py-5">
         {/* <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"> */}
           {children}
         {/* </div> */}
