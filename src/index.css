@@ -63,7 +63,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary-foreground: oklch(36.177% 0.02716 18.406);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -158,4 +158,33 @@
   body {
     @apply bg-background text-foreground font-figtree;
   }
+}
+
+/* Custom background colors */
+.bg-blue { background-color: var(--blue); }
+.bg-blue-light { background-color: var(--blue-light); }
+.bg-navy { background-color: var(--navy); }
+.bg-gray { background-color: var(--gray); }
+.bg-white { background-color: var(--white); }
+
+.bg-ui-surface { background-color: var(--ui-surface); }
+.bg-ui-card { background-color: var(--ui-card); }
+.bg-ui-muted { background-color: var(--ui-muted); }
+
+/* Text colors */
+.text-blue { color: var(--blue); }
+.text-blue-light { color: var(--blue-light); }
+.text-navy { color: var(--navy); }
+.text-gray { color: var(--gray); }
+.text-white { color: var(--white); }
+
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+
+/* Border colors */
+.border-ui-border { border-color: var(--ui-border); }
+
+/* Focus rings */
+.focus-ring-ui:focus {
+  ring: 2px solid var(--ui-ring);
 }
