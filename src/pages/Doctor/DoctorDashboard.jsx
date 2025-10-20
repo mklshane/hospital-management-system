@@ -13,7 +13,7 @@ const DoctorDashboard = () => {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
-  
+
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
@@ -115,10 +115,38 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Upper Right - Calendar Section */}
-      <div className="col-span-3 row-span-1 rounded-2xl p-6 overflow-hidden">
-        <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2>
-        <div className="bg-ui-muted rounded-lg p-8 text-center">
-          <p className="text-muted-foreground font-figtree">Calendar view will be implemented here</p>
+      <div className="col-span-3 row-span-1 rounded-2xl p-4 overflow-hidden">
+        {/* <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2> */}
+        <div className="bg-ui-muted rounded-lg p-4 text-center">
+          {/* Calendar Grid */}
+          <div className="bg-ui-muted dark:bg-ui-card rounded-lg">
+            {/* Month Header */}
+            <div className="flex justify-between items-center mb-4">
+              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&lt;</button>
+              <h3 className="text-md font-semibold font-montserrat text-foreground dark:text-white">October 2025</h3>
+              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&gt;</button>
+            </div>
+
+            {/* Week Days */}
+            <div className="grid grid-cols-7 text-sm font-figtree text-muted-foreground dark:text-gray-300 mb-2">
+              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day) => (
+                <div key={day} className="text-center">{day}</div>
+              ))}
+            </div>
+
+            {/* Days Grid */}
+            <div className="grid grid-cols-7 gap-2 text-sm">
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                <div
+                  key={day}
+                  className="p-2 rounded hover:bg-blue-light/20 dark:hover:bg-blue-600 transition text-center cursor-pointer"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
 
