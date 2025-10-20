@@ -14,6 +14,18 @@ const DoctorDashboard = () => {
     }
   }, [isDarkMode]);
   
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+  }, [isDarkMode]);
+  
   // Mock data
   const doctorData = {
     name: "Dr. Juan De La Cruz",
@@ -111,7 +123,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Lower Left - Appointments Card with Search */}
-      <div className="col-span-9 row-span-1 bg-white rounded-2xl shadow-sm border border-ui-border overflow-hidden">
+      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl shadow-sm border border-ui-border overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Today's Appointment</h2>
         
