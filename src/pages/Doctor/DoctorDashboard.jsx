@@ -119,7 +119,7 @@ const DoctorDashboard = () => {
         {/* <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2> */}
         <div className="bg-ui-muted rounded-lg p-4 text-center">
           {/* Calendar Grid */}
-          <div className="bg-ui-muted dark:bg-ui-card rounded-lg">
+          <div className="bg-ui-muted rounded-lg">
             {/* Month Header */}
             <div className="flex justify-between items-center mb-4">
               <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&lt;</button>

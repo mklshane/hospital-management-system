@@ -76,7 +76,7 @@ export default function DoctorLayout({ children }) {
   return (
     <div
       className={cn(
-        "flex w-full h-screen overflow-hidden bg-neutral-50 dark:bg-neutral-900"
+        "flex w-full h-screen overflow-hidden bg-ui-surface"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>

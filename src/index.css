@@ -143,12 +143,48 @@
   --gray: #9AA3AE;
   --white: #E3E7EC;
 
+  /* --blue: #4A9EFF;
+  --blue-light: #7BB6FF;
+  --navy: #2A3441;
+  --gray: #B0B8C4;
+  --white: #F0F4F8; */
+
+  /* --blue: #4A9EFF;
+  --blue-light: #7BB6FF;
+  --navy: #2D3748;
+  --gray: #CBD5E0;
+  --white: #F7FAFC; */
+
+  /* --blue: #4A9EFF;
+  --blue-light: #7BB6FF;
+  --navy: #374151;
+  --gray: #D1D5DB;
+  --white: #F9FAFB; */
+
   /* UI-specific Dark Colors */
   --ui-surface: #121417;           
   --ui-card: #1E2227;              
   --ui-border: #2D3136;
   --ui-muted: #22262B;
   --ui-ring: #2196F3;
+
+  /* --ui-surface: #1A1D24;
+  --ui-card: #252A33;
+  --ui-border: #3A4250;
+  --ui-muted: #2D3440;
+  --ui-ring: #4A9EFF; */
+
+  /* --ui-surface: #111827;
+  --ui-card: #1F2937;
+  --ui-border: #374151;
+  --ui-muted: #1F2937;
+  --ui-ring: #4A9EFF; */
+
+  /* --ui-surface: #1A202C;
+  --ui-card: #2D3748;
+  --ui-border: #4A5568;
+  --ui-muted: #2D3748;
+  --ui-ring: #4A9EFF; */
 }
 
 @layer base {
