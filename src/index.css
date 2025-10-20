@@ -137,11 +137,11 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* Brand Colors - Dark Theme */
-  --blue: #2196F3;            
+  /* --blue: #2196F3;            
   --blue-light: #64B5F6;
   --navy: #1E2227;            
   --gray: #9AA3AE;
-  --white: #E3E7EC;
+  --white: #E3E7EC; */
 
   /* --blue: #4A9EFF;
   --blue-light: #7BB6FF;
@@ -160,6 +160,12 @@
   --navy: #374151;
   --gray: #D1D5DB;
   --white: #F9FAFB; */
+
+  --blue: #1E40AF;
+  --blue-light: #3B82F6;
+  --navy: #1C2333;
+  --gray: #9CA3AF;
+  --white: #E5E7EB;
 
   /* UI-specific Dark Colors */
   --ui-surface: #121417;           
@@ -185,6 +191,12 @@
   --ui-border: #4A5568;
   --ui-muted: #2D3748;
   --ui-ring: #4A9EFF; */
+
+  /* --ui-surface: #111827;
+  --ui-card: #1E2533;
+  --ui-border: #2B3342;
+  --ui-muted: #1A2130;
+  --ui-ring: #2563EB; */
 }
 
 @layer base {
