@@ -1,7 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Moon, Sun } from "lucide-react";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
+   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Toggle dark mode
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
   
   // Mock data
   const doctorData = {
@@ -62,10 +73,23 @@ const DoctorDashboard = () => {
       
       {/* Upper Left - Blue Background Section */}
       <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
-        {/* Doctor Info */}
-        <div>
-          <h1 className="text-2xl font-bold font-montserrat">{doctorData.name}</h1>
-          <p className="text-blue-light font-figtree">{doctorData.specialization}</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold font-montserrat">{doctorData.name}</h1>
+            <p className="text-blue-light font-figtree">{doctorData.specialization}</p>
+          </div>
+
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="p-2 bg-blue-light/20 rounded-full hover:bg-blue-light/40 transition"
+            aria-label="Toggle dark mode"
+          >
+            {isDarkMode ? (
+              <Sun className="w-5 h-5 text-white" />
+            ) : (
+              <Moon className="w-5 h-5 text-white" />
+            )}
+          </button>
         </div>
 
         <div className="mt-8 grid grid-cols-4 gap-4 flex-1">
