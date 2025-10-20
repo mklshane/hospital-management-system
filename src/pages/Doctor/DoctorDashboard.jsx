@@ -3,7 +3,7 @@ import { Moon, Sun } from "lucide-react";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
-   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Toggle dark mode
   useEffect(() => {
