@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-
+  /* Core Colors */
   --font-montserrat: 'Montserrat', sans-serif;
   --font-figtree: 'Figtree', sans-serif;
 
@@ -44,12 +44,20 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand Colors */
+  --color-blue: var(--brand-blue);
+  --color-blue-light: var(--brand-blue-light);
+  --color-blue-dark: var(--brand-blue-dark);
+  --color-navy: var(--brand-navy);
+  --color-gray: var(--brand-gray);
 }
 
 :root {
+  /* UI Colors */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.27 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -79,6 +87,20 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Brand Colors - Light Theme */
+  --blue: #2196F3;            
+  --blue-light: #64B5F6;     
+  --navy: #2A3C54;           
+  --gray: #9AA3AE;          
+  --white: #FFFFFF;          
+
+  /* UI-specific Light Colors */
+  --ui-surface: #F4F6F8;   
+  --ui-card: #FFFFFF;        
+  --ui-border: #E0E0E0;    
+  --ui-muted: #F0F2F4;      
+  --ui-ring: #2196F3;        
 }
 
 .dark {
@@ -105,14 +127,94 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.19 0.015 250); 
+  --sidebar-foreground: oklch(0.88 0.02 250);
+  --sidebar-primary: oklch(0.52 0.18 250);
+  --sidebar-primary-foreground: oklch(0.98 0.01 250);
+  --sidebar-accent: oklch(0.24 0.015 250);
+  --sidebar-accent-foreground: oklch(0.92 0.015 250);
+  --sidebar-border: oklch(0.25 0.015 250 / 30%);
+  --sidebar-ring: oklch(0.52 0.18 250);
+
+  /* Brand Colors - Dark Theme */
+  /* --blue: #2196F3;            
+  --blue-light: #64B5F6;
+  --navy: #1E2227;            
+  --gray: #9AA3AE;
+  --white: #E3E7EC; */
+
+  /* --blue: #4A9EFF;
+  --blue-light: #7BB6FF;
+  --navy: #2A3441;
+  --gray: #B0B8C4;
+  --white: #F0F4F8; */
+
+  /* --blue: #4A9EFF;
+  --blue-light: #7BB6FF;
+  --navy: #2D3748;
+  --gray: #CBD5E0;
+  --white: #F7FAFC; */
+
+  /* --blue: #4A9EFF;
+  --blue-light: #7BB6FF;
+  --navy: #374151;
+  --gray: #D1D5DB;
+  --white: #F9FAFB; */
+
+  /* --blue: #1E40AF;
+  --blue-light: #2c53d2;
+  --navy: #1C2333;
+  --gray: #9CA3AF;
+  --white: #E5E7EB; */
+
+  --blue: #2756A7;
+  --blue-light: #3267C2;
+  --navy: #1C2333;
+  --gray: #9CA3AF;
+  --white: #E5E7EB;
+
+  /* UI-specific Dark Colors */
+  /* --ui-surface: #121417;           
+  --ui-card: #1E2227;              
+  --ui-border: #2D3136;
+  --ui-muted: #22262B;
+  --ui-ring: #2196F3; */
+
+  /* --ui-surface: #1A1D24;
+  --ui-card: #252A33;
+  --ui-border: #3A4250;
+  --ui-muted: #2D3440;
+  --ui-ring: #4A9EFF; */
+
+  /* --ui-surface: #111827;
+  --ui-card: #1F2937;
+  --ui-border: #374151;
+  --ui-muted: #1F2937;
+  --ui-ring: #4A9EFF; */
+
+  /* --ui-surface: #1A202C;
+  --ui-card: #2D3748;
+  --ui-border: #4A5568;
+  --ui-muted: #2D3748;
+  --ui-ring: #4A9EFF; */
+
+  /* --ui-surface: #111827;
+  --ui-card: #1E2533;
+  --ui-border: #2B3342;
+  --ui-muted: #1A2130;
+  --ui-ring: #2563EB; */
+
+  /* --ui-surface: #1E1D23;
+  --ui-card: #27262C;
+  --ui-border: #323137;
+  --ui-muted: #2A292F;
+  --ui-ring: #4A90E2; */
+
+  --ui-surface: #1B1E26;
+  --ui-card: #242834;
+  --ui-border: #2E3442;
+  --ui-muted: #262B38;
+  --ui-ring: #3267C2;
 }
 
 @layer base {
@@ -122,4 +224,33 @@
   body {
     @apply bg-background text-foreground font-figtree;
   }
+}
+
+/* Custom background colors */
+.bg-blue { background-color: var(--blue); }
+.bg-blue-light { background-color: var(--blue-light); }
+.bg-navy { background-color: var(--navy); }
+.bg-gray { background-color: var(--gray); }
+.bg-white { background-color: var(--white); }
+
+.bg-ui-surface { background-color: var(--ui-surface); }
+.bg-ui-card { background-color: var(--ui-card); }
+.bg-ui-muted { background-color: var(--ui-muted); }
+
+/* Text colors */
+.text-blue { color: var(--blue); }
+.text-blue-light { color: var(--blue-light); }
+.text-navy { color: var(--navy); }
+.text-gray { color: var(--gray); }
+.text-white { color: var(--white); }
+
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
+
+/* Border colors */
+.border-ui-border { border-color: var(--ui-border); }
+
+/* Focus rings */
+.focus-ring-ui:focus {
+  ring: 2px solid var(--ui-ring);
 }

@@ -15,6 +15,7 @@ import { ProtectedRoute, PublicRoute } from "./components/guards/ProtectedRoutes
 import { Navigate } from "react-router-dom";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
+import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 
@@ -79,6 +80,16 @@ function App() {
             <ProtectedRoute allowedUserTypes={["doctor"]}>
               <DoctorLayout>
                 <DoctorDashboard />
+              </DoctorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/appointments"
+          element={
+            <ProtectedRoute allowedUserTypes={["doctor"]}>
+              <DoctorLayout>
+                <DoctorAppointments />
               </DoctorLayout>
             </ProtectedRoute>
           }

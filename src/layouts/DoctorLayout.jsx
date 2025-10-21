@@ -50,8 +50,8 @@ export default function DoctorLayout({ children }) {
       ),
     },
     {
-      label: "Profile",
-      href: "/profile",
+      label: "Appointments",
+      href: "/doctor/appointments",
       icon: (
         <IconUserBolt className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
@@ -76,7 +76,7 @@ export default function DoctorLayout({ children }) {
   return (
     <div
       className={cn(
-        "flex w-full h-screen overflow-hidden bg-neutral-50 dark:bg-neutral-900"
+        "flex w-full h-screen overflow-hidden bg-ui-surface"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
@@ -128,10 +128,10 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content with refined styling */}
-      <main className="flex-1 overflow-y-auto p-2 md:p-4">
-        <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
+      <main className="flex-1 overflow-hidden px-8 py-5">
+        {/* <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"> */}
           {children}
-        </div>
+        {/* </div> */}
       </main>
     </div>
   );
