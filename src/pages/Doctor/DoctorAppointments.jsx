@@ -27,7 +27,7 @@ const DoctorAppointments = () => {
   
     return (
         <div className="min-h-screen flex flex-col pb-10">
-            <div className="flex-1 grid grid-cols-12 overflow-hidden">
+            <div className="flex-1 grid grid-cols-12 overflow-hidden gap-5">
             {/* Left - Appointments Section */}
             <div className="col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-hidden">
                 {/* Header */}
@@ -132,7 +132,7 @@ const DoctorAppointments = () => {
             </div>
 
             {/* Right - Appointment Details Section */}
-            <div className="col-span-3 p-10">
+            <div className="col-span-3 bg-ui-card rounded-2xl p-8 flex flex-col overflow-hidden p-6">
             <h2 className="text-xl font-bold font-montserrat text-foreground mb-6">Appointment Details</h2>
             
             {/* Patient Information */}

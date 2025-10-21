@@ -81,7 +81,7 @@ const DoctorDashboard = () => {
   ];
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden">
+    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
       
       {/* Upper Left - Blue Background Section */}
       <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
@@ -115,7 +115,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Upper Right - Calendar Section */}
-      <div className="col-span-3 row-span-1 rounded-2xl p-4 overflow-hidden">
+      <div className="col-span-3 row-span-1 rounded-2xl p-1 overflow-hidden">
         {/* <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2> */}
         <div className="bg-ui-muted rounded-lg p-4 text-center">
           {/* Calendar Grid */}
@@ -151,7 +151,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Lower Left - Appointments Card with Search */}
-      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl shadow-sm border border-ui-border overflow-hidden">
+      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Today's Appointment</h2>
         
@@ -179,7 +179,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Lower Right - Appointment Requests */}
-      <div className="col-span-3 row-span-1 rounded-2xl flex flex-col overflow-hidden">
+      <div className="col-span-3 row-span-1 flex flex-col overflow-hidden">
         <div className="p-6 border-b border-ui-border">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
         </div>
