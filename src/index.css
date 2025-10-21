@@ -127,14 +127,14 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.19 0.015 250); 
+  --sidebar-foreground: oklch(0.88 0.02 250);
+  --sidebar-primary: oklch(0.52 0.18 250);
+  --sidebar-primary-foreground: oklch(0.98 0.01 250);
+  --sidebar-accent: oklch(0.24 0.015 250);
+  --sidebar-accent-foreground: oklch(0.92 0.015 250);
+  --sidebar-border: oklch(0.25 0.015 250 / 30%);
+  --sidebar-ring: oklch(0.52 0.18 250);
 
   /* Brand Colors - Dark Theme */
   /* --blue: #2196F3;            
@@ -161,18 +161,24 @@
   --gray: #D1D5DB;
   --white: #F9FAFB; */
 
-  --blue: #1E40AF;
-  --blue-light: #3B82F6;
+  /* --blue: #1E40AF;
+  --blue-light: #2c53d2;
+  --navy: #1C2333;
+  --gray: #9CA3AF;
+  --white: #E5E7EB; */
+
+  --blue: #2756A7;
+  --blue-light: #3267C2;
   --navy: #1C2333;
   --gray: #9CA3AF;
   --white: #E5E7EB;
 
   /* UI-specific Dark Colors */
-  --ui-surface: #121417;           
+  /* --ui-surface: #121417;           
   --ui-card: #1E2227;              
   --ui-border: #2D3136;
   --ui-muted: #22262B;
-  --ui-ring: #2196F3;
+  --ui-ring: #2196F3; */
 
   /* --ui-surface: #1A1D24;
   --ui-card: #252A33;
@@ -197,6 +203,18 @@
   --ui-border: #2B3342;
   --ui-muted: #1A2130;
   --ui-ring: #2563EB; */
+
+  /* --ui-surface: #1E1D23;
+  --ui-card: #27262C;
+  --ui-border: #323137;
+  --ui-muted: #2A292F;
+  --ui-ring: #4A90E2; */
+
+  --ui-surface: #1B1E26;
+  --ui-card: #242834;
+  --ui-border: #2E3442;
+  --ui-muted: #262B38;
+  --ui-ring: #3267C2;
 }
 
 @layer base {
