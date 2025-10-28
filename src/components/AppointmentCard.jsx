@@ -1,4 +1,5 @@
-// src/components/AppointmentCard.jsx
+import { CalendarClock, NotepadText } from "lucide-react";
+
 const AppointmentCard = ({ appt, onClick, formatDate }) => {
   const statusConfig = {
     Pending:   { color: "text-yellow-600", bg: "bg-yellow-100", dot: "bg-yellow-500" },
@@ -13,7 +14,7 @@ const AppointmentCard = ({ appt, onClick, formatDate }) => {
   return (
     <div
       onClick={() => onClick(appt)}
-      className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 
+      className="p-4 bg-ui-card rounded-xl border border-gray-200 dark:border-gray-700 
                  shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 
                  hover:border-blue-300 dark:hover:border-blue-600"
     >
@@ -37,14 +38,15 @@ const AppointmentCard = ({ appt, onClick, formatDate }) => {
       {/* Bottom: Date, Time, Notes */}
       <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
         <p className="flex items-center gap-1.5">
-          <span>Date:</span> 
+          <span><CalendarClock className="w-4 h-4 text-foreground" /></span> 
           <span className="font-medium text-gray-800 dark:text-gray-200">
             {formatDate(appt.appointment_date)} | {appt.appointment_time}
           </span>
         </p>
         {appt.notes && (
-          <p className="text-xs italic line-clamp-2 text-gray-500 dark:text-gray-400">
-            "{appt.notes}"
+          <p className="flex items-center gap-1 line-clamp-2 text-gray-500 dark:text-gray-400">
+            <NotepadText className="w-4 h-4" />
+            {appt.notes}
           </p>
         )}
       </div>
