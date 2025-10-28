@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, RefreshCw, ArrowUpDown } from "lucide-react";
+import { Moon, Sun, Search, RefreshCw, Funnel } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 
 const DoctorAppointments = () => {
@@ -93,16 +93,22 @@ const DoctorAppointments = () => {
 
           {/* Search + Buttons */}
           <div className="flex flex-wrap gap-2 mb-6 items-center">
-            <input
-              type="text"
-              placeholder="Search name, date, notes..."
-              className="flex-1 min-w-[200px] px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
-            />
-            <button className="flex items-center gap-1 px-4 py-2 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition">
-              <ArrowUpDown className="w-4 h-4" /> Sort
+            <div className="relative flex-1 min-w-[250px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search name, date, notes..."
+                className="w-full h-10 pl-10 pr-4 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
+              />
+            </div>
+            <button className="flex items-center justify-center gap-2 h-10 px-4 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition">
+              <Funnel className="w-4 h-4" />
+              Filter
             </button>
-            <button className="flex items-center gap-1 px-4 py-2 bg-blue hover:bg-blue-light text-white text-sm font-medium rounded-lg transition">
-              <RefreshCw className="w-4 h-4" /> Refresh
+
+            <button className="flex items-center justify-center gap-2 h-10 px-4 bg-blue hover:bg-blue-light text-white text-sm font-medium rounded-lg transition">
+              <RefreshCw className="w-4 h-4" />
+              Refresh
             </button>
           </div>
 
