@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
+import AppointmentCard from "../../components/AppointmentCard";
 
 const DoctorAppointments = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
     const [sortOrders, setSortOrders] = useState({
       pending: 'desc',
       scheduled: 'desc',
       completed: 'desc',
+      cancelled: 'desc',
+      rejected: 'desc',
     });
     
     // Toggle dark mode
@@ -61,27 +65,42 @@ const DoctorAppointments = () => {
     };
 
     const toggleSort = (column) => {
-      setSortOrders(prev => ({
-        ...prev,
-        [column]: prev[column] === 'desc' ? 'asc' : 'desc'
-      }));
+      setSortOrders(prev => {
+        const newOrder = prev[column] === "desc" ? "asc" : "desc";
+        return { ...prev, [column]: newOrder };
+      });
+      setRefreshKey((k) => k + 1);
     };
 
     // Categorize Appointments
-    const pending = sortByDate(
-      appointments.filter(a => a.status === "Pending"),
-      sortOrders.pending
-    );
+    const pending = useMemo(() => {
+      const list = appointments.filter((a) => a.status === "Pending");
+      return sortByDate(list, sortOrders.pending);
+    }, [appointments, sortOrders.pending]);
 
-    const scheduled = sortByDate(
-      appointments.filter(a => a.status === "Scheduled"),
-      sortOrders.scheduled
-    );
+    const scheduled = useMemo(() => {
+      const list = appointments.filter((a) => a.status === "Scheduled");
+      return sortByDate(list, sortOrders.scheduled);
+    }, [appointments, sortOrders.scheduled]);
 
-    const completed = sortByDate(
-      appointments.filter(a => a.status === "Completed"),
-      sortOrders.completed
-    );
+    const completed = useMemo(() => {
+      const list = appointments.filter((a) => a.status === "Completed");
+      return sortByDate(list, sortOrders.completed);
+    }, [appointments, sortOrders.completed]);
+
+    const cancelled = useMemo(() => {
+      const list = appointments.filter(a => a.status === "Cancelled");
+      return sortByDate(list, sortOrders.cancelled || 'desc');
+    }, [appointments, sortOrders.cancelled]);
+
+    const rejected = useMemo(() => {
+      const list = appointments.filter(a => a.status === "Rejected");
+      return sortByDate(list, sortOrders.rejected || 'desc');
+    }, [appointments, sortOrders.rejected]);
+
+    useEffect(() => {
+      setAppointments((prev) => [...prev]);
+    }, [appointments.length]);
 
     // Helper for date/time formatting
     const formatDate = (dateStr) =>
@@ -162,25 +181,12 @@ const DoctorAppointments = () => {
               </h2>
               <div className="space-y-4">
                 {pending.map(appt => (
-                  <div
+                  <AppointmentCard
                     key={appt._id}
-                    onClick={() => setSelectedAppointment(appt)}
-                    className="p-4 rounded-xl border border-border bg-ui-card shadow-sm hover:bg-blue-light/10 cursor-pointer transition"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-foreground">
-                        {appt.patient?.name?.[0] || "P"}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{appt.patient?.name}</p>
-                        <p className="text-xs text-yellow-500 font-medium">● Pending</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      <span className="block">📅 {formatDate(appt.appointment_date)} | {appt.appointment_time}</span>
-                      <span className="block mt-1">{appt.notes}</span>
-                    </p>
-                  </div>
+                    appt={appt}
+                    onClick={setSelectedAppointment}
+                    formatDate={formatDate}
+                  />
                 ))}
               </div>
             </div>
@@ -196,25 +202,12 @@ const DoctorAppointments = () => {
               </h2>
               <div className="space-y-4">
                 {scheduled.map(appt => (
-                  <div
+                  <AppointmentCard
                     key={appt._id}
-                    onClick={() => setSelectedAppointment(appt)}
-                    className="p-4 rounded-xl border border-border bg-ui-card shadow-sm hover:bg-blue-light/10 cursor-pointer transition"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-foreground">
-                        {appt.patient?.name?.[0] || "P"}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{appt.patient?.name}</p>
-                        <p className="text-xs text-blue-500 font-medium">● Scheduled</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      <span className="block">📅 {formatDate(appt.appointment_date)} | {appt.appointment_time}</span>
-                      <span className="block mt-1">{appt.notes}</span>
-                    </p>
-                  </div>
+                    appt={appt}
+                    onClick={setSelectedAppointment}
+                    formatDate={formatDate}
+                  />
                 ))}
               </div>
             </div>
@@ -230,25 +223,38 @@ const DoctorAppointments = () => {
               </h2>
               <div className="space-y-4">
                 {completed.map(appt => (
-                  <div
+                  <AppointmentCard
                     key={appt._id}
-                    onClick={() => setSelectedAppointment(appt)}
-                    className="p-4 rounded-xl border border-border bg-ui-card shadow-sm hover:bg-blue-light/10 cursor-pointer transition"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold text-foreground">
-                        {appt.patient?.name?.[0] || "P"}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">{appt.patient?.name}</p>
-                        <p className="text-xs text-green-500 font-medium">● Completed</p>
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      <span className="block">📅 {formatDate(appt.appointment_date)} | {appt.appointment_time}</span>
-                      <span className="block mt-1">{appt.notes}</span>
-                    </p>
-                  </div>
+                    appt={appt}
+                    onClick={setSelectedAppointment}
+                    formatDate={formatDate}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Cancelled */}
+            <div>
+              <h2 onClick={() => toggleSort('cancelled')} className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition">
+                Cancelled ({cancelled.length})
+                <ArrowUpDown className={`... ${sortOrders.cancelled === 'asc' ? 'rotate-180' : ''}`} />
+              </h2>
+              <div className="space-y-4">
+                {cancelled.map(appt => (
+                  <AppointmentCard key={appt._id} appt={appt} onClick={setSelectedAppointment} formatDate={formatDate} />
+                ))}
+              </div>
+            </div>
+            
+            {/* Rejected */}
+            <div>
+              <h2 onClick={() => toggleSort('rejected')} className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition">
+                Rejected ({rejected.length})
+                <ArrowUpDown className={`... ${sortOrders.rejected === 'asc' ? 'rotate-180' : ''}`} />
+              </h2>
+              <div className="space-y-4">
+                {rejected.map(appt => (
+                  <AppointmentCard key={appt._id} appt={appt} onClick={setSelectedAppointment} formatDate={formatDate} />
                 ))}
               </div>
             </div>
