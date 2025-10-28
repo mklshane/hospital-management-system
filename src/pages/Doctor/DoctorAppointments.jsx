@@ -7,6 +7,11 @@ const DoctorAppointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [sortOrders, setSortOrders] = useState({
+      pending: 'desc',
+      scheduled: 'desc',
+      completed: 'desc',
+    });
     
     // Toggle dark mode
     useEffect(() => {
@@ -46,6 +51,46 @@ const DoctorAppointments = () => {
       fetchAppointments();
     }, []);
 
+    // Helper for sorting date
+    const sortByDate = (appointments, order) => {
+      return [...appointments].sort((a, b) => {
+        const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
+        const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
+        return order === 'desc' ? dateB - dateA : dateA - dateB;
+      });
+    };
+
+    const toggleSort = (column) => {
+      setSortOrders(prev => ({
+        ...prev,
+        [column]: prev[column] === 'desc' ? 'asc' : 'desc'
+      }));
+    };
+
+    // Categorize Appointments
+    const pending = sortByDate(
+      appointments.filter(a => a.status === "Pending"),
+      sortOrders.pending
+    );
+
+    const scheduled = sortByDate(
+      appointments.filter(a => a.status === "Scheduled"),
+      sortOrders.scheduled
+    );
+
+    const completed = sortByDate(
+      appointments.filter(a => a.status === "Completed"),
+      sortOrders.completed
+    );
+
+    // Helper for date/time formatting
+    const formatDate = (dateStr) =>
+    new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
     // Update Appointment Status
     const updateStatus = async (id, status) => {
       try {
@@ -60,19 +105,6 @@ const DoctorAppointments = () => {
         alert(err.response?.data?.message || "Failed to update status");
       }
     };
-
-    // Categorize Appointments
-    const pending = appointments.filter(a => a.status === "Pending");
-    const scheduled = appointments.filter(a => a.status === "Scheduled");
-    const completed = appointments.filter(a => a.status === "Completed");
-
-    // Helper for date/time formatting
-    const formatDate = (dateStr) =>
-    new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
 
     if (loading) return <p className="text-center py-10 text-foreground">Loading appointments...</p>;
 
@@ -121,8 +153,12 @@ const DoctorAppointments = () => {
           <div className="grid grid-cols-3 gap-6">
             {/* Pending */}
             <div>
-              <h2 className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground">
-                Pending ({pending.length}) <ArrowUpDown className="w-4 h-4" />
+              <h2 
+                onClick={() => toggleSort('pending')}
+                className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
+              >
+                Pending ({pending.length}) 
+                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders.pending === 'asc' ? 'rotate-180' : ''}`} />
               </h2>
               <div className="space-y-4">
                 {pending.map(appt => (
@@ -151,8 +187,12 @@ const DoctorAppointments = () => {
 
             {/* Scheduled */}
             <div>
-              <h2 className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground">
-                Scheduled ({scheduled.length}) <ArrowUpDown className="w-4 h-4" />
+              <h2 
+                onClick={() => toggleSort('scheduled')} 
+                className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
+              >
+                Scheduled ({scheduled.length}) 
+                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders.scheduled === 'asc' ? 'rotate-180' : ''}`} />
               </h2>
               <div className="space-y-4">
                 {scheduled.map(appt => (
@@ -181,8 +221,12 @@ const DoctorAppointments = () => {
 
             {/* Completed */}
             <div>
-              <h2 className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground">
-                Completed ({completed.length}) <ArrowUpDown className="w-4 h-4" />
+              <h2 
+                onClick={() => toggleSort('completed')} 
+                className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
+              >
+                Completed ({completed.length}) 
+                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders.completed === 'asc' ? 'rotate-180' : ''}`} />
               </h2>
               <div className="space-y-4">
                 {completed.map(appt => (
