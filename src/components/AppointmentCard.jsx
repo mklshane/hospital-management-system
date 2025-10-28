@@ -20,7 +20,7 @@ const AppointmentCard = ({ appt, onClick, formatDate }) => {
     >
       {/* Top: Avatar + Name + Status */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 
+        <div className="w-10 h-10 rounded-full bg-blue
                         flex items-center justify-center text-white font-bold text-sm">
           {appt.patient?.name?.[0] || "P"}
         </div>

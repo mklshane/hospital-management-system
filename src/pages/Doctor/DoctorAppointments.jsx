@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown } from "lucide-react";
+import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown, Calendar, Clock } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
 
@@ -272,32 +272,32 @@ const DoctorAppointments = () => {
               {/* Patient Info */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-light/20 flex items-center justify-center text-lg font-semibold text-blue">
+                  <div className="w-12 h-12 rounded-full bg-blue flex items-center justify-center text-lg font-semibold text-background">
                     {selectedAppointment.patient?.name?.split(" ").map(n => n[0]).join("")}
                   </div>
                   <div>
                     <h3 className="font-bold text-foreground">{selectedAppointment.patient?.name}</h3>
-                    <p className="text-sm text-muted-foreground">📞 {selectedAppointment.patient?.contact || "N/A"}</p>
+                    {/* <p className="text-sm text-muted-foreground">📞 {selectedAppointment.patient?.contact || "N/A"}</p> */}
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                      selectedAppointment.status === "Pending"
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                        : selectedAppointment.status === "Scheduled"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                        : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    }`}>
+                      ● {selectedAppointment.status}
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">📅</span>
+                    <span className="text-muted-foreground"><Calendar className="w-4 h-4"/></span>
                     <span className="text-foreground">{formatDate(selectedAppointment.appointment_date)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">⏰</span>
+                    <span className="text-muted-foreground"><Clock className="w-4 h-4" /></span>
                     <span className="text-foreground">{selectedAppointment.appointment_time}</span>
-                  </div>
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedAppointment.status === "Pending"
-                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                      : selectedAppointment.status === "Scheduled"
-                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                      : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                  }`}>
-                    ● {selectedAppointment.status}
                   </div>
                 </div>
               </div>
