@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, Search, RefreshCw, Funnel } from "lucide-react";
+import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 
 const DoctorAppointments = () => {
@@ -116,8 +116,8 @@ const DoctorAppointments = () => {
           <div className="grid grid-cols-3 gap-6">
             {/* Pending */}
             <div>
-              <h2 className="text-lg font-semibold mb-3 text-foreground">
-                Pending ({pending.length})
+              <h2 className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground">
+                Pending ({pending.length}) <ArrowUpDown className="w-4 h-4" />
               </h2>
               <div className="space-y-4">
                 {pending.map(appt => (
@@ -146,8 +146,8 @@ const DoctorAppointments = () => {
 
             {/* Scheduled */}
             <div>
-              <h2 className="text-lg font-semibold mb-3 text-foreground">
-                Scheduled ({scheduled.length})
+              <h2 className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground">
+                Scheduled ({scheduled.length}) <ArrowUpDown className="w-4 h-4" />
               </h2>
               <div className="space-y-4">
                 {scheduled.map(appt => (
@@ -176,8 +176,8 @@ const DoctorAppointments = () => {
 
             {/* Completed */}
             <div>
-              <h2 className="text-lg font-semibold mb-3 text-foreground">
-                Completed ({completed.length})
+              <h2 className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground">
+                Completed ({completed.length}) <ArrowUpDown className="w-4 h-4" />
               </h2>
               <div className="space-y-4">
                 {completed.map(appt => (
