@@ -32,6 +32,7 @@ const DoctorAppointments = () => {
     // Fetch Appointments
     const fetchAppointments = async () => {
       try {
+        setLoading(true);
         const res = await api.get("/appointment");
         setAppointments(res.data.appointments || []);
       } catch (err) {
@@ -106,8 +107,12 @@ const DoctorAppointments = () => {
               Filter
             </button>
 
-            <button className="flex items-center justify-center gap-2 h-10 px-4 bg-blue hover:bg-blue-light text-white text-sm font-medium rounded-lg transition">
-              <RefreshCw className="w-4 h-4" />
+            <button 
+              onClick={fetchAppointments}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 h-10 px-4 bg-blue hover:bg-blue-light text-white text-sm font-medium rounded-lg transition"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </button>
           </div>
