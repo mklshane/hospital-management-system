@@ -361,6 +361,7 @@ const DoctorAppointments = () => {
                   </>
                 )}
               </div>
+              
               {/* Medical Record Modal */}
               <MedicalRecordModal
                 isOpen={isRecordModalOpen}

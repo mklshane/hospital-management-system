@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Moon, Sun } from "lucide-react";
+import AppointmentCard from "../../components/AppointmentCard";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [scheduledAppointments, setScheduledAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Toggle dark mode
   useEffect(() => {
@@ -79,6 +82,36 @@ const DoctorDashboard = () => {
       symptoms: "Routine checkup"
     }
   ];
+
+  // Fetch scheduled appointments for today
+  const fetchTodayAppointments = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/appointment");
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+      const todayScheduled = (res.data.appointments || [])
+        .filter(appt => 
+          appt.status === "Scheduled" && 
+          appt.appointment_date === today
+        )
+        .sort((a, b) => {
+          const timeA = a.appointment_time;
+          const timeB = b.appointment_time;
+          return timeA.localeCompare(timeB);
+        });
+
+      setScheduledAppointments(todayScheduled);
+    } catch (err) {
+      console.error("Error fetching today's appointments:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTodayAppointments();
+  }, []);
 
   return (
     <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
@@ -173,8 +206,26 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Appointment List */}
-        <div className="flex-1 overflow-y-auto p-6">
-          
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {loading ? (
+            <p className="text-center text-muted-foreground py-8">Loading today's appointments...</p>
+          ) : scheduledAppointments.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No scheduled appointments for today.</p>
+          ) : (
+            scheduledAppointments.map(appt => (
+              <AppointmentCard
+                key={appt._id}
+                appt={appt}
+                formatDate={(dateStr) =>
+                  new Date(dateStr).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                }
+              />
+            ))
+          )}
         </div>
       </div>
 
