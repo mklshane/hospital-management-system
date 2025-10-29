@@ -3,6 +3,7 @@ import { Moon, Sun, RefreshCw, Search } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
 import AppointmentRequestCard from "../../components/AppointmentRequestCard";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,6 +13,9 @@ const DoctorDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [allAppointments, setAllAppointments] = useState([]); 
+  const [calendarLoading, setCalendarLoading] = useState(true);
 
   // Toggle dark mode
   useEffect(() => {
@@ -166,6 +170,98 @@ const DoctorDashboard = () => {
     }
   };
 
+  const fetchCalendarAppointments = async () => {
+    try {
+      setCalendarLoading(true);
+      const res = await api.get("/appointment");
+
+      const scheduled = (res.data.appointments || [])
+        .filter(appt => appt.status === "Scheduled")
+        .map(appt => ({
+          _id: appt._id,
+          patient: appt.patient,
+          appointment_date: appt.appointment_date,
+          appointment_time: appt.appointment_time,
+        }));
+
+      setAllAppointments(scheduled);
+    } catch (err) {
+      console.error("Error fetching calendar data:", err);
+    } finally {
+      setCalendarLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCalendarAppointments();
+  }, []);
+
+  const Calendar = () => {
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
+    const days = eachDayOfInterval({ start, end });
+    const appointmentDates = allAppointments.map(a => a.appointment_date);
+
+    return (
+      <div className="bg-ui-muted rounded-lg p-4 h-full flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-3">
+          <button
+            onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1))}
+            className="p-1 rounded hover:bg-blue/20 transition text-foreground"
+          >
+            Less than
+          </button>
+          <h3 className="text-sm font-semibold font-montserrat text-foreground">
+            {format(currentMonth, "MMM yyyy")}
+          </h3>
+          <button
+            onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1))}
+            className="p-1 rounded hover:bg-blue/20 transition text-foreground"
+          >
+            Greater than
+          </button>
+        </div>
+
+        {/* Weekdays */}
+        <div className="grid grid-cols-7 text-xs text-muted-foreground mb-1">
+          {["S", "M", "T", "W", "T", "F", "S"].map(d => (
+            <div key={d} className="text-center">{d}</div>
+          ))}
+        </div>
+
+        {/* Days */}
+        <div className="grid grid-cols-7 gap-1 text-xs flex-1">
+          {/* Empty cells */}
+          {Array.from({ length: start.getDay() }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+
+          {/* Days */}
+          {days.map(day => {
+            const dateStr = format(day, "yyyy-MM-dd");
+            const hasAppt = appointmentDates.includes(dateStr);
+            const isToday = isSameDay(day, new Date());
+
+            return (
+              <div
+                key={dateStr}
+                className={`
+                  aspect-square flex items-center justify-center rounded transition text-sm
+                  ${hasAppt ? "bg-blue text-white font-bold" : "hover:bg-ui-muted/50"}
+                  ${isToday ? "ring-2 ring-blue-light" : ""}
+                `}
+                title={hasAppt ? `${appointmentDates.filter(d => d === dateStr).length} appointment(s)` : ""}
+              >
+                {format(day, "d")}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
       
@@ -200,39 +296,14 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      {/* Upper Right - Calendar Section */}
-      <div className="col-span-3 row-span-1 rounded-2xl p-1 overflow-hidden">
-        {/* <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2> */}
-        <div className="bg-ui-muted rounded-lg p-4 text-center">
-          {/* Calendar Grid */}
-          <div className="bg-ui-muted rounded-lg">
-            {/* Month Header */}
-            <div className="flex justify-between items-center mb-4">
-              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&lt;</button>
-              <h3 className="text-md font-semibold font-montserrat text-foreground dark:text-white">October 2025</h3>
-              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&gt;</button>
-            </div>
-
-            {/* Week Days */}
-            <div className="grid grid-cols-7 text-sm font-figtree text-muted-foreground dark:text-gray-300 mb-2">
-              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day) => (
-                <div key={day} className="text-center">{day}</div>
-              ))}
-            </div>
-
-            {/* Days Grid */}
-            <div className="grid grid-cols-7 gap-2 text-sm">
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                <div
-                  key={day}
-                  className="p-2 rounded hover:bg-blue-light/20 dark:hover:bg-blue-600 transition text-center cursor-pointer"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-          </div>
-
+      {/* Upper Right - Dynamic Calendar */}
+      <div className="col-span-3 row-span-1 bg-ui-card rounded-2xl flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-hidden">
+          {calendarLoading ? (
+            <p className="text-center text-muted-foreground py-8">Loading calendar...</p>
+          ) : (
+            <Calendar />
+          )}
         </div>
       </div>
 
