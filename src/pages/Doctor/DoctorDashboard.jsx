@@ -8,6 +8,9 @@ const DoctorDashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [scheduledAppointments, setScheduledAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
 
   // Toggle dark mode
   useEffect(() => {
@@ -113,6 +116,54 @@ const DoctorDashboard = () => {
   useEffect(() => {
     fetchTodayAppointments();
   }, []);
+
+  // Fetch pending appointment requests
+  const fetchPendingRequests = async () => {
+    try {
+      setRequestsLoading(true);
+      const res = await api.get("/appointment");
+
+      // Get current doctor's ID (from auth context or localStorage)
+      const doctorId = localStorage.getItem("doctorId"); // or use auth context
+
+      const pending = (res.data.appointments || [])
+        .filter(appt => 
+          appt.status === "pending" && 
+          appt.doctor_id === doctorId
+        )
+        .sort((a, b) => {
+          // Sort by date and time: earliest first
+          const dateA = new Date(a.appointment_date + " " + a.appointment_time);
+          const dateB = new Date(b.appointment_date + " " + b.appointment_time);
+          return dateA - dateB;
+        });
+
+      setRequests(pending);
+    } catch (err) {
+      console.error("Error fetching pending requests:", err);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingRequests();
+  }, []);
+
+  // Handle approve/reject
+  const handleStatusUpdate = async (id, newStatus) => {
+    setActionLoading(prev => ({ ...prev, [id]: true }));
+    try {
+      await api.put(`/appointment/${id}`, { status: newStatus });
+      await fetchPendingRequests(); // refresh list
+      await fetchTodayAppointments(); // update stats
+    } catch (err) {
+      console.error(`Failed to ${newStatus} appointment:`, err);
+      alert("Action failed. Please try again.");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [id]: false }));
+    }
+  };
 
   return (
     <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
@@ -244,8 +295,22 @@ const DoctorDashboard = () => {
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* requests list goes here */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-3">
+          {requestsLoading ? (
+            <p className="text-center text-muted-foreground py-8">Loading requests...</p>
+          ) : requests.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No pending requests.</p>
+          ) : (
+            requests.map(req => (
+              <AppointmentRequestCard
+                key={req._id}
+                request={req}
+                onApprove={(id) => handleStatusUpdate(id, "scheduled")}
+                onReject={(id) => handleStatusUpdate(id, "rejected")}
+                loading={actionLoading[req._id]}
+              />
+            ))
+          )}
         </div>
       </div>
 
