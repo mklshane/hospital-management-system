@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown, Calendar, Clock } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
+import MedicalRecordModal from '../../components/MedicalRecordModal';
 
 const DoctorAppointments = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -16,6 +17,7 @@ const DoctorAppointments = () => {
       cancelled: 'desc',
       rejected: 'desc',
     });
+    const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
     
     // Toggle dark mode
     useEffect(() => {
@@ -345,7 +347,7 @@ const DoctorAppointments = () => {
                 {selectedAppointment.status === "Scheduled" && (
                   <>
                     <button
-                      onClick={() => {console.log("Add Medical Record for", selectedAppointment._id);}}
+                      onClick={() => setIsRecordModalOpen(true)}
                       className="w-full bg-blue hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
                     >
                       Add Medical Record
@@ -355,10 +357,26 @@ const DoctorAppointments = () => {
                       className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-3 rounded-lg font-semibold transition-colors dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
                     >
                       Complete Appointment
-                    </button>
+                    </button>      
                   </>
                 )}
               </div>
+              {/* Medical Record Modal */}
+              <MedicalRecordModal
+                isOpen={isRecordModalOpen}
+                onClose={() => setIsRecordModalOpen(false)}
+                appointment={{
+                  _id: selectedAppointment._id,
+                  patientName: selectedAppointment.patient?.name,
+                  date: formatDate(selectedAppointment.appointment_date),
+                  time: selectedAppointment.appointment_time,
+                  notes: selectedAppointment.notes,
+                }}
+                onRecordAdded={() => {
+                  fetchAppointments(); // Refresh list
+                  setSelectedAppointment(null); // Optional: clear selection
+                }}
+              />
             </>
           )}
         </div>
