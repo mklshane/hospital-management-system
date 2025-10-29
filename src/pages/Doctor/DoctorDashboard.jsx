@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Moon, Sun, RefreshCw, Search } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
+import AppointmentRequestCard from "../../components/AppointmentRequestCard";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -123,16 +124,16 @@ const DoctorDashboard = () => {
       setRequestsLoading(true);
       const res = await api.get("/appointment");
 
-      // Get current doctor's ID (from auth context or localStorage)
-      const doctorId = localStorage.getItem("doctorId"); // or use auth context
-
       const pending = (res.data.appointments || [])
-        .filter(appt => 
-          appt.status === "pending" && 
-          appt.doctor_id === doctorId
-        )
+        .filter(appt => appt.status === "Pending")
+        .map(appt => ({
+          _id: appt._id,
+          patient: appt.patient,
+          appointment_date: appt.appointment_date,
+          appointment_time: appt.appointment_time,
+          notes: appt.notes,
+        }))
         .sort((a, b) => {
-          // Sort by date and time: earliest first
           const dateA = new Date(a.appointment_date + " " + a.appointment_time);
           const dateB = new Date(b.appointment_date + " " + b.appointment_time);
           return dateA - dateB;
@@ -140,7 +141,7 @@ const DoctorDashboard = () => {
 
       setRequests(pending);
     } catch (err) {
-      console.error("Error fetching pending requests:", err);
+      console.error("Error:", err);
     } finally {
       setRequestsLoading(false);
     }
@@ -305,8 +306,8 @@ const DoctorDashboard = () => {
               <AppointmentRequestCard
                 key={req._id}
                 request={req}
-                onApprove={(id) => handleStatusUpdate(id, "scheduled")}
-                onReject={(id) => handleStatusUpdate(id, "rejected")}
+                onApprove={(id) => handleStatusUpdate(id, "Scheduled")}
+                onReject={(id) => handleStatusUpdate(id, "Rejected")}
                 loading={actionLoading[req._id]}
               />
             ))
