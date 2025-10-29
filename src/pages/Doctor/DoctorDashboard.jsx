@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, RefreshCw, Search } from "lucide-react";
+import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
 
 const DoctorDashboard = () => {
@@ -188,20 +189,28 @@ const DoctorDashboard = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Today's Appointment</h2>
         
-        {/* Search Bar */}
-        <div className="relative w-full sm:w-1/2 lg:w-1/4">
-            <input
-              type="text"
-              placeholder="Search for name, date, notes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
-            />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          {/* Search Bar */}
+         <div className="flex items-center gap-2 w-full sm:w-1/2 lg:w-1/3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search name, date, notes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             </div>
+
+            {/* Refresh Button */}
+            <button
+              onClick={fetchTodayAppointments}
+              disabled={loading}
+              className="p-2 h-10 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
           </div>
         </div>
 
