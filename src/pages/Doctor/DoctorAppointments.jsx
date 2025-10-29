@@ -1,135 +1,147 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown, Calendar, Clock } from "lucide-react";
+import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown, Calendar, Clock, X, Check } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
 import MedicalRecordModal from '../../components/MedicalRecordModal';
 
 const DoctorAppointments = () => {
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const [appointments, setAppointments] = useState([]);
-    const [selectedAppointment, setSelectedAppointment] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [refreshKey, setRefreshKey] = useState(0);
-    const [sortOrders, setSortOrders] = useState({
-      pending: 'desc',
-      scheduled: 'desc',
-      completed: 'desc',
-      cancelled: 'desc',
-      rejected: 'desc',
-    });
-    const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
-    
-    // Toggle dark mode
-    useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-    }, [isDarkMode]);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [sortOrders, setSortOrders] = useState({
+    pending: 'desc',
+    scheduled: 'desc',
+    completed: 'desc',
+    cancelled: 'desc',
+    rejected: 'desc',
+  });
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
-    useEffect(() => {
-        const savedTheme = localStorage.getItem("theme");
-        if (savedTheme === "dark") {
-            setIsDarkMode(true);
-            document.documentElement.classList.add("dark");
-        }
-    }, []);
+  // Filter State
+  const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']); // Default: show first 3
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    useEffect(() => {
-        localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-    }, [isDarkMode]);
+  const statusOptions = [
+    { key: 'pending', label: 'Pending', color: 'yellow' },
+    { key: 'scheduled', label: 'Scheduled', color: 'blue' },
+    { key: 'completed', label: 'Completed', color: 'green' },
+    { key: 'cancelled', label: 'Cancelled', color: 'red' },
+    { key: 'rejected', label: 'Rejected', color: 'purple' },
+  ];
 
-    // Fetch Appointments
-    const fetchAppointments = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get("/appointment");
-        setAppointments(res.data.appointments || []);
-      } catch (err) {
-        console.error("Error fetching appointments:", err);
-      } finally {
-        setLoading(false);
+  // Toggle filter selection
+  const toggleFilter = (key) => {
+    setSelectedFilters(prev => {
+      if (prev.includes(key)) {
+        return prev.filter(f => f !== key);
       }
+      if (prev.length >= 3) {
+        alert("You can select a maximum of 3 statuses.");
+        return prev;
+      }
+      return [...prev, key];
+    });
+  };
+
+  // Toggle dark mode
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+  }, [isDarkMode]);
+
+  // Fetch Appointments
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/appointment");
+      setAppointments(res.data.appointments || []);
+    } catch (err) {
+      console.error("Error fetching appointments:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  // Helper for sorting date
+  const sortByDate = (appointments, order) => {
+    return [...appointments].sort((a, b) => {
+      const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
+      const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
+      return order === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+  };
+
+  const toggleSort = (column) => {
+    setSortOrders(prev => {
+      const newOrder = prev[column] === "desc" ? "asc" : "desc";
+      return { ...prev, [column]: newOrder };
+    });
+    setRefreshKey((k) => k + 1);
+  };
+
+  // Categorize Appointments (filtered by selectedFilters)
+  const filteredAppointments = useMemo(() => {
+    const statusMap = {
+      pending: appointments.filter(a => a.status === "Pending"),
+      scheduled: appointments.filter(a => a.status === "Scheduled"),
+      completed: appointments.filter(a => a.status === "Completed"),
+      cancelled: appointments.filter(a => a.status === "Cancelled"),
+      rejected: appointments.filter(a => a.status === "Rejected"),
     };
 
-    useEffect(() => {
-      fetchAppointments();
-    }, []);
+    return selectedFilters.reduce((acc, key) => {
+      acc[key] = sortByDate(statusMap[key], sortOrders[key]);
+      return acc;
+    }, {});
+  }, [appointments, selectedFilters, sortOrders]);
 
-    // Helper for sorting date
-    const sortByDate = (appointments, order) => {
-      return [...appointments].sort((a, b) => {
-        const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
-        const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
-        return order === 'desc' ? dateB - dateA : dateA - dateB;
-      });
-    };
-
-    const toggleSort = (column) => {
-      setSortOrders(prev => {
-        const newOrder = prev[column] === "desc" ? "asc" : "desc";
-        return { ...prev, [column]: newOrder };
-      });
-      setRefreshKey((k) => k + 1);
-    };
-
-    // Categorize Appointments
-    const pending = useMemo(() => {
-      const list = appointments.filter((a) => a.status === "Pending");
-      return sortByDate(list, sortOrders.pending);
-    }, [appointments, sortOrders.pending]);
-
-    const scheduled = useMemo(() => {
-      const list = appointments.filter((a) => a.status === "Scheduled");
-      return sortByDate(list, sortOrders.scheduled);
-    }, [appointments, sortOrders.scheduled]);
-
-    const completed = useMemo(() => {
-      const list = appointments.filter((a) => a.status === "Completed");
-      return sortByDate(list, sortOrders.completed);
-    }, [appointments, sortOrders.completed]);
-
-    const cancelled = useMemo(() => {
-      const list = appointments.filter(a => a.status === "Cancelled");
-      return sortByDate(list, sortOrders.cancelled || 'desc');
-    }, [appointments, sortOrders.cancelled]);
-
-    const rejected = useMemo(() => {
-      const list = appointments.filter(a => a.status === "Rejected");
-      return sortByDate(list, sortOrders.rejected || 'desc');
-    }, [appointments, sortOrders.rejected]);
-
-    useEffect(() => {
-      setAppointments((prev) => [...prev]);
-    }, [appointments.length]);
-
-    // Helper for date/time formatting
-    const formatDate = (dateStr) =>
+  // Helper for date/time formatting
+  const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
 
-    // Update Appointment Status
-    const updateStatus = async (id, status) => {
-      try {
-        await api.put(`/appointment/${id}`, { status });
-        setAppointments(prev =>
-          prev.map(appt => (appt._id === id ? { ...appt, status } : appt))
-        );
-        if (selectedAppointment?._id === id)
-          setSelectedAppointment(prev => ({ ...prev, status }));
-      } catch (err) {
-        console.error("Error updating status:", err);
-        alert(err.response?.data?.message || "Failed to update status");
-      }
-    };
+  // Update Appointment Status
+  const updateStatus = async (id, status) => {
+    try {
+      await api.put(`/appointment/${id}`, { status });
+      setAppointments(prev =>
+        prev.map(appt => (appt._id === id ? { ...appt, status } : appt))
+      );
+      if (selectedAppointment?._id === id)
+        setSelectedAppointment(prev => ({ ...prev, status }));
+    } catch (err) {
+      console.error("Error updating status:", err);
+      alert(err.response?.data?.message || "Failed to update status");
+    }
+  };
 
-    if (loading) return <p className="text-center py-10 text-foreground">Loading appointments...</p>;
+  if (loading) return <p className="text-center py-10 text-foreground">Loading appointments...</p>;
 
-    return (
+  return (
     <div className="min-h-screen flex flex-col pb-10">
       <div className="flex-1 grid grid-cols-12 overflow-y-auto gap-5">
         {/* LEFT SECTION - APPOINTMENTS */}
@@ -155,10 +167,88 @@ const DoctorAppointments = () => {
                 className="w-full h-10 pl-10 pr-4 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
               />
             </div>
-            <button className="flex items-center justify-center gap-2 h-10 px-4 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition">
-              <Funnel className="w-4 h-4" />
-              Filter
-            </button>
+
+            {/* Filter Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="flex items-center justify-center gap-2 h-10 px-4 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition"
+              >
+                <Funnel className="w-4 h-4" />
+                Filter ({selectedFilters.length})
+              </button>
+
+              {/* Dropdown */}
+              {isFilterOpen && (
+                <div className="absolute top-full mt-2 left-0 w-56 bg-ui-card border border-ui-border rounded-lg shadow-lg z-50 p-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm font-semibold text-foreground">Select up to 3</p>
+                    <button
+                      onClick={() => setIsFilterOpen(false)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    {[
+                      { key: 'pending',    label: 'Pending',    color: 'yellow' },
+                      { key: 'scheduled',  label: 'Scheduled',  color: 'blue' },
+                      { key: 'completed',  label: 'Completed',  color: 'green' },
+                      { key: 'cancelled',  label: 'Cancelled',  color: 'red' },
+                      { key: 'rejected',   label: 'Rejected',   color: 'purple' },
+                    ].map(opt => {
+                      const isChecked = selectedFilters.includes(opt.key);
+                      return (
+                        <label
+                          key={opt.key}
+                          onClick={() => toggleFilter(opt.key)}   // <-- click to check/uncheck
+                          className="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-ui-muted transition"
+                        >
+                          {/* Custom checkbox */}
+                          <div
+                            className={`w-4 h-4 rounded border flex items-center justify-center transition ${
+                              isChecked ? 'bg-blue border-blue' : 'border-ui-border'
+                            }`}
+                          >
+                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                          </div>
+
+                          <span className="text-sm text-foreground capitalize">{opt.label}</span>
+
+                          {/* Count */}
+                          <span
+                            className={`ml-auto text-xs font-medium ${
+                              opt.color === 'yellow' ? 'text-yellow-600' :
+                              opt.color === 'blue'   ? 'text-blue-600'   :
+                              opt.color === 'green'  ? 'text-green-600'  :
+                              opt.color === 'red'    ? 'text-red-600'    :
+                                                      'text-purple-600'
+                            }`}
+                          >
+                            {appointments.filter(a => a.status.toLowerCase() === opt.key).length}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {/* Reset */}
+                  <div className="mt-3 pt-3 border-t border-ui-border">
+                    <button
+                      onClick={() => {
+                        setSelectedFilters(['pending', 'scheduled', 'completed']);
+                        setIsFilterOpen(false);
+                      }}
+                      className="w-full text-xs text-blue hover:underline"
+                    >
+                      Reset to default
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <button 
               onClick={fetchAppointments}
@@ -170,96 +260,34 @@ const DoctorAppointments = () => {
             </button>
           </div>
 
-          {/* Columns */}
+          {/* Dynamic Columns based on selectedFilters */}
           <div className="grid grid-cols-3 gap-6">
-            {/* Pending */}
-            <div>
-              <h2 
-                onClick={() => toggleSort('pending')}
-                className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
-              >
-                Pending ({pending.length}) 
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders.pending === 'asc' ? 'rotate-180' : ''}`} />
-              </h2>
-              <div className="space-y-4">
-                {pending.map(appt => (
-                  <AppointmentCard
-                    key={appt._id}
-                    appt={appt}
-                    onClick={setSelectedAppointment}
-                    formatDate={formatDate}
-                  />
-                ))}
-              </div>
-            </div>
+            {selectedFilters.map(filterKey => {
+              const statusData = statusOptions.find(s => s.key === filterKey);
+              const list = filteredAppointments[filterKey] || [];
 
-            {/* Scheduled */}
-            <div>
-              <h2 
-                onClick={() => toggleSort('scheduled')} 
-                className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
-              >
-                Scheduled ({scheduled.length}) 
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders.scheduled === 'asc' ? 'rotate-180' : ''}`} />
-              </h2>
-              <div className="space-y-4">
-                {scheduled.map(appt => (
-                  <AppointmentCard
-                    key={appt._id}
-                    appt={appt}
-                    onClick={setSelectedAppointment}
-                    formatDate={formatDate}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Completed */}
-            <div>
-              <h2 
-                onClick={() => toggleSort('completed')} 
-                className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
-              >
-                Completed ({completed.length}) 
-                <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders.completed === 'asc' ? 'rotate-180' : ''}`} />
-              </h2>
-              <div className="space-y-4">
-                {completed.map(appt => (
-                  <AppointmentCard
-                    key={appt._id}
-                    appt={appt}
-                    onClick={setSelectedAppointment}
-                    formatDate={formatDate}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Cancelled */}
-            <div>
-              <h2 onClick={() => toggleSort('cancelled')} className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition">
-                Cancelled ({cancelled.length})
-                <ArrowUpDown className={`... ${sortOrders.cancelled === 'asc' ? 'rotate-180' : ''}`} />
-              </h2>
-              <div className="space-y-4">
-                {cancelled.map(appt => (
-                  <AppointmentCard key={appt._id} appt={appt} onClick={setSelectedAppointment} formatDate={formatDate} />
-                ))}
-              </div>
-            </div>
-            
-            {/* Rejected */}
-            <div>
-              <h2 onClick={() => toggleSort('rejected')} className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition">
-                Rejected ({rejected.length})
-                <ArrowUpDown className={`... ${sortOrders.rejected === 'asc' ? 'rotate-180' : ''}`} />
-              </h2>
-              <div className="space-y-4">
-                {rejected.map(appt => (
-                  <AppointmentCard key={appt._id} appt={appt} onClick={setSelectedAppointment} formatDate={formatDate} />
-                ))}
-              </div>
-            </div>
+              return (
+                <div key={filterKey}>
+                  <h2 
+                    onClick={() => toggleSort(filterKey)}
+                    className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
+                  >
+                    {statusData.label} ({list.length}) 
+                    <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders[filterKey] === 'asc' ? 'rotate-180' : ''}`} />
+                  </h2>
+                  <div className="space-y-4">
+                    {list.map(appt => (
+                      <AppointmentCard
+                        key={appt._id}
+                        appt={appt}
+                        onClick={setSelectedAppointment}
+                        formatDate={formatDate}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -279,13 +307,16 @@ const DoctorAppointments = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-foreground">{selectedAppointment.patient?.name}</h3>
-                    {/* <p className="text-sm text-muted-foreground">📞 {selectedAppointment.patient?.contact || "N/A"}</p> */}
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                       selectedAppointment.status === "Pending"
                         ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
                         : selectedAppointment.status === "Scheduled"
                         ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : selectedAppointment.status === "Completed"
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : selectedAppointment.status === "Cancelled"
+                        ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                        : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
                     }`}>
                       ● {selectedAppointment.status}
                     </div>
@@ -305,11 +336,11 @@ const DoctorAppointments = () => {
               </div>
 
               {/* Notes */}
-              <div className=" border-ui-border mb-6">
+              <div className="border-ui-border mb-6">
                 <div className="mb-4">
                   <h4 className="font-semibold text-foreground mb-2">Patient Notes</h4>
                   <div className="bg-ui-muted rounded-lg p-3">
-                    <p className="text-sm text-foreground">{selectedAppointment.notes}</p>
+                    <p className="text-sm text-foreground">{selectedAppointment.notes || "No notes provided."}</p>
                   </div>
                 </div>
 
@@ -374,8 +405,8 @@ const DoctorAppointments = () => {
                   notes: selectedAppointment.notes,
                 }}
                 onRecordAdded={() => {
-                  fetchAppointments(); // Refresh list
-                  setSelectedAppointment(null); // Optional: clear selection
+                  fetchAppointments();
+                  setSelectedAppointment(null);
                 }}
               />
             </>
