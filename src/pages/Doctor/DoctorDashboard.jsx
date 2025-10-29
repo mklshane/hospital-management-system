@@ -1,44 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Moon, Sun, RefreshCw, Search } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
 import AppointmentRequestCard from "../../components/AppointmentRequestCard";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [scheduledAppointments, setScheduledAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
-  const [requestsLoading, setRequestsLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState({});
+  const [allAppointments, setAllAppointments] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [allAppointments, setAllAppointments] = useState([]); 
+
+  const [loading, setLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(true);
   const [calendarLoading, setCalendarLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
 
-  // Toggle dark mode
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
-  
-  // Mock data
   const doctorData = {
     name: "Dr. Juan De La Cruz",
     specialization: "General Medicine"
@@ -51,48 +30,20 @@ const DoctorDashboard = () => {
     { label: "Assigned Patients", value: 23 }
   ];
 
-  const appointmentsData = [
-    {
-      patientName: "Maria Dela Cruz",
-      status: "Pending",
-      date: "Oct 12, 2025",
-      time: "09:30 AM – 10:00 AM",
-      notes: "Complains of persistent cough and mild fever"
-    },
-    {
-      patientName: "John Santos",
-      status: "Approved",
-      date: "Oct 10, 2025",
-      time: "02:00 PM – 02:30 PM",
-      notes: "Routine blood pressure check-up"
-    },
-    {
-      patientName: "John Santos",
-      status: "Approved",
-      date: "Oct 10, 2025",
-      time: "02:00 PM – 02:30 PM",
-      notes: "Routine blood pressure check-up"
-    }
-  ];
+  // Theme handling
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = savedTheme === "dark";
+    setIsDarkMode(prefersDark);
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
 
-  const appointmentRequests = [
-    {
-      patientName: "Maria Dela Cruz",
-      age: 32,
-      gender: "Female",
-      time: "Today, 09:30 AM",
-      symptoms: "Fever and cough for 3 days"
-    },
-    {
-      patientName: "John Doe",
-      age: 40,
-      gender: "Male", 
-      time: "Today, 10:00 AM",
-      symptoms: "Routine checkup"
-    }
-  ];
+  useEffect(() => {
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", isDarkMode);
+  }, [isDarkMode]);
 
-  // Fetch scheduled appointments for today
+  // API: Fetch today's scheduled appointments
   const fetchTodayAppointments = async () => {
     try {
       setLoading(true);
@@ -118,11 +69,7 @@ const DoctorDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchTodayAppointments();
-  }, []);
-
-  // Fetch pending appointment requests
+  // API: Fetch pending appointment requests
   const fetchPendingRequests = async () => {
     try {
       setRequestsLoading(true);
@@ -151,25 +98,7 @@ const DoctorDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchPendingRequests();
-  }, []);
-
-  // Handle approve/reject
-  const handleStatusUpdate = async (id, newStatus) => {
-    setActionLoading(prev => ({ ...prev, [id]: true }));
-    try {
-      await api.put(`/appointment/${id}`, { status: newStatus });
-      await fetchPendingRequests(); // refresh list
-      await fetchTodayAppointments(); // update stats
-    } catch (err) {
-      console.error(`Failed to ${newStatus} appointment:`, err);
-      alert("Action failed. Please try again.");
-    } finally {
-      setActionLoading(prev => ({ ...prev, [id]: false }));
-    }
-  };
-
+  // API: Fetch all scheduled appointments for calendar
   const fetchCalendarAppointments = async () => {
     try {
       setCalendarLoading(true);
@@ -192,10 +121,36 @@ const DoctorDashboard = () => {
     }
   };
 
+  // API: Update appointment status
+  const handleStatusUpdate = async (id, newStatus) => {
+    setActionLoading(prev => ({ ...prev, [id]: true }));
+    try {
+      await api.put(`/appointment/${id}`, { status: newStatus });
+      await fetchPendingRequests(); // refresh list
+      await fetchTodayAppointments(); // update stats
+    } catch (err) {
+      console.error(`Failed to ${newStatus} appointment:`, err);
+      alert("Action failed. Please try again.");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Initial data fetch
   useEffect(() => {
+    fetchTodayAppointments();
+    fetchPendingRequests();
     fetchCalendarAppointments();
   }, []);
 
+  // Search filter
+  const filteredAppointments = scheduledAppointments.filter(appt =>
+    appt.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    appt.appointment_date.includes(searchTerm) ||
+    appt.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calendar component (to be transfered)
   const Calendar = () => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
@@ -265,7 +220,7 @@ const DoctorDashboard = () => {
   return (
     <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
       
-      {/* Upper Left - Blue Background Section */}
+      {/* Upper Left - Doctor Info and Statistics*/}
       <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
         <div className="flex justify-between items-start">
           <div>
@@ -296,7 +251,7 @@ const DoctorDashboard = () => {
         </div>
       </div>
 
-      {/* Upper Right - Dynamic Calendar */}
+      {/* Upper Right - Calendar */}
       <div className="col-span-3 row-span-1 bg-ui-card rounded-2xl flex flex-col overflow-hidden">
         <div className="flex-1 overflow-hidden">
           {calendarLoading ? (
@@ -385,7 +340,6 @@ const DoctorDashboard = () => {
           )}
         </div>
       </div>
-
     </div>
   );
 };
