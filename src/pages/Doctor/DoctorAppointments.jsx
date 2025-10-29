@@ -303,7 +303,7 @@ const DoctorAppointments = () => {
               </div>
 
               {/* Notes */}
-              <div className="border-t border-ui-border pt-4 mb-6">
+              <div className=" border-ui-border mb-6">
                 <div className="mb-4">
                   <h4 className="font-semibold text-foreground mb-2">Patient Notes</h4>
                   <div className="bg-ui-muted rounded-lg p-3">
@@ -343,12 +343,20 @@ const DoctorAppointments = () => {
                 )}
 
                 {selectedAppointment.status === "Scheduled" && (
-                  <button
-                    onClick={() => updateStatus(selectedAppointment._id, "Completed")}
-                    className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-3 rounded-lg font-semibold transition-colors dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
-                  >
-                    Complete Appointment
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {console.log("Add Medical Record for", selectedAppointment._id);}}
+                      className="w-full bg-blue hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                    >
+                      Add Medical Record
+                    </button>
+                    <button
+                      onClick={() => updateStatus(selectedAppointment._id, "Completed")}
+                      className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-3 rounded-lg font-semibold transition-colors dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
+                    >
+                      Complete Appointment
+                    </button>
+                  </>
                 )}
               </div>
             </>

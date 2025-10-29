@@ -14,9 +14,10 @@ const AppointmentCard = ({ appt, onClick, formatDate }) => {
   return (
     <div
       onClick={() => onClick(appt)}
-      className="p-4 bg-ui-card rounded-xl border border-gray-200 dark:border-gray-700 
-                 shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 
-                 hover:border-blue-300 dark:hover:border-blue-600"
+      className="p-4 bg-ui-card rounded-xl border border-gray-200 dark:border-gray-700
+             shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 transition-colors
+             hover:border-blue-300 dark:hover:border-blue-600
+             hover-bg-ui-muted dark:hover-bg-ui-surface-dark"
     >
       {/* Top: Avatar + Name + Status */}
       <div className="flex items-center gap-3 mb-3">

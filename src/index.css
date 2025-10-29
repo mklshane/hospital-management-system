@@ -254,3 +254,8 @@
 .focus-ring-ui:focus {
   ring: 2px solid var(--ui-ring);
 }
+
+@layer utilities {
+  .hover-bg-ui-muted:hover { background-color: #E3F2FD !important; }
+  .hover-bg-ui-surface-dark:hover { background-color: #2C303D !important; }
+}
