@@ -1,10 +1,9 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 const DoctorMedicalRecords = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  
+
   // Dark mode persistence
   useEffect(() => {
     if (isDarkMode) {
