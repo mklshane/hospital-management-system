@@ -322,7 +322,7 @@ const DoctorDashboard = () => {
           <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6 space-y-3">
+        <div className="scrollbar flex-1 overflow-y-auto p-6 space-y-3">
           {requestsLoading ? (
             <p className="text-center text-muted-foreground py-8">Loading requests...</p>
           ) : requests.length === 0 ? (

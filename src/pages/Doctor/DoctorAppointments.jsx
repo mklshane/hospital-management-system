@@ -9,15 +9,20 @@ const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [sortOrders, setSortOrders] = useState({
-    pending: 'desc',
-    scheduled: 'desc',
-    completed: 'desc',
-    cancelled: 'desc',
-    rejected: 'desc',
-  });
+  // const [sortOrders, setSortOrders] = useState({
+  //   pending: 'desc',
+  //   scheduled: 'desc',
+  //   completed: 'desc',
+  //   cancelled: 'desc',
+  //   rejected: 'desc',
+  // });
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  // Replace the entire sortOrders state
+  const [sortOrderPending, setSortOrderPending] = useState('desc');
+  const [sortOrderScheduled, setSortOrderScheduled] = useState('desc');
+  const [sortOrderCompleted, setSortOrderCompleted] = useState('desc');
+  const [sortOrderCancelled, setSortOrderCancelled] = useState('desc');
+  const [sortOrderRejected, setSortOrderRejected] = useState('desc');
 
   // Filter State
   const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']); // Default: show first 3
@@ -86,21 +91,49 @@ const DoctorAppointments = () => {
   // Helper for sorting date
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
-      const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
-      const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
+      const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`).getTime();
+      const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`).getTime();
       return order === 'desc' ? dateB - dateA : dateA - dateB;
     });
   };
 
+  // const toggleSort = (column) => {
+  //   setSortOrders(prev => {
+  //     const newOrder = prev[column] === "desc" ? "asc" : "desc";
+  //     return {
+  //       ...prev,
+  //       [column]: newOrder,
+  //       _trigger: Date.now()
+  //     };
+  //   });
+  // };
   const toggleSort = (column) => {
-    setSortOrders(prev => {
-      const newOrder = prev[column] === "desc" ? "asc" : "desc";
-      return { ...prev, [column]: newOrder };
-    });
-    setRefreshKey((k) => k + 1);
+    if (column === 'pending') setSortOrderPending(prev => prev === 'desc' ? 'asc' : 'desc');
+    if (column === 'scheduled') setSortOrderScheduled(prev => prev === 'desc' ? 'asc' : 'desc');
+    if (column === 'completed') setSortOrderCompleted(prev => prev === 'desc' ? 'asc' : 'desc');
+    if (column === 'cancelled') setSortOrderCancelled(prev => prev === 'desc' ? 'asc' : 'desc');
+    if (column === 'rejected') setSortOrderRejected(prev => prev === 'desc' ? 'asc' : 'desc');
   };
 
   // Categorize Appointments (filtered by selectedFilters)
+  // const filteredAppointments = useMemo(() => {
+  //   const statusMap = {
+  //     pending: appointments.filter(a => a.status === "Pending"),
+  //     scheduled: appointments.filter(a => a.status === "Scheduled"),
+  //     completed: appointments.filter(a => a.status === "Completed"),
+  //     cancelled: appointments.filter(a => a.status === "Cancelled"),
+  //     rejected: appointments.filter(a => a.status === "Rejected"),
+  //   };
+
+  //   const result = {};
+
+  //   selectedFilters.forEach(key => {
+  //     const list = statusMap[key] || [];
+  //     result[key] = sortByDate(list, sortOrders[key] || 'desc');
+  //   });
+
+  //   return result;
+  // }, [appointments, selectedFilters, sortOrders]); 
   const filteredAppointments = useMemo(() => {
     const statusMap = {
       pending: appointments.filter(a => a.status === "Pending"),
@@ -110,11 +143,30 @@ const DoctorAppointments = () => {
       rejected: appointments.filter(a => a.status === "Rejected"),
     };
 
-    return selectedFilters.reduce((acc, key) => {
-      acc[key] = sortByDate(statusMap[key], sortOrders[key]);
-      return acc;
-    }, {});
-  }, [appointments, selectedFilters, sortOrders]);
+    const result = {};
+
+    selectedFilters.forEach(key => {
+      const list = statusMap[key] || [];
+      let order = 'desc';
+      if (key === 'pending') order = sortOrderPending;
+      if (key === 'scheduled') order = sortOrderScheduled;
+      if (key === 'completed') order = sortOrderCompleted;
+      if (key === 'cancelled') order = sortOrderCancelled;
+      if (key === 'rejected') order = sortOrderRejected;
+
+      result[key] = sortByDate(list, order);
+    });
+
+    return result;
+  }, [
+    appointments,
+    selectedFilters,
+    sortOrderPending,
+    sortOrderScheduled,
+    sortOrderCompleted,
+    sortOrderCancelled,
+    sortOrderRejected
+  ]);
 
   // Helper for date/time formatting
   const formatDate = (dateStr) =>
@@ -145,7 +197,7 @@ const DoctorAppointments = () => {
     <div className="min-h-screen flex flex-col pb-10">
       <div className="flex-1 grid grid-cols-12 overflow-y-auto gap-5">
         {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-y-auto max-h-[95vh]">
+        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-y-auto max-h-[95vh]">
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <h1 className="text-2xl font-bold font-montserrat text-foreground">Appointments</h1>
@@ -265,15 +317,25 @@ const DoctorAppointments = () => {
             {selectedFilters.map(filterKey => {
               const statusData = statusOptions.find(s => s.key === filterKey);
               const list = filteredAppointments[filterKey] || [];
+              let currentOrder = 'desc';
+                if (filterKey === 'pending') currentOrder = sortOrderPending;
+                if (filterKey === 'scheduled') currentOrder = sortOrderScheduled;
+                if (filterKey === 'completed') currentOrder = sortOrderCompleted;
+                if (filterKey === 'cancelled') currentOrder = sortOrderCancelled;
+                if (filterKey === 'rejected') currentOrder = sortOrderRejected;
 
               return (
                 <div key={filterKey}>
-                  <h2 
+                  <h2
                     onClick={() => toggleSort(filterKey)}
-                    className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition"
+                    className="flex items-center gap-1 text-lg font-semibold mb-3 text-foreground cursor-pointer hover:text-blue transition select-none"
                   >
-                    {statusData.label} ({list.length}) 
-                    <ArrowUpDown className={`w-4 h-4 transition-transform ${sortOrders[filterKey] === 'asc' ? 'rotate-180' : ''}`} />
+                    {statusData.label} ({list.length})
+                    <ArrowUpDown
+                      className={`w-4 h-4 transition-transform ${
+                        currentOrder === 'asc' ? 'rotate-180' : ''
+                      }`}
+                    />
                   </h2>
                   <div className="space-y-4">
                     {list.map(appt => (
