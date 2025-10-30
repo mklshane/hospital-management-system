@@ -9,20 +9,13 @@ const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
-  // const [sortOrders, setSortOrders] = useState({
-  //   pending: 'desc',
-  //   scheduled: 'desc',
-  //   completed: 'desc',
-  //   cancelled: 'desc',
-  //   rejected: 'desc',
-  // });
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
-  // Replace the entire sortOrders state
   const [sortOrderPending, setSortOrderPending] = useState('desc');
   const [sortOrderScheduled, setSortOrderScheduled] = useState('desc');
   const [sortOrderCompleted, setSortOrderCompleted] = useState('desc');
   const [sortOrderCancelled, setSortOrderCancelled] = useState('desc');
   const [sortOrderRejected, setSortOrderRejected] = useState('desc');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Filter State
   const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']); // Default: show first 3
@@ -97,16 +90,6 @@ const DoctorAppointments = () => {
     });
   };
 
-  // const toggleSort = (column) => {
-  //   setSortOrders(prev => {
-  //     const newOrder = prev[column] === "desc" ? "asc" : "desc";
-  //     return {
-  //       ...prev,
-  //       [column]: newOrder,
-  //       _trigger: Date.now()
-  //     };
-  //   });
-  // };
   const toggleSort = (column) => {
     if (column === 'pending') setSortOrderPending(prev => prev === 'desc' ? 'asc' : 'desc');
     if (column === 'scheduled') setSortOrderScheduled(prev => prev === 'desc' ? 'asc' : 'desc');
@@ -115,32 +98,31 @@ const DoctorAppointments = () => {
     if (column === 'rejected') setSortOrderRejected(prev => prev === 'desc' ? 'asc' : 'desc');
   };
 
-  // Categorize Appointments (filtered by selectedFilters)
-  // const filteredAppointments = useMemo(() => {
-  //   const statusMap = {
-  //     pending: appointments.filter(a => a.status === "Pending"),
-  //     scheduled: appointments.filter(a => a.status === "Scheduled"),
-  //     completed: appointments.filter(a => a.status === "Completed"),
-  //     cancelled: appointments.filter(a => a.status === "Cancelled"),
-  //     rejected: appointments.filter(a => a.status === "Rejected"),
-  //   };
-
-  //   const result = {};
-
-  //   selectedFilters.forEach(key => {
-  //     const list = statusMap[key] || [];
-  //     result[key] = sortByDate(list, sortOrders[key] || 'desc');
-  //   });
-
-  //   return result;
-  // }, [appointments, selectedFilters, sortOrders]); 
   const filteredAppointments = useMemo(() => {
+    // 1. Global search across name, date, notes
+    const lowerSearch = searchTerm.toLowerCase().trim();
+    const searched = lowerSearch
+      ? appointments.filter(appt => {
+          const name = appt.patient?.name?.toLowerCase() ?? '';
+          const date = appt.appointment_date?.toLowerCase() ?? '';
+          const time = appt.appointment_time?.toLowerCase() ?? '';
+          const notes = appt.notes?.toLowerCase() ?? '';
+          return (
+            name.includes(lowerSearch) ||
+            date.includes(lowerSearch) ||
+            time.includes(lowerSearch) ||
+            notes.includes(lowerSearch)
+          );
+        })
+      : appointments;
+
+    // 2. Split into status buckets (same as before)
     const statusMap = {
-      pending: appointments.filter(a => a.status === "Pending"),
-      scheduled: appointments.filter(a => a.status === "Scheduled"),
-      completed: appointments.filter(a => a.status === "Completed"),
-      cancelled: appointments.filter(a => a.status === "Cancelled"),
-      rejected: appointments.filter(a => a.status === "Rejected"),
+      pending:    searched.filter(a => a.status === "Pending"),
+      scheduled:  searched.filter(a => a.status === "Scheduled"),
+      completed:  searched.filter(a => a.status === "Completed"),
+      cancelled:  searched.filter(a => a.status === "Cancelled"),
+      rejected:   searched.filter(a => a.status === "Rejected"),
     };
 
     const result = {};
@@ -148,11 +130,11 @@ const DoctorAppointments = () => {
     selectedFilters.forEach(key => {
       const list = statusMap[key] || [];
       let order = 'desc';
-      if (key === 'pending') order = sortOrderPending;
-      if (key === 'scheduled') order = sortOrderScheduled;
-      if (key === 'completed') order = sortOrderCompleted;
-      if (key === 'cancelled') order = sortOrderCancelled;
-      if (key === 'rejected') order = sortOrderRejected;
+      if (key === 'pending')    order = sortOrderPending;
+      if (key === 'scheduled')  order = sortOrderScheduled;
+      if (key === 'completed')  order = sortOrderCompleted;
+      if (key === 'cancelled')  order = sortOrderCancelled;
+      if (key === 'rejected')   order = sortOrderRejected;
 
       result[key] = sortByDate(list, order);
     });
@@ -160,12 +142,13 @@ const DoctorAppointments = () => {
     return result;
   }, [
     appointments,
+    searchTerm,               
     selectedFilters,
     sortOrderPending,
     sortOrderScheduled,
     sortOrderCompleted,
     sortOrderCancelled,
-    sortOrderRejected
+    sortOrderRejected,
   ]);
 
   // Helper for date/time formatting
@@ -216,6 +199,8 @@ const DoctorAppointments = () => {
               <input
                 type="text"
                 placeholder="Search name, date, notes..."
+                value={searchTerm}                   
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
               />
             </div>
