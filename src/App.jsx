@@ -16,6 +16,8 @@ import { Navigate } from "react-router-dom";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
+import DoctorMedicalRecords from "./pages/Doctor/DoctorMedicalRecords";
+import DoctorPatients from "./pages/Doctor/DoctorPatients";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 
@@ -90,6 +92,26 @@ function App() {
             <ProtectedRoute allowedUserTypes={["doctor"]}>
               <DoctorLayout>
                 <DoctorAppointments />
+              </DoctorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/medical-records"
+          element={
+            <ProtectedRoute allowedUserTypes={["doctor"]}>
+              <DoctorLayout>
+                <DoctorMedicalRecords />
+              </DoctorLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/doctor/patients"
+          element={
+            <ProtectedRoute allowedUserTypes={["doctor"]}>
+              <DoctorLayout>
+                <DoctorPatients />
               </DoctorLayout>
             </ProtectedRoute>
           }

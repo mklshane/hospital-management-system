@@ -163,18 +163,20 @@ const DoctorDashboard = () => {
         <div className="flex justify-between items-center mb-3">
           <button
             onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1))}
-            className="p-1 rounded hover:bg-blue/20 transition text-foreground"
+            className="p-1 rounded hover:bg-blue/20 transition text-foreground text-lg font-bold"
+            aria-label="Previous month"
           >
-            Less than
+            &lt;
           </button>
           <h3 className="text-sm font-semibold font-montserrat text-foreground">
             {format(currentMonth, "MMM yyyy")}
           </h3>
           <button
             onClick={() => setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1))}
-            className="p-1 rounded hover:bg-blue/20 transition text-foreground"
+            className="p-1 rounded hover:bg-blue/20 transition text-foreground text-lg font-bold"
+            aria-label="Next month"
           >
-            Greater than
+            &gt;
           </button>
         </div>
 
@@ -202,13 +204,26 @@ const DoctorDashboard = () => {
               <div
                 key={dateStr}
                 className={`
-                  aspect-square flex items-center justify-center rounded transition text-sm
-                  ${hasAppt ? "bg-blue text-white font-bold" : "hover:bg-ui-muted/50"}
+                  aspect-square flex items-center justify-center rounded-full transition relative
                   ${isToday ? "ring-2 ring-blue-light" : ""}
                 `}
                 title={hasAppt ? `${appointmentDates.filter(d => d === dateStr).length} appointment(s)` : ""}
               >
-                {format(day, "d")}
+                {/* Circle background for days with appointments */}
+                {hasAppt && (
+                  <div className="absolute inset-0 rounded-full bg-blue opacity-20 scale-90"></div>
+                )}
+
+                {/* Day number */}
+                <span
+                  className={`
+                    relative z-10 text-sm font-medium
+                    ${hasAppt ? "text-blue font-bold" : "text-foreground"}
+                    ${isToday ? "text-blue font-bold" : ""}
+                  `}
+                >
+                  {format(day, "d")}
+                </span>
               </div>
             );
           })}
