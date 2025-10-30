@@ -16,6 +16,7 @@ const DoctorAppointments = () => {
   const [sortOrderCancelled, setSortOrderCancelled] = useState('desc');
   const [sortOrderRejected, setSortOrderRejected] = useState('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   // Filter State
   const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']); // Default: show first 3
@@ -36,7 +37,8 @@ const DoctorAppointments = () => {
         return prev.filter(f => f !== key);
       }
       if (prev.length >= 3) {
-        alert("You can select a maximum of 3 statuses.");
+        setAlertMessage("You can select a maximum of 3 statuses.");
+        setTimeout(() => setAlertMessage(''), 4000); 
         return prev;
       }
       return [...prev, key];
@@ -180,7 +182,21 @@ const DoctorAppointments = () => {
     <div className="min-h-screen flex flex-col pb-10">
       <div className="flex-1 grid grid-cols-12 overflow-y-auto gap-5">
         {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-y-auto max-h-[95vh]">
+        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-y-auto max-h-[95vh] relative">
+          {/* Alert Message */}
+          {alertMessage && (
+            <div className="absolute top-4 right-4 z-50 max-w-xs">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                <span className="text-sm font-medium">{alertMessage}</span>
+                <button
+                  onClick={() => setAlertMessage('')}
+                  className="ml-2 text-red-600 hover:text-red-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <h1 className="text-2xl font-bold font-montserrat text-foreground">Appointments</h1>
