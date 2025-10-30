@@ -10,16 +10,21 @@ const DoctorAppointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
-  const [sortOrderPending, setSortOrderPending] = useState('desc');
-  const [sortOrderScheduled, setSortOrderScheduled] = useState('desc');
-  const [sortOrderCompleted, setSortOrderCompleted] = useState('desc');
-  const [sortOrderCancelled, setSortOrderCancelled] = useState('desc');
-  const [sortOrderRejected, setSortOrderRejected] = useState('desc');
+
+  // Unified sort state
+  const [sortOrders, setSortOrders] = useState({
+    pending: 'desc',
+    scheduled: 'desc',
+    completed: 'desc',
+    cancelled: 'desc',
+    rejected: 'desc',
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
 
   // Filter State
-  const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']); // Default: show first 3
+  const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const statusOptions = [
@@ -30,7 +35,7 @@ const DoctorAppointments = () => {
     { key: 'rejected', label: 'Rejected', color: 'purple' },
   ];
 
-  // Toggle filter selection
+  // Toggle filter selection (max 3)
   const toggleFilter = (key) => {
     setSelectedFilters(prev => {
       if (prev.includes(key)) {
@@ -38,14 +43,14 @@ const DoctorAppointments = () => {
       }
       if (prev.length >= 3) {
         setAlertMessage("You can select a maximum of 3 statuses.");
-        setTimeout(() => setAlertMessage(''), 4000); 
+        setTimeout(() => setAlertMessage(''), 4000);
         return prev;
       }
       return [...prev, key];
     });
   };
 
-  // Toggle dark mode
+  // Dark mode persistence
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
@@ -83,7 +88,7 @@ const DoctorAppointments = () => {
     fetchAppointments();
   }, []);
 
-  // Helper for sorting date
+  // Sort by date + time
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
       const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`).getTime();
@@ -92,16 +97,16 @@ const DoctorAppointments = () => {
     });
   };
 
+  // Toggle sort for a column
   const toggleSort = (column) => {
-    if (column === 'pending') setSortOrderPending(prev => prev === 'desc' ? 'asc' : 'desc');
-    if (column === 'scheduled') setSortOrderScheduled(prev => prev === 'desc' ? 'asc' : 'desc');
-    if (column === 'completed') setSortOrderCompleted(prev => prev === 'desc' ? 'asc' : 'desc');
-    if (column === 'cancelled') setSortOrderCancelled(prev => prev === 'desc' ? 'asc' : 'desc');
-    if (column === 'rejected') setSortOrderRejected(prev => prev === 'desc' ? 'asc' : 'desc');
+    setSortOrders(prev => ({
+      ...prev,
+      [column]: prev[column] === 'desc' ? 'asc' : 'desc'
+    }));
   };
 
+  // Filtered + Searched + Sorted Appointments
   const filteredAppointments = useMemo(() => {
-    // 1. Global search across name, date, notes
     const lowerSearch = searchTerm.toLowerCase().trim();
     const searched = lowerSearch
       ? appointments.filter(appt => {
@@ -118,7 +123,6 @@ const DoctorAppointments = () => {
         })
       : appointments;
 
-    // 2. Split into status buckets (same as before)
     const statusMap = {
       pending:    searched.filter(a => a.status === "Pending"),
       scheduled:  searched.filter(a => a.status === "Scheduled"),
@@ -131,29 +135,19 @@ const DoctorAppointments = () => {
 
     selectedFilters.forEach(key => {
       const list = statusMap[key] || [];
-      let order = 'desc';
-      if (key === 'pending')    order = sortOrderPending;
-      if (key === 'scheduled')  order = sortOrderScheduled;
-      if (key === 'completed')  order = sortOrderCompleted;
-      if (key === 'cancelled')  order = sortOrderCancelled;
-      if (key === 'rejected')   order = sortOrderRejected;
-
+      const order = sortOrders[key] || 'desc';
       result[key] = sortByDate(list, order);
     });
 
     return result;
   }, [
     appointments,
-    searchTerm,               
+    searchTerm,
     selectedFilters,
-    sortOrderPending,
-    sortOrderScheduled,
-    sortOrderCompleted,
-    sortOrderCancelled,
-    sortOrderRejected,
+    sortOrders, 
   ]);
 
-  // Helper for date/time formatting
+  // Format date
   const formatDate = (dateStr) =>
     new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
@@ -197,6 +191,7 @@ const DoctorAppointments = () => {
               </div>
             </div>
           )}
+
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <h1 className="text-2xl font-bold font-montserrat text-foreground">Appointments</h1>
@@ -215,7 +210,7 @@ const DoctorAppointments = () => {
               <input
                 type="text"
                 placeholder="Search name, date, notes..."
-                value={searchTerm}                   
+                value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
               />
@@ -231,7 +226,6 @@ const DoctorAppointments = () => {
                 Filter ({selectedFilters.length})
               </button>
 
-              {/* Dropdown */}
               {isFilterOpen && (
                 <div className="absolute top-full mt-2 left-0 w-56 bg-ui-card border border-ui-border rounded-lg shadow-lg z-50 p-3">
                   <div className="flex justify-between items-center mb-2">
@@ -245,21 +239,14 @@ const DoctorAppointments = () => {
                   </div>
 
                   <div className="space-y-1">
-                    {[
-                      { key: 'pending',    label: 'Pending',    color: 'yellow' },
-                      { key: 'scheduled',  label: 'Scheduled',  color: 'blue' },
-                      { key: 'completed',  label: 'Completed',  color: 'green' },
-                      { key: 'cancelled',  label: 'Cancelled',  color: 'red' },
-                      { key: 'rejected',   label: 'Rejected',   color: 'purple' },
-                    ].map(opt => {
+                    {statusOptions.map(opt => {
                       const isChecked = selectedFilters.includes(opt.key);
                       return (
                         <label
                           key={opt.key}
-                          onClick={() => toggleFilter(opt.key)}   // <-- click to check/uncheck
+                          onClick={() => toggleFilter(opt.key)}
                           className="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-ui-muted transition"
                         >
-                          {/* Custom checkbox */}
                           <div
                             className={`w-4 h-4 rounded border flex items-center justify-center transition ${
                               isChecked ? 'bg-blue border-blue' : 'border-ui-border'
@@ -267,10 +254,7 @@ const DoctorAppointments = () => {
                           >
                             {isChecked && <Check className="w-3 h-3 text-white" />}
                           </div>
-
                           <span className="text-sm text-foreground capitalize">{opt.label}</span>
-
-                          {/* Count */}
                           <span
                             className={`ml-auto text-xs font-medium ${
                               opt.color === 'yellow' ? 'text-yellow-600' :
@@ -287,7 +271,6 @@ const DoctorAppointments = () => {
                     })}
                   </div>
 
-                  {/* Reset */}
                   <div className="mt-3 pt-3 border-t border-ui-border">
                     <button
                       onClick={() => {
@@ -303,7 +286,7 @@ const DoctorAppointments = () => {
               )}
             </div>
 
-            <button 
+            <button
               onClick={fetchAppointments}
               disabled={loading}
               className="flex items-center justify-center gap-2 h-10 px-4 bg-blue hover:bg-blue-light text-white text-sm font-medium rounded-lg transition"
@@ -313,17 +296,12 @@ const DoctorAppointments = () => {
             </button>
           </div>
 
-          {/* Dynamic Columns based on selectedFilters */}
+          {/* Dynamic Columns */}
           <div className="grid grid-cols-3 gap-6">
             {selectedFilters.map(filterKey => {
               const statusData = statusOptions.find(s => s.key === filterKey);
               const list = filteredAppointments[filterKey] || [];
-              let currentOrder = 'desc';
-                if (filterKey === 'pending') currentOrder = sortOrderPending;
-                if (filterKey === 'scheduled') currentOrder = sortOrderScheduled;
-                if (filterKey === 'completed') currentOrder = sortOrderCompleted;
-                if (filterKey === 'cancelled') currentOrder = sortOrderCancelled;
-                if (filterKey === 'rejected') currentOrder = sortOrderRejected;
+              const currentOrder = sortOrders[filterKey] || 'desc';
 
               return (
                 <div key={filterKey}>
@@ -333,8 +311,8 @@ const DoctorAppointments = () => {
                   >
                     {statusData.label} ({list.length})
                     <ArrowUpDown
-                      className={`w-4 h-4 transition-transform ${
-                        currentOrder === 'asc' ? 'rotate-180' : ''
+                      className={`w-4 h-4 transition-all ${
+                        currentOrder === 'asc' ? 'rotate-180 text-blue' : 'text-muted-foreground'
                       }`}
                     />
                   </h2>
@@ -451,11 +429,11 @@ const DoctorAppointments = () => {
                       className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-3 rounded-lg font-semibold transition-colors dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
                     >
                       Complete Appointment
-                    </button>      
+                    </button>
                   </>
                 )}
               </div>
-              
+
               {/* Medical Record Modal */}
               <MedicalRecordModal
                 isOpen={isRecordModalOpen}
