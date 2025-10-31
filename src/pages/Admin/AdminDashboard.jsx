@@ -35,7 +35,7 @@ const AdminDashboard = () => {
         className={`min-h-screen flex flex-col transition-colors duration-300`}
       >
         {/* Main Content Wrapper */}
-        <main className="flex-1 overflow-y-auto pb-6 grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
+        <main className="flex-1 overflow-y-auto pb-6 grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
           {/* Left Column */}
           <div className="lg:col-span-3 space-y-6">
             {/* Top Header Section */}
@@ -192,7 +192,7 @@ const AdminDashboard = () => {
 
           {/* Right Column (System Logs) */}
           <div
-            className={`rounded-xl shadow p-6 flex flex-col h-[76%] bg-ui-card`}
+            className={`rounded-xl shadow py-6 px-4 flex flex-col h-[76%] bg-ui-card`}
           >
             <h2 className="text-xl font-semibold mb-4">System Logs</h2>
             <div className="max-h-[calc(100vh-150px)] overflow-y-auto pr-2 space-y-4 custom-scrollbar">

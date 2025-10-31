@@ -3,7 +3,6 @@ import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
   IconBrandTabler,
-  IconSettings,
   IconStethoscope,
   IconUsersGroup,
   IconCalendarTime,
@@ -27,22 +26,18 @@ export default function AdminLayout({ children }) {
   };
 
   const getUserInitials = () => {
-    if (!user) return "U";
-
+    if (!user) return "A";
     if (user.name) {
       const names = user.name.split(" ");
-      if (names.length === 1) {
-        return names[0].charAt(0).toUpperCase();
-      }
+      if (names.length === 1) return names[0].charAt(0).toUpperCase();
       return (
         names[0].charAt(0) + names[names.length - 1].charAt(0)
       ).toUpperCase();
     }
-
     return "A";
   };
 
-  // ✅ Sidebar Links
+  // Sidebar Navigation Links
   const links = [
     {
       label: "Dashboard",
@@ -72,7 +67,6 @@ export default function AdminLayout({ children }) {
         <IconCalendarTime className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
-    
     {
       label: "Logout",
       href: "#",
@@ -89,11 +83,11 @@ export default function AdminLayout({ children }) {
         "flex w-full h-screen overflow-hidden bg-ui-surface text-neutral-800 dark:text-neutral-100"
       )}
     >
-      {/* ✅ Sidebar */}
+      {/* Sidebar */}
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10 dark:bg-neutral-950 shadow-sm border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            {/* Logo Section */}
+            {/* Logo */}
             <div className="mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
               {open ? <Logo /> : <LogoIcon />}
             </div>
@@ -116,30 +110,34 @@ export default function AdminLayout({ children }) {
             </div>
           </div>
 
-          {/* User Profile Section */}
+          {/* ADMIN PROFILE – ICON + LABEL (NO CLICK) */}
           <div className="pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700">
-            <SidebarLink
-              link={{
-                label: user?.name || user?.username || "Admin",
-                href: "/profile",
-                icon: (
-                  <div
-                    className={cn(
-                      "h-8 w-8 bg-blue-600 min-w-8 shrink-0 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-neutral-200 dark:ring-neutral-700"
-                    )}
-                  >
-                    {getUserInitials()}
-                  </div>
-                ),
-              }}
-              className="py-3 px-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all duration-200"
-            />
+            <div className="flex items-center gap-3 px-2 py-3">
+              {/* Avatar with "A" */}
+              <div
+                className={cn(
+                  "h-8 w-8 bg-blue-600 min-w-8 shrink-0 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-neutral-200 dark:ring-neutral-700"
+                )}
+              >
+                {getUserInitials()}
+              </div>
+
+              {/* Admin Label – only when sidebar is open */}
+              {open && (
+                <div >
+                  <p className="text-sm font-medium text-foreground">
+                    Admin
+                  </p>
+                  
+                </div>
+              )}
+            </div>
           </div>
         </SidebarBody>
       </Sidebar>
 
-      {/* ✅ Main Page Content */}
-      <main className="flex-1 overflow-hidden px-8 ">{children}</main>
+      {/* Main Content */}
+      <main className="flex-1 overflow-hidden px-8">{children}</main>
     </div>
   );
 }

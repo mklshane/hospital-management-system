@@ -23,7 +23,6 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import DoctorsList from "./pages/Admin/DoctorsList";
 import PatientsList from "./pages/Admin/PatientsList";
 import AppointmentsList from "./pages/Admin/AppointmentsList";
-import CreateDoctorAccount from "./pages/Admin/CreateDoctorAccount";
 
 function App() {
   return (
@@ -136,16 +135,6 @@ function App() {
             <ProtectedRoute allowedUserTypes={["admin"]}>
               <AdminLayout>
                 <DoctorsList />
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/doctors/create"
-          element={
-            <ProtectedRoute allowedUserTypes={["admin"]}>
-              <AdminLayout>
-                <CreateDoctorAccount />
               </AdminLayout>
             </ProtectedRoute>
           }
