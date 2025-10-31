@@ -103,7 +103,7 @@ export default function DoctorLayout({ children }) {
                   link={link}
                   onClick={link.onClick}
                   className={cn(
-                    "px-1 py-3 rounded-lg transition-colors duration-200",
+                    "px-2.5 py-3 rounded-lg transition-colors duration-200",
                     link.onClick
                       ? "hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
                       : "hover:bg-neutral-200 dark:hover:bg-neutral-700"

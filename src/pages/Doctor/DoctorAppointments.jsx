@@ -1,11 +1,20 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Moon, Sun, Search, RefreshCw, Funnel, ArrowUpDown, Calendar, Clock, X, Check } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Search,
+  RefreshCw,
+  Funnel,
+  ArrowUpDown,
+  Calendar,
+  Clock,
+  X,
+  Check,
+} from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/AppointmentCard";
-import MedicalRecordModal from '../../components/MedicalRecordModal';
+import MedicalRecordModal from "../../components/MedicalRecordModal";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorAppointments = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,63 +22,46 @@ const DoctorAppointments = () => {
 
   // Unified sort state
   const [sortOrders, setSortOrders] = useState({
-    pending: 'desc',
-    scheduled: 'desc',
-    completed: 'desc',
-    cancelled: 'desc',
-    rejected: 'desc',
+    pending: "desc",
+    scheduled: "desc",
+    completed: "desc",
+    cancelled: "desc",
+    rejected: "desc",
   });
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   // Filter State
-  const [selectedFilters, setSelectedFilters] = useState(['pending', 'scheduled', 'completed']);
+  const [selectedFilters, setSelectedFilters] = useState([
+    "pending",
+    "scheduled",
+    "completed",
+  ]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const statusOptions = [
-    { key: 'pending', label: 'Pending', color: 'yellow' },
-    { key: 'scheduled', label: 'Scheduled', color: 'blue' },
-    { key: 'completed', label: 'Completed', color: 'green' },
-    { key: 'cancelled', label: 'Cancelled', color: 'red' },
-    { key: 'rejected', label: 'Rejected', color: 'purple' },
+    { key: "pending", label: "Pending", color: "yellow" },
+    { key: "scheduled", label: "Scheduled", color: "blue" },
+    { key: "completed", label: "Completed", color: "green" },
+    { key: "cancelled", label: "Cancelled", color: "red" },
+    { key: "rejected", label: "Rejected", color: "purple" },
   ];
 
   // Toggle filter selection (max 3)
   const toggleFilter = (key) => {
-    setSelectedFilters(prev => {
+    setSelectedFilters((prev) => {
       if (prev.includes(key)) {
-        return prev.filter(f => f !== key);
+        return prev.filter((f) => f !== key);
       }
       if (prev.length >= 3) {
         setAlertMessage("You can select a maximum of 3 statuses.");
-        setTimeout(() => setAlertMessage(''), 4000);
+        setTimeout(() => setAlertMessage(""), 4000);
         return prev;
       }
       return [...prev, key];
     });
   };
-
-  // Dark mode persistence
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
 
   // Fetch Appointments
   const fetchAppointments = async () => {
@@ -91,17 +83,21 @@ const DoctorAppointments = () => {
   // Sort by date + time
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
-      const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`).getTime();
-      const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`).getTime();
-      return order === 'desc' ? dateB - dateA : dateA - dateB;
+      const dateA = new Date(
+        `${a.appointment_date} ${a.appointment_time}`
+      ).getTime();
+      const dateB = new Date(
+        `${b.appointment_date} ${b.appointment_time}`
+      ).getTime();
+      return order === "desc" ? dateB - dateA : dateA - dateB;
     });
   };
 
   // Toggle sort for a column
   const toggleSort = (column) => {
-    setSortOrders(prev => ({
+    setSortOrders((prev) => ({
       ...prev,
-      [column]: prev[column] === 'desc' ? 'asc' : 'desc'
+      [column]: prev[column] === "desc" ? "asc" : "desc",
     }));
   };
 
@@ -109,11 +105,11 @@ const DoctorAppointments = () => {
   const filteredAppointments = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase().trim();
     const searched = lowerSearch
-      ? appointments.filter(appt => {
-          const name = appt.patient?.name?.toLowerCase() ?? '';
-          const date = appt.appointment_date?.toLowerCase() ?? '';
-          const time = appt.appointment_time?.toLowerCase() ?? '';
-          const notes = appt.notes?.toLowerCase() ?? '';
+      ? appointments.filter((appt) => {
+          const name = appt.patient?.name?.toLowerCase() ?? "";
+          const date = appt.appointment_date?.toLowerCase() ?? "";
+          const time = appt.appointment_time?.toLowerCase() ?? "";
+          const notes = appt.notes?.toLowerCase() ?? "";
           return (
             name.includes(lowerSearch) ||
             date.includes(lowerSearch) ||
@@ -124,28 +120,23 @@ const DoctorAppointments = () => {
       : appointments;
 
     const statusMap = {
-      pending:    searched.filter(a => a.status === "Pending"),
-      scheduled:  searched.filter(a => a.status === "Scheduled"),
-      completed:  searched.filter(a => a.status === "Completed"),
-      cancelled:  searched.filter(a => a.status === "Cancelled"),
-      rejected:   searched.filter(a => a.status === "Rejected"),
+      pending: searched.filter((a) => a.status === "Pending"),
+      scheduled: searched.filter((a) => a.status === "Scheduled"),
+      completed: searched.filter((a) => a.status === "Completed"),
+      cancelled: searched.filter((a) => a.status === "Cancelled"),
+      rejected: searched.filter((a) => a.status === "Rejected"),
     };
 
     const result = {};
 
-    selectedFilters.forEach(key => {
+    selectedFilters.forEach((key) => {
       const list = statusMap[key] || [];
-      const order = sortOrders[key] || 'desc';
+      const order = sortOrders[key] || "desc";
       result[key] = sortByDate(list, order);
     });
 
     return result;
-  }, [
-    appointments,
-    searchTerm,
-    selectedFilters,
-    sortOrders, 
-  ]);
+  }, [appointments, searchTerm, selectedFilters, sortOrders]);
 
   // Format date
   const formatDate = (dateStr) =>
@@ -159,18 +150,23 @@ const DoctorAppointments = () => {
   const updateStatus = async (id, status) => {
     try {
       await api.put(`/appointment/${id}`, { status });
-      setAppointments(prev =>
-        prev.map(appt => (appt._id === id ? { ...appt, status } : appt))
+      setAppointments((prev) =>
+        prev.map((appt) => (appt._id === id ? { ...appt, status } : appt))
       );
       if (selectedAppointment?._id === id)
-        setSelectedAppointment(prev => ({ ...prev, status }));
+        setSelectedAppointment((prev) => ({ ...prev, status }));
     } catch (err) {
       console.error("Error updating status:", err);
       alert(err.response?.data?.message || "Failed to update status");
     }
   };
 
-  if (loading) return <p className="text-center py-10 text-foreground">Loading appointments...</p>;
+  if (loading)
+    return (
+      <p className="text-center py-10 text-foreground">
+        Loading appointments...
+      </p>
+    );
 
   return (
     <div className="min-h-screen flex flex-col pb-10">
@@ -183,7 +179,7 @@ const DoctorAppointments = () => {
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
                 <span className="text-sm font-medium">{alertMessage}</span>
                 <button
-                  onClick={() => setAlertMessage('')}
+                  onClick={() => setAlertMessage("")}
                   className="ml-2 text-red-600 hover:text-red-800"
                 >
                   <X className="w-4 h-4" />
@@ -194,13 +190,11 @@ const DoctorAppointments = () => {
 
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
-            <h1 className="text-2xl font-bold font-montserrat text-foreground">Appointments</h1>
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 bg-blue-light/20 rounded-full hover:bg-blue-light/40 transition"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
-            </button>
+            <h1 className="text-2xl font-bold font-montserrat text-foreground">
+              Appointments
+            </h1>
+            {/* Universal Theme Toggle */}
+            <ThemeToggle />
           </div>
 
           {/* Search + Buttons */}
@@ -211,7 +205,7 @@ const DoctorAppointments = () => {
                 type="text"
                 placeholder="Search name, date, notes..."
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full h-10 pl-10 pr-4 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
               />
             </div>
@@ -229,7 +223,9 @@ const DoctorAppointments = () => {
               {isFilterOpen && (
                 <div className="absolute top-full mt-2 left-0 w-56 bg-ui-card border border-ui-border rounded-lg shadow-lg z-50 p-3">
                   <div className="flex justify-between items-center mb-2">
-                    <p className="text-sm font-semibold text-foreground">Select up to 3</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Select up to 3
+                    </p>
                     <button
                       onClick={() => setIsFilterOpen(false)}
                       className="text-muted-foreground hover:text-foreground"
@@ -239,7 +235,7 @@ const DoctorAppointments = () => {
                   </div>
 
                   <div className="space-y-1">
-                    {statusOptions.map(opt => {
+                    {statusOptions.map((opt) => {
                       const isChecked = selectedFilters.includes(opt.key);
                       return (
                         <label
@@ -249,22 +245,36 @@ const DoctorAppointments = () => {
                         >
                           <div
                             className={`w-4 h-4 rounded border flex items-center justify-center transition ${
-                              isChecked ? 'bg-blue border-blue' : 'border-ui-border'
+                              isChecked
+                                ? "bg-blue border-blue"
+                                : "border-ui-border"
                             }`}
                           >
-                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                            {isChecked && (
+                              <Check className="w-3 h-3 text-white" />
+                            )}
                           </div>
-                          <span className="text-sm text-foreground capitalize">{opt.label}</span>
+                          <span className="text-sm text-foreground capitalize">
+                            {opt.label}
+                          </span>
                           <span
                             className={`ml-auto text-xs font-medium ${
-                              opt.color === 'yellow' ? 'text-yellow-600' :
-                              opt.color === 'blue'   ? 'text-blue-600'   :
-                              opt.color === 'green'  ? 'text-green-600'  :
-                              opt.color === 'red'    ? 'text-red-600'    :
-                                                      'text-purple-600'
+                              opt.color === "yellow"
+                                ? "text-yellow-600"
+                                : opt.color === "blue"
+                                ? "text-blue-600"
+                                : opt.color === "green"
+                                ? "text-green-600"
+                                : opt.color === "red"
+                                ? "text-red-600"
+                                : "text-purple-600"
                             }`}
                           >
-                            {appointments.filter(a => a.status.toLowerCase() === opt.key).length}
+                            {
+                              appointments.filter(
+                                (a) => a.status.toLowerCase() === opt.key
+                              ).length
+                            }
                           </span>
                         </label>
                       );
@@ -274,7 +284,11 @@ const DoctorAppointments = () => {
                   <div className="mt-3 pt-3 border-t border-ui-border">
                     <button
                       onClick={() => {
-                        setSelectedFilters(['pending', 'scheduled', 'completed']);
+                        setSelectedFilters([
+                          "pending",
+                          "scheduled",
+                          "completed",
+                        ]);
                         setIsFilterOpen(false);
                       }}
                       className="w-full text-xs text-blue hover:underline"
@@ -291,17 +305,19 @@ const DoctorAppointments = () => {
               disabled={loading}
               className="flex items-center justify-center gap-2 h-10 px-4 bg-blue hover:bg-blue-light text-white text-sm font-medium rounded-lg transition"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
               Refresh
             </button>
           </div>
 
           {/* Dynamic Columns */}
           <div className="grid grid-cols-3 gap-6">
-            {selectedFilters.map(filterKey => {
-              const statusData = statusOptions.find(s => s.key === filterKey);
+            {selectedFilters.map((filterKey) => {
+              const statusData = statusOptions.find((s) => s.key === filterKey);
               const list = filteredAppointments[filterKey] || [];
-              const currentOrder = sortOrders[filterKey] || 'desc';
+              const currentOrder = sortOrders[filterKey] || "desc";
 
               return (
                 <div key={filterKey}>
@@ -312,12 +328,14 @@ const DoctorAppointments = () => {
                     {statusData.label} ({list.length})
                     <ArrowUpDown
                       className={`w-4 h-4 transition-all ${
-                        currentOrder === 'asc' ? 'rotate-180 text-blue' : 'text-muted-foreground'
+                        currentOrder === "asc"
+                          ? "rotate-180 text-blue"
+                          : "text-muted-foreground"
                       }`}
                     />
                   </h2>
                   <div className="space-y-4">
-                    {list.map(appt => (
+                    {list.map((appt) => (
                       <AppointmentCard
                         key={appt._id}
                         appt={appt}
@@ -334,31 +352,42 @@ const DoctorAppointments = () => {
 
         {/* RIGHT SECTION - DETAILS */}
         <div className="col-span-3 bg-ui-card rounded-2xl p-8 flex flex-col overflow-y-auto p-6">
-          <h2 className="text-xl font-bold font-montserrat text-foreground mb-6">Appointment Details</h2>
+          <h2 className="text-xl font-bold font-montserrat text-foreground mb-6">
+            Appointment Details
+          </h2>
 
           {!selectedAppointment ? (
-            <p className="text-muted-foreground">Select an appointment to view details.</p>
+            <p className="text-muted-foreground">
+              Select an appointment to view details.
+            </p>
           ) : (
             <>
               {/* Patient Info */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 rounded-full bg-blue flex items-center justify-center text-lg font-semibold text-background">
-                    {selectedAppointment.patient?.name?.split(" ").map(n => n[0]).join("")}
+                    {selectedAppointment.patient?.name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground">{selectedAppointment.patient?.name}</h3>
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                      selectedAppointment.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                        : selectedAppointment.status === "Scheduled"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                        : selectedAppointment.status === "Completed"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                        : selectedAppointment.status === "Cancelled"
-                        ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                        : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                    }`}>
+                    <h3 className="font-bold text-foreground">
+                      {selectedAppointment.patient?.name}
+                    </h3>
+                    <div
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                        selectedAppointment.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                          : selectedAppointment.status === "Scheduled"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                          : selectedAppointment.status === "Completed"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                          : selectedAppointment.status === "Cancelled"
+                          ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                          : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                      }`}
+                    >
                       ● {selectedAppointment.status}
                     </div>
                   </div>
@@ -366,12 +395,20 @@ const DoctorAppointments = () => {
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground"><Calendar className="w-4 h-4"/></span>
-                    <span className="text-foreground">{formatDate(selectedAppointment.appointment_date)}</span>
+                    <span className="text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                    </span>
+                    <span className="text-foreground">
+                      {formatDate(selectedAppointment.appointment_date)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground"><Clock className="w-4 h-4" /></span>
-                    <span className="text-foreground">{selectedAppointment.appointment_time}</span>
+                    <span className="text-muted-foreground">
+                      <Clock className="w-4 h-4" />
+                    </span>
+                    <span className="text-foreground">
+                      {selectedAppointment.appointment_time}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -379,20 +416,30 @@ const DoctorAppointments = () => {
               {/* Notes */}
               <div className="border-ui-border mb-6">
                 <div className="mb-4">
-                  <h4 className="font-semibold text-foreground mb-2">Patient Notes</h4>
+                  <h4 className="font-semibold text-foreground mb-2">
+                    Patient Notes
+                  </h4>
                   <div className="bg-ui-muted rounded-lg p-3">
-                    <p className="text-sm text-foreground">{selectedAppointment.notes || "No notes provided."}</p>
+                    <p className="text-sm text-foreground">
+                      {selectedAppointment.notes || "No notes provided."}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Appointment ID:</span>
-                    <span className="text-foreground font-medium">{selectedAppointment._id.slice(-6).toUpperCase()}</span>
+                    <span className="text-muted-foreground">
+                      Appointment ID:
+                    </span>
+                    <span className="text-foreground font-medium">
+                      {selectedAppointment._id.slice(-6).toUpperCase()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Created:</span>
-                    <span className="text-foreground">{formatDate(selectedAppointment.createdAt)}</span>
+                    <span className="text-foreground">
+                      {formatDate(selectedAppointment.createdAt)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -402,13 +449,17 @@ const DoctorAppointments = () => {
                 {selectedAppointment.status === "Pending" && (
                   <>
                     <button
-                      onClick={() => updateStatus(selectedAppointment._id, "Scheduled")}
+                      onClick={() =>
+                        updateStatus(selectedAppointment._id, "Scheduled")
+                      }
                       className="w-full bg-blue hover:bg-blue-dark text-white py-3 rounded-lg font-semibold transition-colors"
                     >
                       Accept Appointment
                     </button>
                     <button
-                      onClick={() => updateStatus(selectedAppointment._id, "Rejected")}
+                      onClick={() =>
+                        updateStatus(selectedAppointment._id, "Rejected")
+                      }
                       className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-3 rounded-lg font-semibold transition-colors dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
                     >
                       Reject Appointment
@@ -425,7 +476,9 @@ const DoctorAppointments = () => {
                       Add Medical Record
                     </button>
                     <button
-                      onClick={() => updateStatus(selectedAppointment._id, "Completed")}
+                      onClick={() =>
+                        updateStatus(selectedAppointment._id, "Completed")
+                      }
                       className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-3 rounded-lg font-semibold transition-colors dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
                     >
                       Complete Appointment

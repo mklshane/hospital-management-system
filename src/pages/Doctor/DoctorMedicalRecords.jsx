@@ -1,56 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { Sun, Moon } from 'lucide-react';
+import React from "react";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorMedicalRecords = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Dark mode persistence
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
-
   return (
     <div className="min-h-screen flex flex-col pb-10">
       <div className="flex-1 grid grid-cols-12 overflow-y-auto gap-5">
-        {/* LEFT SECTION - APPOINTMENTS */}
+        {/* LEFT SECTION - MEDICAL RECORDS */}
         <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-y-auto max-h-[95vh] relative">
-          
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
-            <h1 className="text-2xl font-bold font-montserrat text-foreground">Medical Records</h1>
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 bg-blue-light/20 rounded-full hover:bg-blue-light/40 transition"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
-            </button>
+            <h1 className="text-2xl font-bold font-montserrat text-foreground">
+              Medical Records
+            </h1>
+            {/* Universal Theme Toggle */}
+            <ThemeToggle />
           </div>
 
-          {/* Dynamic Columns */}
+          {/* Dynamic Columns / Records Grid */}
           <div className="grid grid-cols-3 gap-6">
-            <p>Records Cards</p>
+            <p className="text-muted-foreground">Records Cards</p>
+            {/* Future: Map over medical records here */}
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS */}
-        <div className="col-span-3 bg-ui-card rounded-2xl p-8 flex flex-col overflow-y-auto p-6">
-          <h2 className="text-xl font-bold font-montserrat text-foreground mb-6">Record Details</h2>
+        {/* RIGHT SECTION - RECORD DETAILS */}
+        <div className="col-span-3 bg-ui-card rounded-2xl p-8 flex flex-col overflow-y-auto">
+          <h2 className="text-xl font-bold font-montserrat text-foreground mb-6">
+            Record Details
+          </h2>
+
+          <p className="text-muted-foreground">
+            Select a record to view details.
+          </p>
+          {/* Future: Show selected record details here */}
         </div>
       </div>
     </div>
