@@ -254,3 +254,45 @@
 .focus-ring-ui:focus {
   ring: 2px solid var(--ui-ring);
 }
+
+.focus\\:ring-offset-ui-card:focus {
+  --tw-ring-offset-color: var(--ui-card);
+}
+
+@layer utilities {
+  .hover-bg-ui-muted:hover { background-color: #E3F2FD !important; }
+  .hover-bg-ui-surface-dark:hover { background-color: #2C303D !important; }
+}
+
+@layer components {
+  .scrollbar {
+    @apply overflow-y-auto;
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+  }
+
+  .scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: 
+      color-mix(in oklab, var(--muted-foreground) 50%, transparent) 
+      transparent;
+  }
+}

@@ -72,13 +72,7 @@ export default function AdminLayout({ children }) {
         <IconCalendarTime className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
-    {
-      label: "Settings",
-      href: "/settings",
-      icon: (
-        <IconSettings className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
-      ),
-    },
+    
     {
       label: "Logout",
       href: "#",
@@ -92,7 +86,7 @@ export default function AdminLayout({ children }) {
   return (
     <div
       className={cn(
-        "flex w-full h-screen overflow-hidden bg-neutral-50 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-100"
+        "flex w-full h-screen overflow-hidden bg-ui-surface text-neutral-800 dark:text-neutral-100"
       )}
     >
       {/* ✅ Sidebar */}
@@ -145,9 +139,7 @@ export default function AdminLayout({ children }) {
       </Sidebar>
 
       {/* ✅ Main Page Content */}
-      <div className="flex h-full w-full flex-1 flex-col transition-colors duration-300">
-        {children}
-      </div>
+      <main className="flex-1 overflow-hidden px-8 ">{children}</main>
     </div>
   );
 }

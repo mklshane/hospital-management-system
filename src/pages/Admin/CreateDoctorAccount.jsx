@@ -7,8 +7,8 @@ const CreateDoctorAccount = () => {
     const prevStep = () => setStep((prev) => prev - 1);
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <div className="bg-white shadow-md rounded-xl p-10 w-[800px]">
+        <div className="flex justify-center items-center min-h-screen ">
+            <div className=" shadow-md rounded-xl p-10 w-[800px]  border-2">
                 <h2 className="text-2xl font-bold text-center mb-8">Create Doctor Account</h2>
 
                 {/* Step 1 */}

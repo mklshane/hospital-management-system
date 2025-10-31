@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Moon, Sun } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const AdminDashboard = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -31,12 +32,10 @@ const AdminDashboard = () => {
   return (
     <div className={darkMode ? "dark" : ""}>
       <div
-        className={`min-h-screen flex flex-col transition-colors duration-300 ${
-          darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
-        }`}
+        className={`min-h-screen flex flex-col transition-colors duration-300`}
       >
         {/* Main Content Wrapper */}
-        <main className="flex-1 overflow-y-auto px-6 pb-6 grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
+        <main className="flex-1 overflow-y-auto pb-6 grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4">
           {/* Left Column */}
           <div className="lg:col-span-3 space-y-6">
             {/* Top Header Section */}
@@ -59,12 +58,7 @@ const AdminDashboard = () => {
                 >
                   Recent Patients
                 </button>
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition"
-                >
-                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                </button>
+               <ThemeToggle />
               </div>
             </header>
 
@@ -91,12 +85,10 @@ const AdminDashboard = () => {
 
             {/* Chart Section */}
             <div
-              className={`rounded-xl shadow p-6 ${
-                darkMode ? "bg-gray-800" : "bg-white"
-              }`}
+              className={`rounded-xl shadow p-6 bg-ui-card`}
             >
               <h2 className="text-xl font-semibold mb-4">Patient Statistics</h2>
-              <div className="h-64 flex items-center justify-center text-gray-400">
+              <div className="h-64 flex items-center justify-center text-primary">
                 <p>Chart component will go here...</p>
               </div>
             </div>
@@ -200,12 +192,10 @@ const AdminDashboard = () => {
 
           {/* Right Column (System Logs) */}
           <div
-            className={`rounded-xl shadow p-6 flex flex-col h-full ${
-              darkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`rounded-xl shadow p-6 flex flex-col h-[76%] bg-ui-card`}
           >
             <h2 className="text-xl font-semibold mb-4">System Logs</h2>
-            <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+            <div className="max-h-[calc(100vh-150px)] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
               {logs.map((log) => (
                 <div
                   key={log.id}
