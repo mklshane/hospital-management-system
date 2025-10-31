@@ -3,6 +3,8 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
 import { api } from "@/lib/axiosHeader";
+import Input from "@/components/Common/Input";
+import Select from "@/components/Common/Select";
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -49,7 +51,6 @@ const CreateDoctorModal = ({
   useEffect(() => {
     if (isOpen) {
       if (mode === "edit" && doctor) {
-        // For edit mode, populate form with doctor data
         setFormData({
           name: doctor.name || "",
           email: doctor.email || "",
@@ -63,7 +64,6 @@ const CreateDoctorModal = ({
             doctor.schedule_time?.[doctor.schedule_time?.length - 1] || "",
         });
       } else {
-        // For create mode, reset form
         setFormData({
           name: "",
           email: "",
@@ -107,7 +107,6 @@ const CreateDoctorModal = ({
       const payload = {
         ...formData,
         schedule_time,
-        // Remove password if empty in edit mode
         ...(mode === "edit" && !formData.password && { password: undefined }),
       };
 
@@ -197,20 +196,20 @@ const CreateDoctorModal = ({
                   {step === 1 && (
                     <div className="grid grid-cols-2 gap-4">
                       <Input
-                        label="Full Name *"
+                        label="Full Name"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
                         required
                       />
                       <Input
-                        label="Email *"
+                        label="Email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        disabled={mode === "edit"} // Email shouldn't be editable
+                        disabled={mode === "edit"}
                       />
                       <Input
                         label="Contact"
@@ -224,6 +223,7 @@ const CreateDoctorModal = ({
                         value={formData.gender}
                         onChange={handleChange}
                         options={["Male", "Female", "Other"]}
+                        placeholder="Select gender"
                       />
                       <Input
                         label="Age"
@@ -234,12 +234,13 @@ const CreateDoctorModal = ({
                         placeholder="e.g. 35"
                       />
                       <Select
-                        label="Specialization *"
+                        label="Specialization"
                         name="specialization"
                         value={formData.specialization}
                         onChange={handleChange}
                         options={SPECIALIZATIONS}
                         required
+                        placeholder="Select specialization"
                       />
                     </div>
                   )}
@@ -249,20 +250,22 @@ const CreateDoctorModal = ({
                     <div className="space-y-5 py-2">
                       <div className="grid grid-cols-2 gap-4">
                         <Select
-                          label="Start Time *"
+                          label="Start Time"
                           name="startTime"
                           value={formData.startTime}
                           onChange={handleChange}
                           options={TIME_SLOTS}
                           required
+                          placeholder="Select start time"
                         />
                         <Select
-                          label="End Time *"
+                          label="End Time"
                           name="endTime"
                           value={formData.endTime}
                           onChange={handleChange}
                           options={TIME_SLOTS}
                           required
+                          placeholder="Select end time"
                         />
                       </div>
 
@@ -292,7 +295,7 @@ const CreateDoctorModal = ({
                       <Input
                         label={
                           mode === "create"
-                            ? "Password *"
+                            ? "Password"
                             : "New Password (leave blank to keep current)"
                         }
                         name="password"
@@ -381,50 +384,5 @@ const CreateDoctorModal = ({
     </Transition>
   );
 };
-
-/* Reusable Input & Select Components */
-const Input = ({ label, required, ...props }) => (
-  <div className="relative z-0">
-    <label className="block text-sm font-medium text-foreground mb-1">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      className={`
-        w-full px-4 py-3 bg-ui-muted border border-ui-border rounded-lg
-        text-foreground placeholder-muted-foreground
-        focus:outline-none focus:ring-2 focus:ring-blue
-        focus:ring-offset-2 focus:ring-offset-ui-card
-        focus:border-transparent
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
-      {...props}
-    />
-  </div>
-);
-
-const Select = ({ label, options, required, ...props }) => (
-  <div className="relative z-0">
-    <label className="block text-sm font-medium text-foreground mb-1">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <select
-      className={`
-        w-full px-4 py-3 bg-ui-muted border border-ui-border rounded-lg
-        text-foreground
-        focus:outline-none focus:ring-2 focus:ring-blue
-        focus:ring-offset-2 focus:ring-offset-ui-card
-        focus:border-transparent
-      `}
-      {...props}
-    >
-      <option value="">Select {label.toLowerCase()}</option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
-    </select>
-  </div>
-);
 
 export default CreateDoctorModal;
