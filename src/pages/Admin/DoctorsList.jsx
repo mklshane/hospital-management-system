@@ -112,7 +112,7 @@ const DoctorsList = () => {
     <>
       <div className="min-h-screen bg-ui-surface flex flex-col">
         {/* Header */}
-        <header className="border-b border-ui-border px-6 py-4 flex justify-between items-center">
+        <header className="border-b border-ui-border px-6 pt-4 pb-1 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Doctors List</h1>
           <div className="flex items-center gap-4">
             <button
@@ -181,14 +181,14 @@ const DoctorsList = () => {
           ) : (
             <>
               {/* Results Count */}
-              <div className="mb-4 flex justify-between items-center">
+              <div className="mb-2 flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
                   Showing {filteredDoctors.length} of {doctors.length} doctors
                 </p>
               </div>
 
               {/* Doctors List - Single column layout like patients */}
-              <div className="h-[calc(100vh-280px)] overflow-y-auto">
+              <div className="h-[calc(100vh-195px)] overflow-y-auto">
                 <div className="space-y-3 pr-2 pb-6">
                   {filteredDoctors.map((doctor) => (
                     <DoctorCard

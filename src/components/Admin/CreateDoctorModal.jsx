@@ -27,12 +27,7 @@ const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
   return `${displayHour}:${minute} ${period}`;
 });
 
-const CreateDoctorModal = ({
-  isOpen,
-  onClose,
-  doctor = null,
-  mode = "create",
-}) => {
+const CreateDoctorModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,38 +42,23 @@ const CreateDoctorModal = ({
     endTime: "",
   });
 
-  // Reset form when modal opens/closes or doctor changes
+  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      if (mode === "edit" && doctor) {
-        setFormData({
-          name: doctor.name || "",
-          email: doctor.email || "",
-          password: "", // Don't pre-fill password
-          age: doctor.age || "",
-          gender: doctor.gender || "",
-          contact: doctor.contact || "",
-          specialization: doctor.specialization || "",
-          startTime: doctor.schedule_time?.[0] || "",
-          endTime:
-            doctor.schedule_time?.[doctor.schedule_time?.length - 1] || "",
-        });
-      } else {
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          age: "",
-          gender: "",
-          contact: "",
-          specialization: "",
-          startTime: "",
-          endTime: "",
-        });
-      }
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        age: "",
+        gender: "",
+        contact: "",
+        specialization: "",
+        startTime: "",
+        endTime: "",
+      });
       setStep(1);
     }
-  }, [isOpen, doctor, mode]);
+  }, [isOpen]);
 
   const nextStep = () => setStep((s) => Math.min(s + 1, 3));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
@@ -107,36 +87,18 @@ const CreateDoctorModal = ({
       const payload = {
         ...formData,
         schedule_time,
-        ...(mode === "edit" && !formData.password && { password: undefined }),
       };
 
-      if (mode === "create") {
-        await api.post("/doctor", payload);
-        alert("Doctor created successfully!");
-      } else {
-        await api.put(`/doctor/${doctor._id}`, payload);
-        alert("Doctor updated successfully!");
-      }
-
+      await api.post("/auth/doctor/register", payload);
+      alert("Doctor created successfully!");
       onClose();
     } catch (error) {
-      console.error(
-        `Error ${mode === "create" ? "creating" : "updating"} doctor:`,
-        error
-      );
-      alert(
-        error.message ||
-          `Failed to ${mode === "create" ? "create" : "update"} doctor`
-      );
+      console.error("Error creating doctor:", error);
+      alert(error.message || "Failed to create doctor");
     } finally {
       setLoading(false);
     }
   };
-
-  const modalTitle =
-    mode === "create" ? "Create Doctor Account" : "Edit Doctor Details";
-  const submitButtonText =
-    mode === "create" ? "Create Account" : "Update Doctor";
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -168,7 +130,7 @@ const CreateDoctorModal = ({
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-xl font-semibold text-foreground">
-                    {modalTitle}
+                    Create Doctor Account
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -209,7 +171,6 @@ const CreateDoctorModal = ({
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        disabled={mode === "edit"}
                       />
                       <Input
                         label="Contact"
@@ -293,37 +254,23 @@ const CreateDoctorModal = ({
                   {step === 3 && (
                     <div className="grid grid-cols-2 gap-4 py-2">
                       <Input
-                        label={
-                          mode === "create"
-                            ? "Password"
-                            : "New Password (leave blank to keep current)"
-                        }
+                        label="Password"
                         name="password"
                         type="password"
                         value={formData.password}
                         onChange={handleChange}
-                        required={mode === "create"}
-                        placeholder={
-                          mode === "edit"
-                            ? "Leave blank to keep current password"
-                            : ""
-                        }
+                        required
                       />
                       <div className="relative z-0">
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Confirm Password{" "}
-                          {mode === "create" && (
-                            <span className="text-red-500">*</span>
-                          )}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="password"
                           className="w-full px-4 py-3 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue focus:ring-offset-2 focus:ring-offset-ui-card focus:border-transparent"
                           onChange={(e) => {
-                            if (
-                              mode === "create" &&
-                              e.target.value !== formData.password
-                            ) {
+                            if (e.target.value !== formData.password) {
                               e.target.setCustomValidity(
                                 "Passwords do not match"
                               );
@@ -331,10 +278,7 @@ const CreateDoctorModal = ({
                               e.target.setCustomValidity("");
                             }
                           }}
-                          required={mode === "create"}
-                          placeholder={
-                            mode === "edit" ? "Confirm new password" : ""
-                          }
+                          required
                         />
                       </div>
                     </div>
@@ -371,7 +315,7 @@ const CreateDoctorModal = ({
                         disabled={loading}
                         className="px-5 py-2 bg-blue hover:bg-blue/90 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {loading ? "Processing..." : submitButtonText}
+                        {loading ? "Creating..." : "Create Account"}
                       </button>
                     )}
                   </div>

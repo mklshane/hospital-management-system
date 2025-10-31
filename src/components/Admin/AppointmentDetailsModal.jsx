@@ -106,13 +106,7 @@ const AppointmentDetailsModal = ({
                       Appointment Details
                     </Dialog.Title>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleDeleteClick}
-                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                        title="Delete Appointment"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                   
                       <button
                         onClick={onClose}
                         className="text-muted-foreground hover:text-foreground transition-colors"
@@ -219,18 +213,6 @@ const AppointmentDetailsModal = ({
                         </div>
                       </div>
                     </div>
-
-                    {/* Notes */}
-                    {appointment.notes && (
-                      <div className="space-y-3">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          Appointment Notes
-                        </h3>
-                        <div className="p-4 bg-ui-muted rounded-lg">
-                          <p className="text-foreground">{appointment.notes}</p>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Appointment Metadata */}
                     <div className="pt-4 border-t border-ui-border">
