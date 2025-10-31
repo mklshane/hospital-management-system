@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import CreateDoctorModal from "@/components/Admin/CreateDoctorModal";
+import DoctorDetailsModal from "@/components/Admin/DoctorDetailsModal";
 import DoctorCard from "@/components/Admin/DoctorCard";
 import SearchBar from "@/components/Common/SearchBar";
+import DeleteModal from "@/components/Common/DeleteModal";
 import { api } from "@/lib/axiosHeader";
 
 const DoctorsList = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [doctors, setDoctors] = useState([]);
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [modalMode, setModalMode] = useState("create"); // "create" or "edit"
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [modalMode, setModalMode] = useState("create");
 
   // Fetch doctors on component mount
   useEffect(() => {
@@ -23,7 +29,7 @@ const DoctorsList = () => {
       setLoading(true);
       const response = await api.get("/doctor");
       setDoctors(response.data.doctors);
-      setFilteredDoctors(response.data.doctors); // Initialize filtered doctors
+      setFilteredDoctors(response.data.doctors);
     } catch (error) {
       console.error("Error fetching doctors:", error);
       alert("Failed to fetch doctors");
@@ -53,39 +59,58 @@ const DoctorsList = () => {
   const handleCreateDoctor = () => {
     setSelectedDoctor(null);
     setModalMode("create");
-    setIsModalOpen(true);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleViewDoctor = (doctor) => {
+    setSelectedDoctor(doctor);
+    setIsDetailsModalOpen(true);
   };
 
   const handleEditDoctor = (doctor) => {
     setSelectedDoctor(doctor);
     setModalMode("edit");
-    setIsModalOpen(true);
+    setIsCreateModalOpen(true);
   };
 
-  const handleDeleteDoctor = async (doctorId, doctorName) => {
-    if (!confirm(`Are you sure you want to delete Dr. ${doctorName}?`)) {
-      return;
-    }
+  const handleDeleteDoctor = (doctor) => {
+    setDoctorToDelete(doctor);
+    setIsDeleteModalOpen(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!doctorToDelete) return;
+
+    setDeleteLoading(true);
     try {
-      await api.delete(`/doctor/${doctorId}`);
+      await api.delete(`/doctor/${doctorToDelete._id}`);
       alert("Doctor deleted successfully!");
-      fetchDoctors(); // Refresh the list
+      setIsDeleteModalOpen(false);
+      setDoctorToDelete(null);
+      fetchDoctors();
     } catch (error) {
       console.error("Error deleting doctor:", error);
       alert("Failed to delete doctor");
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
   const handleModalClose = () => {
-    setIsModalOpen(false);
+    setIsCreateModalOpen(false);
+    setIsDetailsModalOpen(false);
     setSelectedDoctor(null);
-    fetchDoctors(); // Refresh list after any operation
+    fetchDoctors();
+  };
+
+  const handleDeleteModalClose = () => {
+    setIsDeleteModalOpen(false);
+    setDoctorToDelete(null);
   };
 
   return (
     <>
-      <div className="min-h-screen bg-ui-surface">
+      <div className="min-h-screen bg-ui-surface flex flex-col">
         {/* Header */}
         <header className="border-b border-ui-border px-6 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Doctors List</h1>
@@ -114,9 +139,9 @@ const DoctorsList = () => {
         </header>
 
         {/* Main Content */}
-        <main className="p-6">
+        <main className="flex-1 p-6">
           {/* Search Bar */}
-          <div className="mb-6">
+          <div className="mb-3">
             <SearchBar
               onSearch={handleSearch}
               placeholder="Search doctors by name, email, specialization, contact..."
@@ -162,28 +187,53 @@ const DoctorsList = () => {
                 </p>
               </div>
 
-              {/* Doctors Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredDoctors.map((doctor) => (
-                  <DoctorCard
-                    key={doctor._id}
-                    doctor={doctor}
-                    onEdit={handleEditDoctor}
-                    onDelete={handleDeleteDoctor}
-                  />
-                ))}
+              {/* Doctors List - Single column layout like patients */}
+              <div className="h-[calc(100vh-280px)] overflow-y-auto">
+                <div className="space-y-3 pr-2 pb-6">
+                  {filteredDoctors.map((doctor) => (
+                    <DoctorCard
+                      key={doctor._id}
+                      doctor={doctor}
+                      onClick={handleViewDoctor}
+                    />
+                  ))}
+                </div>
               </div>
             </>
           )}
         </main>
       </div>
 
-      {/* Modal */}
+      {/* Create/Edit Modal */}
       <CreateDoctorModal
-        isOpen={isModalOpen}
+        isOpen={isCreateModalOpen}
         onClose={handleModalClose}
         doctor={selectedDoctor}
         mode={modalMode}
+      />
+
+      {/* Details Modal */}
+      <DoctorDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={handleModalClose}
+        doctor={selectedDoctor}
+        onDelete={handleDeleteDoctor}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteModalClose}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Doctor"
+        description="Are you sure you want to delete this doctor? All associated data including appointments will be permanently removed. This action cannot be undone."
+        confirmText="Delete Doctor"
+        loading={deleteLoading}
+        itemName={`Dr. ${doctorToDelete?.name || ""}${
+          doctorToDelete?.specialization
+            ? ` (${doctorToDelete.specialization})`
+            : ""
+        }`}
       />
     </>
   );

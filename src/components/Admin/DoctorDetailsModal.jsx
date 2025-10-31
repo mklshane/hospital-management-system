@@ -5,9 +5,9 @@ import {
   X,
   Mail,
   Phone,
-  MapPin,
   User,
-  Calendar,
+  Clock,
+  MapPin,
   Save,
   Edit2,
   Trash2,
@@ -17,7 +17,20 @@ import Select from "@/components/Common/Select";
 import { api } from "@/lib/axiosHeader";
 import DeleteModal from "@/components/Common/DeleteModal";
 
-const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
+const SPECIALIZATIONS = [
+  "Cardiology",
+  "Neurology",
+  "Pediatrics",
+  "Orthopedics",
+  "Dermatology",
+  "General Medicine",
+  "Ophthalmology",
+  "Psychiatry",
+  "ENT",
+  "Radiology",
+];
+
+const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -27,24 +40,24 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
     age: "",
     gender: "",
     contact: "",
-    address: "",
+    specialization: "",
   });
 
   const genders = ["Male", "Female", "Other"];
 
   useEffect(() => {
-    if (patient) {
+    if (doctor) {
       setFormData({
-        name: patient.name || "",
-        email: patient.email || "",
-        age: patient.age || "",
-        gender: patient.gender || "",
-        contact: patient.contact || "",
-        address: patient.address || "",
+        name: doctor.name || "",
+        email: doctor.email || "",
+        age: doctor.age || "",
+        gender: doctor.gender || "",
+        contact: doctor.contact || "",
+        specialization: doctor.specialization || "",
       });
     }
     setIsEditing(false);
-  }, [patient]);
+  }, [doctor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,13 +67,13 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await api.put(`/patient/${patient._id}`, formData);
-      alert("Patient updated successfully!");
+      await api.put(`/doctor/${doctor._id}`, formData);
+      alert("Doctor updated successfully!");
       setIsEditing(false);
       onClose();
     } catch (error) {
-      console.error("Error updating patient:", error);
-      alert("Failed to update patient");
+      console.error("Error updating doctor:", error);
+      alert("Failed to update doctor");
     } finally {
       setLoading(false);
     }
@@ -72,29 +85,29 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await api.delete(`/patient/${patient._id}`);
-      alert("Patient deleted successfully!");
+      await api.delete(`/doctor/${doctor._id}`);
+      alert("Doctor deleted successfully!");
       setShowDeleteModal(false);
       onClose();
     } catch (error) {
-      console.error("Error deleting patient:", error);
-      alert("Failed to delete patient");
+      console.error("Error deleting doctor:", error);
+      alert("Failed to delete doctor");
     }
   };
 
   const handleCancelEdit = () => {
     setFormData({
-      name: patient.name || "",
-      email: patient.email || "",
-      age: patient.age || "",
-      gender: patient.gender || "",
-      contact: patient.contact || "",
-      address: patient.address || "",
+      name: doctor.name || "",
+      email: doctor.email || "",
+      age: doctor.age || "",
+      gender: doctor.gender || "",
+      contact: doctor.contact || "",
+      specialization: doctor.specialization || "",
     });
     setIsEditing(false);
   };
 
-  if (!patient) return null;
+  if (!doctor) return null;
 
   return (
     <>
@@ -127,7 +140,7 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-6">
                     <Dialog.Title className="text-xl font-bold text-foreground">
-                      {isEditing ? "Edit Patient" : "Patient Details"}
+                      {isEditing ? "Edit Doctor" : "Doctor Details"}
                     </Dialog.Title>
                     <div className="flex items-center gap-2">
                       {!isEditing ? (
@@ -135,14 +148,14 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                           <button
                             onClick={() => setIsEditing(true)}
                             className="p-2 text-muted-foreground hover:text-blue hover:bg-blue/10 rounded-lg transition-colors"
-                            title="Edit Patient"
+                            title="Edit Doctor"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={handleDeleteClick}
                             className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                            title="Delete Patient"
+                            title="Delete Doctor"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -157,7 +170,7 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                     </div>
                   </div>
 
-                  {/* Patient Information */}
+                  {/* Doctor Information */}
                   <div className="space-y-6">
                     {/* Basic Info Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -199,7 +212,16 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                             type="number"
                             value={formData.age}
                             onChange={handleChange}
-                            placeholder="e.g. 25"
+                            placeholder="e.g. 35"
+                          />
+                          <Select
+                            label="Specialization"
+                            name="specialization"
+                            value={formData.specialization}
+                            onChange={handleChange}
+                            options={SPECIALIZATIONS}
+                            required
+                            placeholder="Select specialization"
                           />
                         </>
                       ) : (
@@ -211,7 +233,7 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                                 Full Name
                               </p>
                               <p className="text-foreground font-medium">
-                                {patient.name}
+                                Dr. {doctor.name}
                               </p>
                             </div>
                           </div>
@@ -223,12 +245,12 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                                 Email
                               </p>
                               <p className="text-foreground font-medium">
-                                {patient.email}
+                                {doctor.email}
                               </p>
                             </div>
                           </div>
 
-                          {patient.contact && (
+                          {doctor.contact && (
                             <div className="flex items-center gap-3 p-3 bg-ui-muted rounded-lg">
                               <Phone className="w-5 h-5 text-blue" />
                               <div>
@@ -236,23 +258,37 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                                   Contact
                                 </p>
                                 <p className="text-foreground font-medium">
-                                  {patient.contact}
+                                  {doctor.contact}
                                 </p>
                               </div>
                             </div>
                           )}
 
-                          {(patient.age || patient.gender) && (
+                          {(doctor.age || doctor.gender) && (
                             <div className="flex items-center gap-3 p-3 bg-ui-muted rounded-lg">
-                              <Calendar className="w-5 h-5 text-blue" />
+                              <User className="w-5 h-5 text-blue" />
                               <div>
                                 <p className="text-sm text-muted-foreground">
                                   Age & Gender
                                 </p>
                                 <p className="text-foreground font-medium">
-                                  {patient.age && `Age: ${patient.age}`}
-                                  {patient.age && patient.gender && " • "}
-                                  {patient.gender || "Not specified"}
+                                  {doctor.age && `Age: ${doctor.age}`}
+                                  {doctor.age && doctor.gender && " • "}
+                                  {doctor.gender || "Not specified"}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {doctor.specialization && (
+                            <div className="flex items-center gap-3 p-3 bg-ui-muted rounded-lg">
+                              <MapPin className="w-5 h-5 text-blue" />
+                              <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Specialization
+                                </p>
+                                <p className="text-foreground font-medium">
+                                  {doctor.specialization}
                                 </p>
                               </div>
                             </div>
@@ -261,36 +297,28 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
                       )}
                     </div>
 
-                    {/* Address Field */}
-                    <div>
-                      {isEditing ? (
-                        <div className="relative z-0">
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Address
-                          </label>
-                          <textarea
-                            name="address"
-                            value={formData.address}
-                            onChange={handleChange}
-                            rows={3}
-                            className="w-full px-4 py-3 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue focus:ring-offset-2 focus:ring-offset-ui-card focus:border-transparent resize-none"
-                            placeholder="Enter patient's address"
-                          />
-                        </div>
-                      ) : patient.address ? (
-                        <div className="flex items-start gap-3 p-3 bg-ui-muted rounded-lg">
-                          <MapPin className="w-5 h-5 text-blue mt-0.5" />
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Address
-                            </p>
-                            <p className="text-foreground font-medium">
-                              {patient.address}
-                            </p>
+                    {/* Schedule Times */}
+                    {doctor.schedule_time &&
+                      doctor.schedule_time.length > 0 && (
+                        <div className="space-y-3">
+                          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-blue" />
+                            Available Schedule
+                          </h3>
+                          <div className="p-4 bg-ui-muted rounded-lg">
+                            <div className="flex flex-wrap gap-2">
+                              {doctor.schedule_time.map((time, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1 bg-blue/10 text-blue rounded-full text-sm"
+                                >
+                                  {time}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      ) : null}
-                    </div>
+                      )}
                   </div>
 
                   {/* Action Buttons */}
@@ -333,13 +361,15 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Patient"
-        description="Are you sure you want to delete this patient? All associated data will be permanently removed. This action cannot be undone."
-        confirmText="Delete Patient"
-        itemName={patient?.name}
+        title="Delete Doctor"
+        description="Are you sure you want to delete this doctor? All associated data including appointments will be permanently removed. This action cannot be undone."
+        confirmText="Delete Doctor"
+        itemName={`Dr. ${doctor?.name}${
+          doctor?.specialization ? ` (${doctor.specialization})` : ""
+        }`}
       />
     </>
   );
 };
 
-export default PatientDetailsModal;
+export default DoctorDetailsModal;
