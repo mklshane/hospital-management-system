@@ -18,6 +18,10 @@ import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import DoctorsList from "./pages/Admin/DoctorsList";
+import PatientsList from "./pages/Admin/PatientsList";
+import AppointmentsList from "./pages/Admin/AppointmentsList";
+import CreateDoctorAccount from "./pages/Admin/CreateDoctorAccount";
 
 function App() {
   return (
@@ -100,6 +104,46 @@ function App() {
             <ProtectedRoute allowedUserTypes={["admin"]}>
               <AdminLayout>
                 <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/doctors"
+          element={
+            <ProtectedRoute allowedUserTypes={["admin"]}>
+              <AdminLayout>
+                <DoctorsList />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/doctors/create"
+          element={
+            <ProtectedRoute allowedUserTypes={["admin"]}>
+              <AdminLayout>
+                <CreateDoctorAccount />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/patients"
+          element={
+            <ProtectedRoute allowedUserTypes={["admin"]}>
+              <AdminLayout>
+                <PatientsList/>
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/appointments"
+          element={
+            <ProtectedRoute allowedUserTypes={["admin"]}>
+              <AdminLayout>
+                <AppointmentsList />
               </AdminLayout>
             </ProtectedRoute>
           }
