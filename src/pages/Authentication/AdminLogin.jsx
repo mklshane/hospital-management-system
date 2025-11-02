@@ -32,18 +32,7 @@ const AdminLogin = () => {
 
     try {
       const res = await api.post("/auth/admin/login", formData);
-
-      if (!res.data.user) {
-        const userData = res.data.user || res.data.admin || res.data;
-
-        if (!userData || typeof userData !== "object") {
-          throw new Error("Invalid user data in response");
-        }
-
-        await login(userData, "admin");
-      } else {
-        await login(res.data.user, "admin");
-      }
+      await login(res.data.user, "admin");
 
       navigate("/admin/dashboard");
     } catch (error) {
