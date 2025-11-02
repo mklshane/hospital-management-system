@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X, Plus, Trash2 } from "lucide-react";
-import { api } from "../lib/axiosHeader";
+import { api } from "../../lib/axiosHeader";
 import toast from "react-hot-toast";
 
 const MedicalRecordModal = ({

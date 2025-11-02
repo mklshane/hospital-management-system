@@ -11,7 +11,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
-import MedicalRecordCard from "../../components/MedicalRecordCard";
+import MedicalRecordCard from "../../components/Doctor/MedicalRecordCard";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorMedicalRecords = () => {

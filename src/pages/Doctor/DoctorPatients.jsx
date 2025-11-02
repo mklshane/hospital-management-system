@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeToggle from "../../components/ThemeToggle";
-import PatientCard from "../../components/PatientCard";
+import PatientCard from "../../components/Doctor/PatientCard";
 import { api } from "../../lib/axiosHeader";
 
 const DoctorPatientsList = () => {

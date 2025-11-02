@@ -8,8 +8,8 @@ import {
   isSameDay,
 } from "date-fns";
 import { api } from "../../lib/axiosHeader";
-import AppointmentCard from "../../components/AppointmentCard";
-import AppointmentRequestCard from "../../components/AppointmentRequestCard";
+import AppointmentCard from "../../components/Doctor/AppointmentCard";
+import AppointmentRequestCard from "../../components/Doctor/AppointmentRequestCard";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorDashboard = () => {

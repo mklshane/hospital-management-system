@@ -10,8 +10,8 @@ import {
   Check,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
-import AppointmentCard from "../../components/AppointmentCard";
-import MedicalRecordModal from "../../components/MedicalRecordModal";
+import AppointmentCard from "../../components/Doctor/AppointmentCard";
+import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorAppointments = () => {
