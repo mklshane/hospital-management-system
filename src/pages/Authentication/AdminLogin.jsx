@@ -32,7 +32,7 @@ const AdminLogin = () => {
 
     try {
       const res = await api.post("/auth/admin/login", formData);
-      await login(res.data.user, "admin");
+       login(res.data.user, "admin");
 
       navigate("/admin/dashboard");
     } catch (error) {
