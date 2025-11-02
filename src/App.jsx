@@ -1,6 +1,4 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import Dashboard from "./pages/Patient/PatientDashboard";
 import Profile from "./pages/Patient/PatientProfile";
 import Settings from "./pages/Settings.jsx";
@@ -11,7 +9,10 @@ import PatientLogin from "./pages/Authentication/PatientLogin";
 import DoctorLogin from "./pages/Authentication/DoctorLogin";
 import AdminLogin from "./pages/Authentication/AdminLogin";
 import SignUp from "./pages/Authentication/SignUp";
-import { ProtectedRoute, PublicRoute } from "./components/guards/ProtectedRoutes";
+import {
+  ProtectedRoute,
+  PublicRoute,
+} from "./components/guards/ProtectedRoutes";
 import { Navigate } from "react-router-dom";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
@@ -28,6 +29,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route
           path="/"
           element={
@@ -69,6 +71,7 @@ function App() {
           }
         />
 
+        {/* Patient Routes */}
         <Route
           path="/dashboard"
           element={
@@ -79,6 +82,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Doctor Routes */}
         <Route
           path="/doctor/dashboard"
           element={
@@ -119,46 +124,25 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Admin Routes with Nested Layout */}
         <Route
-          path="/admin/dashboard"
+          path="/admin"
           element={
             <ProtectedRoute allowedUserTypes={["admin"]}>
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
+              <AdminLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/admin/doctors"
-          element={
-            <ProtectedRoute allowedUserTypes={["admin"]}>
-              <AdminLayout>
-                <DoctorsList />
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/patients"
-          element={
-            <ProtectedRoute allowedUserTypes={["admin"]}>
-              <AdminLayout>
-                <PatientsList/>
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/appointments"
-          element={
-            <ProtectedRoute allowedUserTypes={["admin"]}>
-              <AdminLayout>
-                <AppointmentsList />
-              </AdminLayout>
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="doctors" element={<DoctorsList />} />
+          <Route path="patients" element={<PatientsList />} />
+          <Route path="appointments" element={<AppointmentsList />} />
+      
+        </Route>
+
+        {/* Common Routes */}
         <Route
           path="/profile"
           element={

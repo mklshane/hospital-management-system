@@ -9,19 +9,29 @@ import {
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { Logo, LogoIcon } from "./Logo";
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
       await logout();
+      navigate("/admin/login");
     } catch (error) {
       console.error("Logout failed:", error);
+    }
+  };
+
+  const handleNavigation = (href, onClick) => {
+    if (onClick) {
+      onClick();
+    } else if (href !== "#") {
+      navigate(href);
     }
   };
 
@@ -98,11 +108,13 @@ export default function AdminLayout({ children }) {
                 <SidebarLink
                   key={idx}
                   link={link}
-                  onClick={link.onClick}
+                  onClick={() => handleNavigation(link.href, link.onClick)}
                   className={cn(
                     "px-2 py-3 rounded-lg flex items-center gap-2 transition-all duration-200",
                     link.onClick
                       ? "hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
+                      : location.pathname === link.href
+                      ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
                       : "hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-700 dark:hover:text-blue-400"
                   )}
                 />
@@ -124,11 +136,11 @@ export default function AdminLayout({ children }) {
 
               {/* Admin Label – only when sidebar is open */}
               {open && (
-                <div >
+                <div>
                   <p className="text-sm font-medium text-foreground">
-                    Admin
+                    {user?.name || "Admin"}
                   </p>
-                  
+                  <p className="text-xs text-muted-foreground">Administrator</p>
                 </div>
               )}
             </div>
@@ -137,7 +149,9 @@ export default function AdminLayout({ children }) {
       </Sidebar>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto px-8">{children}</main>
+      <main className="flex-1 overflow-y-auto px-8 py-6">
+        <Outlet />
+      </main>
     </div>
   );
 }
