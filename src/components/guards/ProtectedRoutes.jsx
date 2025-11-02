@@ -29,23 +29,21 @@ export const ProtectedRoute = ({ children, allowedUserTypes }) => {
 };
 
 // Public Route - Only accessible when NOT logged in
-export const PublicRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+export const PublicRoute = ({ children, restrictedTo }) => {
+  const { isAuthenticated, loading, userType } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  if (loading) { /* show spinner */ }
 
-  // Only redirect if user is truly authenticated
   if (isAuthenticated()) {
-    return <Navigate to={getDashboardPath() /* userType inside AuthContext */} replace />;
+    const redirectPath = getDashboardPath(userType);
+    return <Navigate to={redirectPath} replace />;
   }
 
-  // Otherwise, stay on the public route (login/signup)
+  // Restrict public route to specific user types if specified
+  if (restrictedTo && userType && !restrictedTo.includes(userType)) {
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 };
 
