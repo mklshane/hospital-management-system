@@ -83,8 +83,10 @@ const AdminLogin = () => {
           </div>
 
           {/* Right Section */}
-          <div className="p-10 w-[100%] mx-auto border-2 rounded-2xl">
-            <h2 className="text-2xl font-semibold mb-1">Admin Login</h2>
+          <div className="p-10 w-[100%] mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
+            <h2 className="text-2xl font-semibold mb-1 text-black">
+              Admin Login
+            </h2>
             <p className="text-gray-600 mb-6 text-sm">
               Enter your credentials to access the admin dashboard
             </p>
@@ -109,7 +111,7 @@ const AdminLogin = () => {
                     value={formData.email}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full text-black mt-1 px-4 py-2 border border-[#cecececa]  rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
 
@@ -126,7 +128,7 @@ const AdminLogin = () => {
                       value={formData.password}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                      className="w-full text-black mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                     />
                     <button
                       type="button"
@@ -154,20 +156,20 @@ const AdminLogin = () => {
             </form>
 
             <div className="flex items-center my-6">
-              <div className="flex-grow border-t"></div>
+              <div className="flex-grow border-t border-[#cecececa]"></div>
               <span className="px-4 text-sm text-gray-500">or login as</span>
-              <div className="flex-grow border-t"></div>
+              <div className="flex-grow border-t border-[#cecececa]"></div>
             </div>
 
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
                 onClick={() => navigate("/doctor/login")}
               >
                 Doctor
               </button>
               <button
-                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
                 onClick={() => navigate("/login")}
               >
                 Patient
