@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
+  IconHome,
+  IconCalendarUser,
+  IconClipboardHeart,
+  IconUserPlus,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -46,21 +47,28 @@ export default function DoctorLayout({ children }) {
       label: "Dashboard",
       href: "/doctor/dashboard",
       icon: (
-        <IconBrandTabler className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+        <IconHome className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
       label: "Appointments",
       href: "/doctor/appointments",
       icon: (
-        <IconUserBolt className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+        <IconCalendarUser className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
-      label: "Settings",
-      href: "/settings",
+      label: "Medical Records",
+      href: "/doctor/medical-records",
       icon: (
-        <IconSettings className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+        <IconClipboardHeart className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+      ),
+    },
+    {
+      label: "Patients",
+      href: "/doctor/patients",
+      icon: (
+        <IconUserPlus className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
@@ -95,7 +103,7 @@ export default function DoctorLayout({ children }) {
                   link={link}
                   onClick={link.onClick}
                   className={cn(
-                    "px-1 py-3 rounded-lg transition-colors duration-200",
+                    "px-2.5 py-3 rounded-lg transition-colors duration-200",
                     link.onClick
                       ? "hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
                       : "hover:bg-neutral-200 dark:hover:bg-neutral-700"

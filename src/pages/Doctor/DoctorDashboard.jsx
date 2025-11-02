@@ -1,194 +1,378 @@
-import React, { useState, useEffect } from 'react';
-import { Moon, Sun } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { RefreshCw, Search } from "lucide-react";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+} from "date-fns";
+import { api } from "../../lib/axiosHeader";
+import AppointmentCard from "../../components/AppointmentCard";
+import AppointmentRequestCard from "../../components/AppointmentRequestCard";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorDashboard = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [scheduledAppointments, setScheduledAppointments] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  // Toggle dark mode
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
+  const [loading, setLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
-  
-  // Mock data
   const doctorData = {
     name: "Dr. Juan De La Cruz",
-    specialization: "General Medicine"
+    specialization: "General Medicine",
   };
 
   const statsData = [
     { label: "Today's Appointments", value: 12 },
     { label: "Pending Approvals", value: 5 },
     { label: "Completed Appointments", value: 7 },
-    { label: "Assigned Patients", value: 23 }
+    { label: "Assigned Patients", value: 23 },
   ];
 
-  const appointmentsData = [
-    {
-      patientName: "Maria Dela Cruz",
-      status: "Pending",
-      date: "Oct 12, 2025",
-      time: "09:30 AM – 10:00 AM",
-      notes: "Complains of persistent cough and mild fever"
-    },
-    {
-      patientName: "John Santos",
-      status: "Approved",
-      date: "Oct 10, 2025",
-      time: "02:00 PM – 02:30 PM",
-      notes: "Routine blood pressure check-up"
-    },
-    {
-      patientName: "John Santos",
-      status: "Approved",
-      date: "Oct 10, 2025",
-      time: "02:00 PM – 02:30 PM",
-      notes: "Routine blood pressure check-up"
-    }
-  ];
+  // API: Fetch today's scheduled appointments
+  const fetchTodayAppointments = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/appointment");
+      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-  const appointmentRequests = [
-    {
-      patientName: "Maria Dela Cruz",
-      age: 32,
-      gender: "Female",
-      time: "Today, 09:30 AM",
-      symptoms: "Fever and cough for 3 days"
-    },
-    {
-      patientName: "John Doe",
-      age: 40,
-      gender: "Male", 
-      time: "Today, 10:00 AM",
-      symptoms: "Routine checkup"
+      const todayScheduled = (res.data.appointments || [])
+        .filter(
+          (appt) =>
+            appt.status === "Scheduled" && appt.appointment_date === today
+        )
+        .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
+
+      setScheduledAppointments(todayScheduled);
+    } catch (err) {
+      console.error("Error fetching today's appointments:", err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // API: Fetch pending appointment requests
+  const fetchPendingRequests = async () => {
+    try {
+      setRequestsLoading(true);
+      const res = await api.get("/appointment");
+
+      const pending = (res.data.appointments || [])
+        .filter((appt) => appt.status === "Pending")
+        .map((appt) => ({
+          _id: appt._id,
+          patient: appt.patient,
+          appointment_date: appt.appointment_date,
+          appointment_time: appt.appointment_time,
+          notes: appt.notes,
+        }))
+        .sort((a, b) => {
+          const dateA = new Date(a.appointment_date + " " + a.appointment_time);
+          const dateB = new Date(b.appointment_date + " " + b.appointment_time);
+          return dateA - dateB;
+        });
+
+      setRequests(pending);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  // API: Fetch all scheduled appointments for calendar
+  const fetchCalendarAppointments = async () => {
+    try {
+      setCalendarLoading(true);
+      const res = await api.get("/appointment");
+
+      const scheduled = (res.data.appointments || [])
+        .filter((appt) => appt.status === "Scheduled")
+        .map((appt) => ({
+          _id: appt._id,
+          patient: appt.patient,
+          appointment_date: appt.appointment_date,
+          appointment_time: appt.appointment_time,
+        }));
+
+      setAllAppointments(scheduled);
+    } catch (err) {
+      console.error("Error fetching calendar data:", err);
+    } finally {
+      setCalendarLoading(false);
+    }
+  };
+
+  // API: Update appointment status
+  const handleStatusUpdate = async (id, newStatus) => {
+    setActionLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      await api.put(`/appointment/${id}`, { status: newStatus });
+      await fetchPendingRequests();
+      await fetchTodayAppointments();
+    } catch (err) {
+      console.error(`Failed to ${newStatus} appointment:`, err);
+      alert("Action failed. Please try again.");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchTodayAppointments();
+    fetchPendingRequests();
+    fetchCalendarAppointments();
+  }, []);
+
+  // Search filter
+  const filteredAppointments = scheduledAppointments.filter(
+    (appt) =>
+      appt.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appt.appointment_date.includes(searchTerm) ||
+      appt.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calendar component
+  const Calendar = () => {
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
+    const days = eachDayOfInterval({ start, end });
+    const appointmentDates = allAppointments.map((a) => a.appointment_date);
+
+    return (
+      <div className="bg-ui-muted rounded-lg p-4 h-full flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-3">
+          <button
+            onClick={() =>
+              setCurrentMonth(
+                (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1)
+              )
+            }
+            className="p-1 rounded hover:bg-blue/20 transition text-foreground text-lg font-bold"
+            aria-label="Previous month"
+          >
+            &lt;
+          </button>
+          <h3 className="text-sm font-semibold font-montserrat text-foreground">
+            {format(currentMonth, "MMM yyyy")}
+          </h3>
+          <button
+            onClick={() =>
+              setCurrentMonth(
+                (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1)
+              )
+            }
+            className="p-1 rounded hover:bg-blue/20 transition text-foreground text-lg font-bold"
+            aria-label="Next month"
+          >
+            &gt;
+          </button>
+        </div>
+
+        {/* Weekdays */}
+        <div className="grid grid-cols-7 text-xs text-muted-foreground mb-1">
+          {["S", "M", "T", "W", "T", "F", "S"].map((d) => (
+            <div key={d} className="text-center">
+              {d}
+            </div>
+          ))}
+        </div>
+
+        {/* Days */}
+        <div className="grid grid-cols-7 gap-1 text-xs flex-1">
+          {/* Empty cells */}
+          {Array.from({ length: start.getDay() }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+
+          {/* Days */}
+          {days.map((day) => {
+            const dateStr = format(day, "yyyy-MM-dd");
+            const hasAppt = appointmentDates.includes(dateStr);
+            const isToday = isSameDay(day, new Date());
+
+            return (
+              <div
+                key={dateStr}
+                className={`
+                  aspect-square flex items-center justify-center rounded-full transition relative
+                  ${isToday ? "ring-2 ring-blue-light" : ""}
+                `}
+                title={
+                  hasAppt
+                    ? `${
+                        appointmentDates.filter((d) => d === dateStr).length
+                      } appointment(s)`
+                    : ""
+                }
+              >
+                {hasAppt && (
+                  <div className="absolute inset-0 rounded-full bg-blue opacity-20 scale-90"></div>
+                )}
+                <span
+                  className={`
+                    relative z-10 text-sm font-medium
+                    ${hasAppt ? "text-blue font-bold" : "text-foreground"}
+                    ${isToday ? "text-blue font-bold" : ""}
+                  `}
+                >
+                  {format(day, "d")}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden">
-      
-      {/* Upper Left - Blue Background Section */}
+    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
+      {/* Upper Left - Doctor Info and Statistics */}
       <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold font-montserrat">{doctorData.name}</h1>
-            <p className="text-blue-light font-figtree">{doctorData.specialization}</p>
+            <h1 className="text-2xl font-bold font-montserrat">
+              {doctorData.name}
+            </h1>
+            <p className="text-blue-light font-figtree">
+              {doctorData.specialization}
+            </p>
           </div>
 
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 bg-blue-light/20 rounded-full hover:bg-blue-light/40 transition"
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? (
-              <Sun className="w-5 h-5 text-white" />
-            ) : (
-              <Moon className="w-5 h-5 text-white" />
-            )}
-          </button>
+          {/* Universal Theme Toggle */}
+          <ThemeToggle />
         </div>
 
         <div className="mt-8 grid grid-cols-4 gap-4 flex-1">
           {statsData.map((stat, index) => (
-            <div key={index} className="bg-blue-light rounded-xl p-4 flex flex-col justify-center h-full">
-              <p className="text-md font-figtree opacity-90 mb-1">{stat.label}</p>
+            <div
+              key={index}
+              className="bg-blue-light rounded-xl p-4 flex flex-col justify-center h-full"
+            >
+              <p className="text-md font-figtree opacity-90 mb-1">
+                {stat.label}
+              </p>
               <p className="text-4xl font-bold font-montserrat">{stat.value}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Upper Right - Calendar Section */}
-      <div className="col-span-3 row-span-1 rounded-2xl p-4 overflow-hidden">
-        {/* <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2> */}
-        <div className="bg-ui-muted rounded-lg p-4 text-center">
-          {/* Calendar Grid */}
-          <div className="bg-ui-muted rounded-lg">
-            {/* Month Header */}
-            <div className="flex justify-between items-center mb-4">
-              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&lt;</button>
-              <h3 className="text-md font-semibold font-montserrat text-foreground dark:text-white">October 2025</h3>
-              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&gt;</button>
-            </div>
-
-            {/* Week Days */}
-            <div className="grid grid-cols-7 text-sm font-figtree text-muted-foreground dark:text-gray-300 mb-2">
-              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day) => (
-                <div key={day} className="text-center">{day}</div>
-              ))}
-            </div>
-
-            {/* Days Grid */}
-            <div className="grid grid-cols-7 gap-2 text-sm">
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                <div
-                  key={day}
-                  className="p-2 rounded hover:bg-blue-light/20 dark:hover:bg-blue-600 transition text-center cursor-pointer"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-          </div>
-
+      {/* Upper Right - Calendar */}
+      <div className="col-span-3 row-span-1 bg-ui-card rounded-2xl flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-hidden">
+          {calendarLoading ? (
+            <p className="text-center text-muted-foreground py-8">
+              Loading calendar...
+            </p>
+          ) : (
+            <Calendar />
+          )}
         </div>
       </div>
 
       {/* Lower Left - Appointments Card with Search */}
-      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl shadow-sm border border-ui-border overflow-hidden">
+      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
-          <h2 className="text-lg font-semibold text-foreground font-montserrat">Today's Appointment</h2>
-        
-        {/* Search Bar */}
-        <div className="relative w-full sm:w-1/2 lg:w-1/4">
-            <input
-              type="text"
-              placeholder="Search for name, date, notes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
-            />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          <h2 className="text-lg font-semibold text-foreground font-montserrat">
+            Today's Appointment
+          </h2>
+
+          {/* Search Bar */}
+          <div className="flex items-center gap-2 w-full sm:w-1/2 lg:w-1/3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search name, date, notes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             </div>
+
+            {/* Refresh Button */}
+            <button
+              onClick={fetchTodayAppointments}
+              disabled={loading}
+              className="p-2 h-10 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
+            </button>
           </div>
         </div>
 
         {/* Appointment List */}
-        <div className="flex-1 overflow-y-auto p-6">
-          
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {loading ? (
+            <p className="text-center text-muted-foreground py-8">
+              Loading today's appointments...
+            </p>
+          ) : scheduledAppointments.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No scheduled appointments for today.
+            </p>
+          ) : (
+            filteredAppointments.map((appt) => (
+              <AppointmentCard
+                key={appt._id}
+                appt={appt}
+                formatDate={(dateStr) =>
+                  new Date(dateStr).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                }
+              />
+            ))
+          )}
         </div>
       </div>
 
       {/* Lower Right - Appointment Requests */}
-      <div className="col-span-3 row-span-1 rounded-2xl flex flex-col overflow-hidden">
+      <div className="col-span-3 row-span-1 flex flex-col overflow-hidden">
         <div className="p-6 border-b border-ui-border">
-          <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
+          <h2 className="text-lg font-semibold text-foreground font-montserrat">
+            Appointment Requests
+          </h2>
         </div>
-        
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* requests list goes here */}
+
+        <div className="scrollbar flex-1 overflow-y-auto p-6 space-y-3">
+          {requestsLoading ? (
+            <p className="text-center text-muted-foreground py-8">
+              Loading requests...
+            </p>
+          ) : requests.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No pending requests.
+            </p>
+          ) : (
+            requests.map((req) => (
+              <AppointmentRequestCard
+                key={req._id}
+                request={req}
+                onApprove={(id) => handleStatusUpdate(id, "Scheduled")}
+                onReject={(id) => handleStatusUpdate(id, "Rejected")}
+                loading={actionLoading[req._id]}
+              />
+            ))
+          )}
         </div>
       </div>
-
     </div>
   );
 };
