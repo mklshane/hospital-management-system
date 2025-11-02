@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { RefreshCw, Search } from "lucide-react";
+import { RefreshCw, Search, Clock, AlertCircle, CheckCircle2, Users, TrendingUp } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -24,17 +24,55 @@ const DoctorDashboard = () => {
   const [calendarLoading, setCalendarLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
 
-  const doctorData = {
-    name: "Dr. Juan De La Cruz",
-    specialization: "General Medicine",
-  };
+  const [doctorInfo, setDoctorInfo] = useState(null);     
+  const [stats, setStats] = useState(null);              
+  const [doctorLoading, setDoctorLoading] = useState(true);
 
-  const statsData = [
-    { label: "Today's Appointments", value: 12 },
-    { label: "Pending Approvals", value: 5 },
-    { label: "Completed Appointments", value: 7 },
-    { label: "Assigned Patients", value: 23 },
-  ];
+  // API: Fetch doctor profile and stats
+  const fetchDoctorProfile = async () => {
+    try {
+      setDoctorLoading(true);
+      // 1. Get logged-in doctor ID from token / localStorage (adjust if you store it differently)
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const doctorId = user?._id;               // <-- make sure the token payload has _id
+
+      if (!doctorId) throw new Error("Doctor ID not found");
+
+      // 2. Get doctor profile
+      const docRes = await api.get(`/doc/${doctorId}`);
+      const { name, specialization } = docRes.data.doctor;
+      setDoctorInfo({ name, specialization });
+
+      // 3. Get today-stats (you already fetch appointments → just count)
+      const apptRes = await api.get("/appointment");
+      const allAppts = apptRes.data.appointments || [];
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const todayAppts   = allAppts.filter(a => a.appointment_date === today);
+      const scheduled    = todayAppts.filter(a => a.status === "Scheduled").length;
+      const pendingAll   = allAppts.filter(a => a.status === "Pending").length;
+      const completedAll = allAppts.filter(a => a.status === "Completed").length;
+
+      // OPTIONAL: count unique patients (you may have patient._id in each appt)
+      const uniquePatients = new Set(allAppts.map(a => a.patient?._id)).size;
+
+      setStats({
+        today: scheduled,
+        pending: pendingAll,
+        completed: completedAll,
+        patients: uniquePatients,
+      });
+
+    } catch (err) {
+      console.error("Error loading doctor profile / stats:", err);
+      // fallback to hard-coded values so UI never breaks
+      setDoctorInfo({ name: "Dr. Juan De La Cruz", specialization: "General Medicine" });
+      setStats({ today: 0, pending: 0, completed: 0, patients: 0 });
+    } finally {
+      setDoctorLoading(false);
+    }
+  };
 
   // API: Fetch today's scheduled appointments
   const fetchTodayAppointments = async () => {
@@ -127,6 +165,7 @@ const DoctorDashboard = () => {
 
   // Initial data fetch
   useEffect(() => {
+    fetchDoctorProfile();
     fetchTodayAppointments();
     fetchPendingRequests();
     fetchCalendarAppointments();
@@ -239,32 +278,96 @@ const DoctorDashboard = () => {
     <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
       {/* Upper Left - Doctor Info and Statistics */}
       <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold font-montserrat">
-              {doctorData.name}
-            </h1>
-            <p className="text-blue-light font-figtree">
-              {doctorData.specialization}
-            </p>
+        {/* Header */}
+        <div className="flex justify-between items-start mb-6">
+          <div className="space-y-1">
+            {doctorLoading ? (
+              <>
+                <div className="h-9 w-64 bg-white/20 rounded animate-pulse"></div>
+                <div className="h-6 w-48 bg-white/15 rounded animate-pulse"></div>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold font-montserrat">
+                  {doctorInfo?.name ?? "Dr. Unknown"}
+                </h1>
+                <p className="text-blue-light font-figtree text-lg">
+                  {doctorInfo?.specialization ?? "—"}
+                </p>
+              </>
+            )}
           </div>
 
-          {/* Universal Theme Toggle */}
-          <ThemeToggle />
+          <div>
+            <ThemeToggle />
+          </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-4 gap-4 flex-1">
-          {statsData.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-blue-light rounded-xl p-4 flex flex-col justify-center h-full"
-            >
-              <p className="text-md font-figtree opacity-90 mb-1">
-                {stat.label}
-              </p>
-              <p className="text-4xl font-bold font-montserrat">{stat.value}</p>
-            </div>
-          ))}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-4 gap-4 flex-1">
+          {doctorLoading || !stats ? (
+            /* ----- SKELETON ----- */
+            [...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 flex flex-col justify-center h-full border border-white/20"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 bg-white/20 rounded-full animate-pulse"></div>
+                  <div className="h-5 w-32 bg-white/30 rounded animate-pulse"></div>
+                </div>
+                <div className="h-12 w-24 bg-white/20 rounded animate-pulse"></div>
+              </div>
+            ))
+          ) : (
+            /* ----- REAL STATS – MAXIMIZED TEXT ----- */
+            [
+              { 
+                label: "Today's Appointments", 
+                value: stats.today,
+                icon: <Clock className="w-6 h-6" />,
+                bg: "bg-blue-500"
+              },
+              { 
+                label: "Pending Approvals",   
+                value: stats.pending,
+                icon: <AlertCircle className="w-6 h-6" />,
+                bg: "bg-amber-500"
+              },
+              { 
+                label: "Completed Appointments", 
+                value: stats.completed,
+                icon: <CheckCircle2 className="w-6 h-6" />,
+                bg: "bg-emerald-500"
+              },
+              { 
+                label: "Assigned Patients",   
+                value: stats.patients,
+                icon: <Users className="w-6 h-6" />,
+                bg: "bg-indigo-500"
+              },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 flex flex-col justify-center h-full border border-white/20 transition-all duration-200 hover:bg-white/15 hover:shadow-md"
+              >
+                {/* Icon + Label */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`${stat.bg} text-white p-2.5 rounded-full`}>
+                    {stat.icon}
+                  </div>
+                  <p className="text-sm font-figtree opacity-90 leading-tight">
+                    {stat.label}
+                  </p>
+                </div>
+
+                {/* MAXIMIZED VALUE */}
+                <p className="text-5xl font-bold font-montserrat leading-none">
+                  {stat.value}
+                </p>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
