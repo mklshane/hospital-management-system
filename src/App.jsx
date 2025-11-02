@@ -100,7 +100,7 @@ function App() {
           }
         />
         <Route
-          path="/doctor/medical-records"
+          path="/doctor/record"
           element={
             <ProtectedRoute allowedUserTypes={["doctor"]}>
               <DoctorLayout>
@@ -110,7 +110,7 @@ function App() {
           }
         />
         <Route
-          path="/doctor/patients"
+          path="/doctor/patient"
           element={
             <ProtectedRoute allowedUserTypes={["doctor"]}>
               <DoctorLayout>

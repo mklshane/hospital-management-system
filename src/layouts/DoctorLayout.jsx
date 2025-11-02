@@ -59,7 +59,7 @@ export default function DoctorLayout({ children }) {
     },
     {
       label: "Medical Records",
-      href: "/doctor/medical-records",
+      href: "/doctor/record",
       icon: (
         <IconClipboardHeart className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
