@@ -18,10 +18,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+    console.log(storedUser);
     const storedUserType = localStorage.getItem("userType");
-
-   
-
+    console.log(storedUserType);
     if (storedUser && storedUserType) {
       try {
         setUser(JSON.parse(storedUser));
@@ -48,6 +47,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("userType", type);
 
   };
+  
   const logout = async () => {
     try {
       await axiosHeader.post(

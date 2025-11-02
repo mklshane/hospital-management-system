@@ -34,17 +34,8 @@ const DoctorLogin = () => {
     try {
       const res = await api.post("/auth/doctor/login", formData);
 
-      if (!res.data.user) {
-        const userData = res.data.user || res.data.doctor || res.data;
-
-        if (!userData || typeof userData !== "object") {
-          throw new Error("Invalid user data in response");
-        }
-
-        await login(userData, "doctor");
-      } else {
-        await login(res.data.user, "doctor");
-      }
+      login(res.data.user, "doctor");
+      console.log("LOGIN SUCCESFUL", res.data.user)
 
       navigate("/doctor/dashboard");
     } catch (error) {
