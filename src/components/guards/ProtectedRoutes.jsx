@@ -41,7 +41,7 @@ export const PublicRoute = ({ children, restrictedTo }) => {
 
   // Restrict public route to specific user types if specified
   if (restrictedTo && userType && !restrictedTo.includes(userType)) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
