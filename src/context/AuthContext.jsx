@@ -16,50 +16,27 @@ export const AuthProvider = ({ children }) => {
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
 
- useEffect(() => {
-  const loadUser = async () => {
-    setLoading(true); // Start loading
-
+useEffect(() => {
     const storedUser = localStorage.getItem("user");
+    console.log(storedUser);
     const storedUserType = localStorage.getItem("userType");
-
+    console.log(storedUserType);
     if (storedUser && storedUserType) {
       try {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
+        setUser(JSON.parse(storedUser));
         setUserType(storedUserType);
-      } catch (e) {
+        console.log(
+          "✅ AuthContext initialized with user:",
+          JSON.parse(storedUser)
+        );
+      } catch (error) {
+        console.error("Error parsing stored user:", error);
         localStorage.removeItem("user");
         localStorage.removeItem("userType");
       }
-      setLoading(false);
-      return;
     }
-
-    // No localStorage → verify cookie
-    try {
-      const res = await axiosHeader.get("/auth/verify", {
-        withCredentials: true,
-      });
-
-      if (res.data.authenticated) {
-        const { user, userType } = res.data;
-        setUser(user);
-        setUserType(userType);
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("userType", userType);
-      }
-    } catch (err) {
-      console.log("No valid session:", err.response?.data?.message);
-      // Optional: redirect to login if you want
-      // navigate("/login");
-    } finally {
-      setLoading(false); // ALWAYS set false
-    }
-  };
-
-  loadUser();
-}, []);
+    setLoading(false);
+  }, []);
 
 
   const login = async (userData, type) => {
