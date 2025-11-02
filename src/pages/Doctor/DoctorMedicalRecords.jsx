@@ -45,14 +45,26 @@ const DoctorMedicalRecords = () => {
       console.log("Response data:", res.data); // ← Add
       console.log("Records array:", res.data?.records); // ← Add
 
-      if (!res.data?.records) {
+      if (!res.data?.records || res.data.records.length === 0) {
         console.warn("No records in response");
         setRecords([]);
         return;
       }
 
-      const allRecords = res.data.records;
-      // ... rest of your code
+      const allRecords = res.data.records.map((record) => {
+        const apptDate = new Date(record.appointment?.appointment_date);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        let _category = "archived";
+        if (apptDate >= thirtyDaysAgo) _category = "recent";
+        else _category = "older";
+
+        return { ...record, _category };
+      });
+
+      setRecords(allRecords);
+
     } catch (err) {
       console.error("Fetch error:", err); // ← Add
       console.error("Error response:", err.response?.data); // ← Add

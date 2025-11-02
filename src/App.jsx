@@ -17,7 +17,6 @@ import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import DoctorMedicalRecords from "./pages/Doctor/DoctorMedicalRecords";
-import DoctorPatients from "./pages/Doctor/DoctorPatients";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import DoctorsList from "./pages/Admin/DoctorsList";
@@ -105,16 +104,6 @@ function App() {
             <ProtectedRoute allowedUserTypes={["doctor"]}>
               <DoctorLayout>
                 <DoctorMedicalRecords />
-              </DoctorLayout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/doctor/patient"
-          element={
-            <ProtectedRoute allowedUserTypes={["doctor"]}>
-              <DoctorLayout>
-                <DoctorPatients />
               </DoctorLayout>
             </ProtectedRoute>
           }

@@ -5,7 +5,6 @@ import {
   IconHome,
   IconCalendarUser,
   IconClipboardHeart,
-  IconUserPlus,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -62,13 +61,6 @@ export default function DoctorLayout({ children }) {
       href: "/doctor/record",
       icon: (
         <IconClipboardHeart className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
-      ),
-    },
-    {
-      label: "Patients",
-      href: "/doctor/patients",
-      icon: (
-        <IconUserPlus className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
