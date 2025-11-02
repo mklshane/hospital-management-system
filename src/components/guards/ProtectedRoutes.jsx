@@ -59,7 +59,7 @@ const getDashboardPath = (userType) => {
     case "admin":
       return "/admin/dashboard";
     default:
-      return "/login"; 
+      return "/"; 
   }
 };
 
