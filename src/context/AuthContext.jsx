@@ -17,27 +17,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+  const loadUser = async () => {
     const storedUser = localStorage.getItem("user");
     const storedUserType = localStorage.getItem("userType");
-
-   
 
     if (storedUser && storedUserType) {
       try {
         setUser(JSON.parse(storedUser));
         setUserType(storedUserType);
-        console.log(
-          "✅ AuthContext initialized with user:",
-          JSON.parse(storedUser)
-        );
-      } catch (error) {
-        console.error("Error parsing stored user:", error);
+      } catch (e) {
         localStorage.removeItem("user");
         localStorage.removeItem("userType");
       }
+    } else {
+      // THIS IS THE MISSING PART
+      try {
+        const res = await axiosHeader.get("/auth/verify", {
+          withCredentials: true,
+        });
+
+        if (res.data.authenticated) {
+          const { user, userType } = res.data;
+          setUser(user);
+          setUserType(userType);
+          localStorage.setItem("user", JSON.stringify(user));
+          localStorage.setItem("userType", userType);
+        }
+      } catch (err) {
+        console.log("No session:", err.response?.data?.message);
+      }
     }
+
     setLoading(false);
-  }, []);
+  };
+
+  loadUser();
+}, []);
 
   const login = async (userData, type) => {
 
