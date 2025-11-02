@@ -33,8 +33,10 @@ const DoctorLogin = () => {
 
     try {
       const res = await api.post("/auth/doctor/login", formData);
-      console.log("✅ Doctor login successful:", res.data.user);
+
       login(res.data.user, "doctor");
+      console.log("LOGIN SUCCESFUL", res.data.user)
+
       navigate("/doctor/dashboard");
     } catch (error) {
       console.error("Login error:", error);

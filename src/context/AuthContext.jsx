@@ -48,6 +48,7 @@ useEffect(() => {
     localStorage.setItem("userType", type);
 
   };
+  
   const logout = async () => {
     try {
       await axiosHeader.post(

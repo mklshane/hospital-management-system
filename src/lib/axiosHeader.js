@@ -1,68 +1,59 @@
+// src/lib/axiosHeader.js
 import axios from "axios";
+
 
 const BASE_URL = "https://final-project-group1-webdevt-backend.onrender.com/api";
  /* "http://localhost:3000/api"; */
+
 const axiosHeader = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
-  withCredentials: true,
+  withCredentials: true, // This sends cookies (token)
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// Optional: Debug request (remove in production)
 axiosHeader.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (import.meta.env.DEV) {
+      console.log(
+        `[API Request] ${config.method?.toUpperCase()} ${config.url}`
+      );
+      console.log("Cookies sent:", document.cookie);
     }
     return config;
   },
   (error) => {
+    console.error("Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
 
+// Response interceptor with better error handling
 axiosHeader.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    const { response } = error;
+    const { response, request } = error;
 
     if (!response) {
-      console.error("Network error:", error);
+      // Network error (no response)
+      console.error("Network error:", error.message);
       return Promise.reject({
         message: "Network error. Please check your connection.",
         isNetworkError: true,
       });
     }
 
-    switch (response.status) {
-      case 401:
-        localStorage.removeItem("user");
-        localStorage.removeItem("userType");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-        break;
-
-      case 403:
-        console.error("Forbidden access");
-        break;
-
-      case 404:
-        console.error("Resource not found");
-        break;
-
-      case 500:
-        console.error("Server error occurred");
-        break;
-
-      default:
-        console.error("Request failed with status:", response.status);
+    // 401: Unauthorized (cookie missing or invalid)
+    if (response.status === 401) {
+      console.warn("401 Unauthorized - Cookie may be missing or expired.");
+      // Optional: trigger logout
+      // window.location.href = "/login";
     }
 
+    // Return clean error object
     return Promise.reject({
       message: response.data?.message || "An error occurred",
       status: response.status,
@@ -71,12 +62,22 @@ axiosHeader.interceptors.response.use(
   }
 );
 
+// API helper methods (ensures withCredentials is always true)
 export const api = {
-  get: (url, config = {}) => axiosHeader.get(url, config),
-  post: (url, data = {}, config = {}) => axiosHeader.post(url, data, config),
-  put: (url, data = {}, config = {}) => axiosHeader.put(url, data, config),
-  delete: (url, config = {}) => axiosHeader.delete(url, config),
-  patch: (url, data = {}, config = {}) => axiosHeader.patch(url, data, config),
+  get: (url, config = {}) =>
+    axiosHeader.get(url, { ...config, withCredentials: true }),
+
+  post: (url, data = {}, config = {}) =>
+    axiosHeader.post(url, data, { ...config, withCredentials: true }),
+
+  put: (url, data = {}, config = {}) =>
+    axiosHeader.put(url, data, { ...config, withCredentials: true }),
+
+  patch: (url, data = {}, config = {}) =>
+    axiosHeader.patch(url, data, { ...config, withCredentials: true }),
+
+  delete: (url, config = {}) =>
+    axiosHeader.delete(url, { ...config, withCredentials: true }),
 };
 
 export default axiosHeader;
