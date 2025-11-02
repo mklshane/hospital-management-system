@@ -16,40 +16,50 @@ export const AuthProvider = ({ children }) => {
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+ useEffect(() => {
   const loadUser = async () => {
+    setLoading(true); // Start loading
+
     const storedUser = localStorage.getItem("user");
     const storedUserType = localStorage.getItem("userType");
 
     if (storedUser && storedUserType) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
         setUserType(storedUserType);
       } catch (e) {
         localStorage.removeItem("user");
         localStorage.removeItem("userType");
       }
-    } else {
-      // THIS IS THE MISSING PART
-      try {
-        const res = await axiosHeader.get("/auth/verify", {
-          withCredentials: true,
-        });
-
-        if (res.data.authenticated) {
-          const { user, userType } = res.data;
-          setUser(user);
-          setUserType(userType);
-          localStorage.setItem("user", JSON.stringify(user));
-          localStorage.setItem("userType", userType);
-        }
-      } catch (err) {
-        console.log("No session:", err.response?.data?.message);
-      }
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    // No localStorage → verify cookie
+    try {
+      const res = await axiosHeader.get("/auth/verify", {
+        withCredentials: true,
+      });
+
+      if (res.data.authenticated) {
+        const { user, userType } = res.data;
+        setUser(user);
+        setUserType(userType);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("userType", userType);
+      }
+    } catch (err) {
+      console.log("No valid session:", err.response?.data?.message);
+      // Optional: redirect to login if you want
+      // navigate("/login");
+    } finally {
+      setLoading(false); // ALWAYS set false
+    }
   };
+
+  loadUser();
+}, []);
 
   loadUser();
 }, []);
