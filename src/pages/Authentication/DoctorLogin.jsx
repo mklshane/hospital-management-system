@@ -83,8 +83,10 @@ const DoctorLogin = () => {
           </div>
 
           {/* Right Section */}
-          <div className="p-10 w-[100%] mx-auto border-2 rounded-2xl">
-            <h2 className="text-2xl font-semibold mb-1">Doctor Login</h2>
+          <div className="p-10 w-[100%] mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
+            <h2 className="text-2xl font-semibold mb-1 text-black">
+              Doctor Login
+            </h2>
             <p className="text-gray-600 mb-6 text-sm">
               Access your patients' medical records, appointments, and hospital
               services securely.
@@ -110,7 +112,7 @@ const DoctorLogin = () => {
                     value={formData.email}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
 
@@ -127,7 +129,7 @@ const DoctorLogin = () => {
                       value={formData.password}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                      className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                     />
                     <button
                       type="button"
@@ -156,21 +158,21 @@ const DoctorLogin = () => {
 
             {/* Divider */}
             <div className="flex items-center my-6">
-              <div className="flex-grow border-t"></div>
+              <div className="flex-grow border-t border-[#cecececa]"></div>
               <span className="px-4 text-sm text-gray-500">or login as</span>
-              <div className="flex-grow border-t"></div>
+              <div className="flex-grow border-t border-[#cecececa]"></div>
             </div>
 
             {/* Admin / Doctor Buttons */}
             <div className="flex gap-3">
               <button
-                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
                 onClick={() => navigate("/admin/login")}
               >
                 Admin
               </button>
               <button
-                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
+                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
                 onClick={() => navigate("/login")}
               >
                 Patient

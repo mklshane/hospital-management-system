@@ -110,8 +110,8 @@ const SignUp = () => {
             </div>
           </div>
 
-          <div className="p-8 w-full border-2 rounded-2xl">
-            <h2 className="text-2xl font-semibold mb-1"> Sign Up</h2>
+          <div className="p-8 w-full border-2 border-[#e7e7e7f0] rounded-2xl">
+            <h2 className="text-2xl font-semibold mb-1 text-black"> Sign Up</h2>
             <p className="text-gray-600 mb-6 text-sm">
               Create your account to access medical records, appointments, and
               hospital services securely.
@@ -138,7 +138,7 @@ const SignUp = () => {
                     value={formData.name}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
 
@@ -155,7 +155,7 @@ const SignUp = () => {
                     value={formData.email}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
 
@@ -175,7 +175,7 @@ const SignUp = () => {
                       value={formData.age}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                       onKeyPress={(e) => {
                         if (!/[0-9]/.test(e.key)) {
                           e.preventDefault();
@@ -193,7 +193,7 @@ const SignUp = () => {
                       required
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                      className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     >
                       <option value="">Select Gender</option>
                       <option value="male">Male</option>
@@ -219,7 +219,7 @@ const SignUp = () => {
                     value={formData.contact}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
 
@@ -236,7 +236,7 @@ const SignUp = () => {
                     onChange={handleChange}
                     disabled={loading}
                     rows={3}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg max-h-18 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
+                    className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg max-h-18 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
                   />
                 </div>
 
@@ -254,7 +254,7 @@ const SignUp = () => {
                       value={formData.password}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                      className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                     />
                     <button
                       type="button"
@@ -285,7 +285,7 @@ const SignUp = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                      className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                     />
                     <button
                       type="button"
