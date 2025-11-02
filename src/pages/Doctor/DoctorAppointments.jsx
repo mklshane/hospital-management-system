@@ -95,11 +95,25 @@ const DoctorAppointments = () => {
 
   // Toggle sort for a column
   const toggleSort = (column) => {
-    setSortOrders((prev) => ({
-      ...prev,
-      [column]: prev[column] === "desc" ? "asc" : "desc",
-    }));
+    setSortOrders((prev) => {
+      const newOrder = prev[column] === "desc" ? "asc" : "desc";
+      const updated = { ...prev, [column]: newOrder };
+
+      // Sort the actual appointments state immediately to trigger re-render
+      setAppointments((prevAppointments) => {
+        const sorted = [...prevAppointments].sort((a, b) => {
+          const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
+          const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
+          if (newOrder === "asc") return dateA - dateB;
+          return dateB - dateA;
+        });
+        return sorted;
+      });
+
+      return updated;
+    });
   };
+
 
   // Filtered + Searched + Sorted Appointments
   const filteredAppointments = useMemo(() => {
