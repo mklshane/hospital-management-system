@@ -33,8 +33,7 @@ const DoctorLogin = () => {
 
     try {
       const res = await api.post("/auth/doctor/login", formData);
-      await login(res.data.user, "doctor");
-
+      login(res.data.user, "doctor");
       navigate("/doctor/dashboard");
     } catch (error) {
       console.error("Login error:", error);
