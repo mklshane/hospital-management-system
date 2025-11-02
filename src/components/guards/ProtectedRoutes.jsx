@@ -41,16 +41,12 @@ export const PublicRoute = ({ children, restrictedTo }) => {
   }
 
   if (isAuthenticated()) {
-    const redirectPath = getDashboardPath(userType);
-    return <Navigate to={redirectPath} replace />;
-  }
+  const redirectPath = getDashboardPath(userType);
+  return <Navigate to={redirectPath} replace />;
+}
 
-  // Restrict public route to specific user types if specified
-  if (restrictedTo && userType && !restrictedTo.includes(userType)) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
+// Do NOT redirect if login failed or userType is null
+return children;
 };
 
 // Helper function to determine dashboard path based on userType
