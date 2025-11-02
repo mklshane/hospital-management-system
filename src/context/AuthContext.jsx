@@ -61,8 +61,6 @@ export const AuthProvider = ({ children }) => {
   loadUser();
 }, []);
 
-  loadUser();
-}, []);
 
   const login = async (userData, type) => {
 
