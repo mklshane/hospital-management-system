@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
     const storedUser = localStorage.getItem("user");
     console.log(storedUser);
     const storedUserType = localStorage.getItem("userType");
@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
 
   const login = async (userData, type) => {
 

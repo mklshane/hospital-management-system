@@ -1,8 +1,9 @@
 // src/lib/axiosHeader.js
 import axios from "axios";
 
-// Use environment variable or fallback
-const BASE_URL = "http://localhost:3000/api";
+
+const BASE_URL = "https://final-project-group1-webdevt-backend.onrender.com/api";
+ /* "http://localhost:3000/api"; */
 
 const axiosHeader = axios.create({
   baseURL: BASE_URL,
