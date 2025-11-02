@@ -1,82 +1,51 @@
-// src/lib/axiosHeader.js
 import axios from "axios";
 
-// Use environment variable or fallback
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
 const axiosHeader = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
-  withCredentials: true, // This sends cookies (token)
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Optional: Debug request (remove in production)
+// Add token to every request
 axiosHeader.interceptors.request.use(
   (config) => {
-    if (import.meta.env.DEV) {
-      console.log(
-        `[API Request] ${config.method?.toUpperCase()} ${config.url}`
-      );
-      console.log("Cookies sent:", document.cookie);
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    console.error("Request interceptor error:", error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor with better error handling
+// Handle 401 → auto logout
 axiosHeader.interceptors.response.use(
   (response) => response,
   (error) => {
-    const { response, request } = error;
-
-    if (!response) {
-      // Network error (no response)
-      console.error("Network error:", error.message);
-      return Promise.reject({
-        message: "Network error. Please check your connection.",
-        isNetworkError: true,
-      });
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("userType");
+      window.location.href = "/login";
     }
-
-    // 401: Unauthorized (cookie missing or invalid)
-    if (response.status === 401) {
-      console.warn("401 Unauthorized - Cookie may be missing or expired.");
-      // Optional: trigger logout
-      // window.location.href = "/login";
-    }
-
-    // Return clean error object
     return Promise.reject({
-      message: response.data?.message || "An error occurred",
-      status: response.status,
-      data: response.data,
+      message: error.response?.data?.message || "An error occurred",
+      status: error.response?.status,
     });
   }
 );
 
-// API helper methods (ensures withCredentials is always true)
 export const api = {
-  get: (url, config = {}) =>
-    axiosHeader.get(url, { ...config, withCredentials: true }),
-
-  post: (url, data = {}, config = {}) =>
-    axiosHeader.post(url, data, { ...config, withCredentials: true }),
-
-  put: (url, data = {}, config = {}) =>
-    axiosHeader.put(url, data, { ...config, withCredentials: true }),
-
-  patch: (url, data = {}, config = {}) =>
-    axiosHeader.patch(url, data, { ...config, withCredentials: true }),
-
-  delete: (url, config = {}) =>
-    axiosHeader.delete(url, { ...config, withCredentials: true }),
+  get: (url, config = {}) => axiosHeader.get(url, config),
+  post: (url, data = {}, config = {}) => axiosHeader.post(url, data, config),
+  put: (url, data = {}, config = {}) => axiosHeader.put(url, data, config),
+  patch: (url, data = {}, config = {}) => axiosHeader.patch(url, data, config),
+  delete: (url, config = {}) => axiosHeader.delete(url, config),
 };
 
 export default axiosHeader;

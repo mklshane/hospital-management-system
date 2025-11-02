@@ -36,13 +36,9 @@ const SignUp = () => {
     if (error) setError("");
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,26 +61,26 @@ const SignUp = () => {
     try {
       const { confirmPassword, ...submitData } = formData;
 
-      const res = await api.post("/auth/patient/register", submitData);
+      // 1. Register
+      await api.post("/auth/patient/register", submitData);
 
+      // 2. Auto-login
       const loginRes = await api.post("/auth/patient/login", {
         email: formData.email,
         password: formData.password,
       });
 
-      await login(loginRes.data.user, "patient");
+      const { user, token } = loginRes.data;
+
+      // 3. Save to context + localStorage
+      login(user, "patient", token);
+
       navigate("/dashboard");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         "Registration failed. Please try again.";
       setError(errorMessage);
-
-      if (error.isNetworkError) {
-        setError(
-          "Unable to connect to server. Please check your internet connection."
-        );
-      }
     } finally {
       setLoading(false);
     }
@@ -111,7 +107,7 @@ const SignUp = () => {
           </div>
 
           <div className="p-8 w-full border-2 border-[#e7e7e7f0] rounded-2xl">
-            <h2 className="text-2xl font-semibold mb-1 text-black"> Sign Up</h2>
+            <h2 className="text-2xl font-semibold mb-1 text-black">Sign Up</h2>
             <p className="text-gray-600 mb-6 text-sm">
               Create your account to access medical records, appointments, and
               hospital services securely.
@@ -125,7 +121,6 @@ const SignUp = () => {
               )}
 
               <div className="space-y-3">
-                {/* Name Field */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">
                     Full Name *
@@ -142,7 +137,6 @@ const SignUp = () => {
                   />
                 </div>
 
-                {/* Email Field */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">
                     Email Address *
@@ -159,7 +153,6 @@ const SignUp = () => {
                   />
                 </div>
 
-                {/* Age and Gender Row */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700">
@@ -176,11 +169,9 @@ const SignUp = () => {
                       onChange={handleChange}
                       disabled={loading}
                       className="text-black w-full mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                      onKeyPress={(e) => {
-                        if (!/[0-9]/.test(e.key)) {
-                          e.preventDefault();
-                        }
-                      }}
+                      onKeyPress={(e) =>
+                        !/[0-9]/.test(e.key) && e.preventDefault()
+                      }
                     />
                   </div>
                   <div>
@@ -206,7 +197,6 @@ const SignUp = () => {
                   </div>
                 </div>
 
-                {/* Contact Field */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">
                     Contact Number *
@@ -223,7 +213,6 @@ const SignUp = () => {
                   />
                 </div>
 
-                {/* Address Field */}
                 <div>
                   <label className="text-sm font-medium text-gray-700">
                     Address *
@@ -240,7 +229,6 @@ const SignUp = () => {
                   />
                 </div>
 
-                {/* Password Field */}
                 <div className="relative">
                   <label className="text-sm font-medium text-gray-700">
                     Password *
@@ -271,7 +259,6 @@ const SignUp = () => {
                   </div>
                 </div>
 
-                {/* Confirm Password Field */}
                 <div className="relative">
                   <label className="text-sm font-medium text-gray-700">
                     Confirm Password *
@@ -312,7 +299,6 @@ const SignUp = () => {
               </button>
             </form>
 
-            {/* Login Link */}
             <p className="text-center text-sm text-gray-600 mt-6">
               Already have an account?{" "}
               <Link to="/login" className="text-indigo-600">
