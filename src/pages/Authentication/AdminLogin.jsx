@@ -44,7 +44,7 @@ const AdminLogin = () => {
         <AuthNav />
       </div>
       <div className="flex flex-1 items-center justify-center py-8 px-4 mt-5">
-        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50">
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50 gap-4">
           <div className="hidden lg:flex items-start justify-center p-10 relative rounded-2xl bg-gradient-to-br from-blue-400 via-blue-700 to-blue-200">
             <div className="text-white max-w-sm z-10">
               <h2 className="text-lg">Welcome, Admin!</h2>
