@@ -407,7 +407,51 @@ const DoctorAppointments = () => {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                {/* NEW: Additional Patient Details */}
+                <div className="grid grid-cols-2 gap-3 text-sm mt-4">
+                  {selectedAppointment.patient?.age && (
+                    <div>
+                      <span className="text-muted-foreground">Age:</span>
+                      <span className="ml-2 text-foreground font-medium">
+                        {selectedAppointment.patient.age}
+                      </span>
+                    </div>
+                  )}
+                  {selectedAppointment.patient?.gender && (
+                    <div>
+                      <span className="text-muted-foreground">Gender:</span>
+                      <span className="ml-2 text-foreground font-medium capitalize">
+                        {selectedAppointment.patient.gender}
+                      </span>
+                    </div>
+                  )}
+                  {selectedAppointment.patient?.contact && (
+                    <div>
+                      <span className="text-muted-foreground">Contact:</span>
+                      <span className="ml-2 text-foreground font-medium">
+                        {selectedAppointment.patient.contact}
+                      </span>
+                    </div>
+                  )}
+                  {selectedAppointment.patient?.email && (
+                    <div>
+                      <span className="text-muted-foreground">Email:</span>
+                      <span className="ml-2 text-foreground font-medium">
+                        {selectedAppointment.patient.email}
+                      </span>
+                    </div>
+                  )}
+                  {selectedAppointment.patient?.address && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Address:</span>
+                      <span className="ml-2 text-foreground font-medium block">
+                        {selectedAppointment.patient.address}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3 mt-4">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">
                       <Calendar className="w-4 h-4" />
