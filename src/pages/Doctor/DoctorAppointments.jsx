@@ -8,6 +8,9 @@ import {
   Clock,
   X,
   Check,
+  CheckCircle,
+  XCircle,
+  FileText,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/Doctor/AppointmentCard";
@@ -365,204 +368,245 @@ const DoctorAppointments = () => {
         </div>
 
         {/* RIGHT SECTION - DETAILS */}
-        <div className="col-span-3 bg-ui-card rounded-2xl p-8 flex flex-col overflow-y-auto p-6">
-          <h2 className="text-xl font-bold font-montserrat text-foreground mb-6">
-            Appointment Details
-          </h2>
+        <div className="col-span-3 bg-ui-card rounded-2xl p-6 flex flex-col h-full overflow-hidden">
+          {/* Fixed header */}
+          <header className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-bold font-montserrat text-foreground">
+              Appointment Details
+            </h2>
+          </header>
 
-          {!selectedAppointment ? (
-            <p className="text-muted-foreground">
-              Select an appointment to view details.
-            </p>
-          ) : (
-            <>
-              {/* Patient Info */}
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-blue flex items-center justify-center text-lg font-semibold text-background">
-                    {selectedAppointment.patient?.name
-                      ?.split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-foreground">
-                      {selectedAppointment.patient?.name}
-                    </h3>
-                    <div
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        selectedAppointment.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                          : selectedAppointment.status === "Scheduled"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                          : selectedAppointment.status === "Completed"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                          : selectedAppointment.status === "Cancelled"
-                          ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                          : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                      }`}
-                    >
-                      ● {selectedAppointment.status}
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto pr-2">
+            {!selectedAppointment ? (
+              <p className="text-center text-muted-foreground mt-8">
+                Select an appointment to view details.
+              </p>
+            ) : (
+              <>
+                {/* ── PATIENT CARD ── */}
+                <section className="bg-ui-muted/30 rounded-xl p-3">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-blue flex items-center justify-center text-lg font-semibold text-background">
+                      {selectedAppointment.patient?.name
+                        ?.split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </div>
-                  </div>
-                </div>
 
-                {/* NEW: Additional Patient Details */}
-                <div className="grid grid-cols-2 gap-3 text-sm mt-4">
-                  {selectedAppointment.patient?.age && (
-                    <div>
-                      <span className="text-muted-foreground">Age:</span>
-                      <span className="ml-2 text-foreground font-medium">
-                        {selectedAppointment.patient.age}
-                      </span>
-                    </div>
-                  )}
-                  {selectedAppointment.patient?.gender && (
-                    <div>
-                      <span className="text-muted-foreground">Gender:</span>
-                      <span className="ml-2 text-foreground font-medium capitalize">
-                        {selectedAppointment.patient.gender}
-                      </span>
-                    </div>
-                  )}
-                  {selectedAppointment.patient?.contact && (
-                    <div>
-                      <span className="text-muted-foreground">Contact:</span>
-                      <span className="ml-2 text-foreground font-medium">
-                        {selectedAppointment.patient.contact}
-                      </span>
-                    </div>
-                  )}
-                  {selectedAppointment.patient?.email && (
-                    <div>
-                      <span className="text-muted-foreground">Email:</span>
-                      <span className="ml-2 text-foreground font-medium">
-                        {selectedAppointment.patient.email}
-                      </span>
-                    </div>
-                  )}
-                  {selectedAppointment.patient?.address && (
-                    <div className="col-span-2">
-                      <span className="text-muted-foreground">Address:</span>
-                      <span className="ml-2 text-foreground font-medium block">
-                        {selectedAppointment.patient.address}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground">
+                        {selectedAppointment.patient?.name}
+                      </h3>
 
-                <div className="space-y-3 mt-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                    </span>
-                    <span className="text-foreground">
-                      {formatDate(selectedAppointment.appointment_date)}
-                    </span>
+                      <div
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          selectedAppointment.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                            : selectedAppointment.status === "Scheduled"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                            : selectedAppointment.status === "Completed"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            : selectedAppointment.status === "Cancelled"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                            : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                        }`}
+                      >
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
+                        {selectedAppointment.status}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                    </span>
-                    <span className="text-foreground">
-                      {selectedAppointment.appointment_time}
-                    </span>
-                  </div>
-                </div>
-              </div>
 
-              {/* Notes */}
-              <div className="border-ui-border mb-6">
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground mb-2">
-                    Patient Notes
+                  {/* Patient meta grid */}
+                  <dl className="grid grid-cols-[1fr_2fr] gap-x-2 gap-y-2 text-sm">
+                    {selectedAppointment.patient?.age && (
+                      <>
+                        <dt className="text-muted-foreground">Age</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedAppointment.patient.age}
+                        </dd>
+                      </>
+                    )}
+                    {selectedAppointment.patient?.gender && (
+                      <>
+                        <dt className="text-muted-foreground">Gender</dt>
+                        <dd className="font-medium text-foreground capitalize">
+                          {selectedAppointment.patient.gender}
+                        </dd>
+                      </>
+                    )}
+                    {selectedAppointment.patient?.contact && (
+                      <>
+                        <dt className="text-muted-foreground">Phone</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedAppointment.patient.contact}
+                        </dd>
+                      </>
+                    )}
+                    {selectedAppointment.patient?.email && (
+                      <>
+                        <dt className="text-muted-foreground">Email</dt>
+                        <dd className="font-medium text-foreground break-all">
+                          {selectedAppointment.patient.email}
+                        </dd>
+                      </>
+                    )}
+                    {selectedAppointment.patient?.address && (
+                      <>
+                        <dt className="text-muted-foreground">Address</dt>
+                        <dd className="font-medium text-foreground">
+                          {selectedAppointment.patient.address}
+                        </dd>
+                      </>
+                    )}
+                  </dl>
+                </section>
+
+                {/* ── SCHEDULE ── */}
+                <section className="mb-6">
+                  <h4 className="font-semibold text-foreground mb-3">
+                    Schedule
                   </h4>
-                  <div className="bg-ui-muted rounded-lg p-3">
-                    <p className="text-sm text-foreground">
-                      {selectedAppointment.notes || "No notes provided."}
-                    </p>
+
+                  {/* Compact meta + notes */}
+                  <div className="bg-ui-muted rounded-lg p-4 space-y-3 text-sm mb-2">
+                    {/* Meta */}
+                    <dl className="grid grid-cols-2 gap-x-4 gap-y-1">
+                      <dt className="text-muted-foreground">ID</dt>
+                      <dd className="font-mono font-medium text-foreground">
+                        {selectedAppointment._id.slice(-6).toUpperCase()}
+                      </dd>
+
+                      <dt className="text-muted-foreground">Created</dt>
+                      <dd className="font-medium text-foreground">
+                        {formatDate(selectedAppointment.createdAt, "PPp")}
+                      </dd>
+                    </dl>
+
+                    {/* Notes */}
+                    <div>
+                      <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">
+                        Patient Notes
+                      </p>
+                      <p className="text-foreground">
+                        {selectedAppointment.notes || (
+                          <span className="italic text-muted-foreground">
+                            No notes provided.
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                      
+                  {/* Highlighted Date/Time Card */}
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl p-4 mb-4 border border-blue-200 dark:border-blue-800">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Date */}
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-600 rounded-lg text-white">
+                          <Calendar className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                            Date
+                          </p>
+                          <p className="text-lg font-bold text-foreground">
+                            {formatDate(selectedAppointment.appointment_date, "PPP")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Time */}
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-600 rounded-lg text-white">
+                          <Clock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                            Time
+                          </p>
+                          <p className="text-lg font-bold text-foreground">
+                            {selectedAppointment.appointment_time}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* ── ACTION BAR (sticky) ── */}
+                <div className="sticky bottom-0 bg-ui-card pt-4 -mx-6 px-6 pb-6">
+                  <div className="space-y-2">
+                    {/* PENDING */}
+                    {selectedAppointment.status === "Pending" && (
+                      <>
+                        <button
+                          onClick={() =>
+                            updateStatus(selectedAppointment._id, "Scheduled")
+                          }
+                          className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Accept Appointment
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            updateStatus(selectedAppointment._id, "Rejected")
+                          }
+                          className="w-full border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Reject Appointment
+                        </button>
+                      </>
+                    )}
+
+                    {/* SCHEDULED */}
+                    {selectedAppointment.status === "Scheduled" && (
+                      <>
+                        <button
+                          onClick={() => setIsRecordModalOpen(true)}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Add Medical Record
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            updateStatus(selectedAppointment._id, "Completed")
+                          }
+                          className="w-full border border-green-300 text-green-600 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Mark as Completed
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
+              </>
+            )}
+          </div>
 
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Appointment ID:
-                    </span>
-                    <span className="text-foreground font-medium">
-                      {selectedAppointment._id.slice(-6).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Created:</span>
-                    <span className="text-foreground">
-                      {formatDate(selectedAppointment.createdAt)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                {selectedAppointment.status === "Pending" && (
-                  <>
-                    <button
-                      onClick={() =>
-                        updateStatus(selectedAppointment._id, "Scheduled")
-                      }
-                      className="w-full bg-blue hover:bg-blue-dark text-white py-3 rounded-lg font-semibold transition-colors"
-                    >
-                      Accept Appointment
-                    </button>
-                    <button
-                      onClick={() =>
-                        updateStatus(selectedAppointment._id, "Rejected")
-                      }
-                      className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-3 rounded-lg font-semibold transition-colors dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
-                    >
-                      Reject Appointment
-                    </button>
-                  </>
-                )}
-
-                {selectedAppointment.status === "Scheduled" && (
-                  <>
-                    <button
-                      onClick={() => setIsRecordModalOpen(true)}
-                      className="w-full bg-blue hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition-colors"
-                    >
-                      Add Medical Record
-                    </button>
-                    <button
-                      onClick={() =>
-                        updateStatus(selectedAppointment._id, "Completed")
-                      }
-                      className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-3 rounded-lg font-semibold transition-colors dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
-                    >
-                      Complete Appointment
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Medical Record Modal */}
-              <MedicalRecordModal
-                isOpen={isRecordModalOpen}
-                onClose={() => setIsRecordModalOpen(false)}
-                appointment={{
-                  _id: selectedAppointment._id,
-                  patientName: selectedAppointment.patient?.name,
-                  date: formatDate(selectedAppointment.appointment_date),
-                  time: selectedAppointment.appointment_time,
-                  notes: selectedAppointment.notes,
-                }}
-                onRecordAdded={() => {
-                  fetchAppointments();
-                  setSelectedAppointment(null);
-                }}
-              />
-            </>
-          )}
+          {/* Medical Record Modal (unchanged) */}
+          <MedicalRecordModal
+            isOpen={isRecordModalOpen}
+            onClose={() => setIsRecordModalOpen(false)}
+            appointment={{
+              _id: selectedAppointment?._id,
+              patientName: selectedAppointment?.patient?.name,
+              date: formatDate(selectedAppointment?.appointment_date),
+              time: selectedAppointment?.appointment_time,
+              notes: selectedAppointment?.notes,
+            }}
+            onRecordAdded={() => {
+              fetchAppointments();
+              setSelectedAppointment(null);
+            }}
+          />
         </div>
       </div>
     </div>
