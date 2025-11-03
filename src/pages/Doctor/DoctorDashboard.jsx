@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { RefreshCw, Search, Clock, AlertCircle, CheckCircle2, Users, TrendingUp } from "lucide-react";
+import { RefreshCw, Search, Clock, AlertCircle, CheckCircle2, Users } from "lucide-react";
 import {
   format,
   startOfMonth,
