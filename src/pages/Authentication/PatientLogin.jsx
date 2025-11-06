@@ -57,7 +57,7 @@ const PatientLogin = () => {
 
       {/* Content */}
       <div className="flex flex-1 items-center justify-center py-8 px-4 mt-5">
-        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50">
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50 gap-4">
           {/* Left Section */}
           <div className="hidden lg:flex items-start justify-center p-10 relative rounded-2xl bg-gradient-to-br from-blue-800 via-blue-600 to-blue-400">
             <div className="text-white max-w-sm z-10 mt-8">
@@ -137,7 +137,7 @@ const PatientLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
+                className="w-full mt-5 py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
               >
                 {loading ? "Signing in..." : "Login"}
               </button>
@@ -150,14 +150,9 @@ const PatientLogin = () => {
               <div className="flex-grow border-t border-[#cecececa]"></div>
             </div>
 
-            {/* Admin / Doctor Buttons */}
+            {/* Doctor Button */}
             <div className="flex gap-3">
-              <button
-                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                onClick={() => navigate("/admin/login")}
-              >
-                Admin
-              </button>
+              
               <button
                 className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
                 onClick={() => navigate("/doctor/login")}
