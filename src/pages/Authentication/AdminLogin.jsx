@@ -58,7 +58,7 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          <div className="p-10 w-full mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
+          <div className="p-10 py-22 w-full mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
             <h2 className="text-2xl font-semibold mb-1 text-black">
               Admin Login
             </h2>
@@ -89,63 +89,44 @@ const AdminLogin = () => {
                 />
               </div>
 
-              <div className="relative">
+              <div>
                 <label className="text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <input
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  placeholder="********"
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={loading}
-                  className="w-full text-black mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center mt-1"
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <Eye className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <EyeOff className="h-5 w-5 text-gray-500" />
-                  )}
-                </button>
+                <div className="relative">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="********"
+                    value={formData.password}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="w-full text-black mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    disabled={loading}
+                  >
+                    {showPassword ? (
+                      <Eye className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <EyeOff className="h-5 w-5 text-gray-500" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
+                className="w-full mt-5 py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
               >
                 {loading ? "Signing in..." : "Login"}
               </button>
             </form>
-
-            <div className="flex items-center my-6">
-              <div className="flex-grow border-t border-[#cecececa]"></div>
-              <span className="px-4 text-sm text-gray-500">or login as</span>
-              <div className="flex-grow border-t border-[#cecececa]"></div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                onClick={() => navigate("/doctor/login")}
-              >
-                Doctor
-              </button>
-              <button
-                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                onClick={() => navigate("/login")}
-              >
-                Patient
-              </button>
-            </div>
           </div>
         </div>
       </div>

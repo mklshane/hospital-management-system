@@ -55,7 +55,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/login"
+          path="/ops-hub/signin"
           element={
             <PublicRoute restrictedTo={["admin"]}>
               <AdminLogin />
@@ -139,7 +139,6 @@ function App() {
           <Route path="doctors" element={<DoctorsList />} />
           <Route path="patients" element={<PatientsList />} />
           <Route path="appointments" element={<AppointmentsList />} />
-      
         </Route>
 
         {/* Common Routes */}

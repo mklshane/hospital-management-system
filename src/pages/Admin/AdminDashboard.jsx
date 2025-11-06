@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
 import { api } from "@/lib/axiosHeader";
 
-const LOGS_HEIGHT = "calc(100vh - 50px)";
+const LOGS_HEIGHT = "calc(100vh - 80px)";
 
 const AdminDashboard = () => {
   const [pendingAppointments, setPendingAppointments] = useState([]);
@@ -130,7 +130,7 @@ const AdminDashboard = () => {
 
     const currentNode = logsEndRef.current;
     if (currentNode) {
-  observer.observe(currentNode);
+      observer.observe(currentNode);
     }
 
     return () => {
@@ -170,85 +170,91 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div>
-      <div className="min-h-screen flex flex-col transition-colors duration-300">
-        <main className="flex-1 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6 px-0 lg:px-2">
-          {/* LEFT COLUMN */}
-          <section
-            className="lg:col-span-3 grid grid-rows-[auto_auto_1fr] gap-6 min-h-0"
-            style={{ height: LOGS_HEIGHT }}
-          >
-            {/* Header */}
-            <header className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl p-6 flex justify-between items-center shadow-md">
-              <div>
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-                <p className="text-sm opacity-80">Hospital Management System</p>
-              </div>
-              <ThemeToggle />
-            </header>
+    <div className="min-h-screen flex flex-col transition-colors duration-300">
+      <main className="flex-1 py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 px-2 sm:px-4">
+        {/* LEFT COLUMN */}
+        <section
+          className="lg:col-span-3 grid grid-rows-[auto_auto_1fr] gap-4 sm:gap-6 min-h-0"
+          style={{ height: LOGS_HEIGHT }}
+        >
+          {/* Header */}
+          <header className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl p-4 sm:p-6 flex justify-between items-center shadow-md">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold">Admin Dashboard</h1>
+              <p className="text-xs sm:text-sm opacity-80">
+                Hospital Management System
+              </p>
+            </div>
+            <ThemeToggle />
+          </header>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:gap-6 lg:grid-cols-3">
-              <div
-                onClick={() => navigate("/admin/doctors")}
-                className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-xl shadow hover:opacity-90 transition"
-              >
-                <h3 className="text-lg font-semibold">Total Doctors</h3>
-                <p className="text-3xl font-bold mt-2">
-                  {loading.stats ? "..." : stats.totalDoctors}
-                </p>
-              </div>
-
-              <div
-                onClick={() => navigate("/admin/patients")}
-                className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-xl shadow hover:opacity-90 transition"
-              >
-                <h3 className="text-lg font-semibold">Total Patients</h3>
-                <p className="text-3xl font-bold mt-2">
-                  {loading.stats ? "..." : stats.totalPatients}
-                </p>
-              </div>
-
-              <div
-                onClick={() => navigate("/admin/appointments")}
-                className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-xl shadow hover:opacity-90 transition"
-              >
-                <h3 className economic="text-lg font-semibold">
-                  Appointments for Today
-                </h3>
-                <p className="text-3xl font-bold mt-2">
-                  {loading.stats ? "..." : stats.todayAppointments}
-                </p>
-              </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-3">
+            <div
+              onClick={() => navigate("/admin/doctors")}
+              className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 text-white p-4 sm:p-6 rounded-xl shadow hover:opacity-90 transition"
+            >
+              <h3 className="text-base sm:text-lg font-semibold">
+                Total Doctors
+              </h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2">
+                {loading.stats ? "..." : stats.totalDoctors}
+              </p>
             </div>
 
-            {/* Bottom Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full min-h-0">
-              {/* Appointment Requests */}
-              <div className="lg:col-span-2 px-6 py-4 rounded-xl shadow border bg-card flex flex-col min-h-0">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">
-                    Appointment Requests
-                  </h2>
-                  <button
-                    onClick={() => navigate("/admin/appointments")}
-                    className="text-blue-600 text-sm font-semibold hover:underline"
-                  >
-                    See All
-                  </button>
-                </div>
+            <div
+              onClick={() => navigate("/admin/patients")}
+              className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 text-white p-4 sm:p-6 rounded-xl shadow hover:opacity-90 transition"
+            >
+              <h3 className="text-base sm:text-lg font-semibold">
+                Total Patients
+              </h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2">
+                {loading.stats ? "..." : stats.totalPatients}
+              </p>
+            </div>
 
-                <div className="flex-1 overflow-auto">
-                  {loading.appointments ? (
-                    <div className="flex h-full items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
-                    </div>
-                  ) : pendingAppointments.length === 0 ? (
-                    <p className="text-center py-8 text-muted-foreground">
-                      No pending appointment requests
-                    </p>
-                  ) : (
-                    <table className="w-full text-left text-sm">
+            <div
+              onClick={() => navigate("/admin/appointments")}
+              className="cursor-pointer bg-gradient-to-r from-blue-400 to-blue-500 text-white p-4 sm:p-6 rounded-xl shadow hover:opacity-90 transition"
+            >
+              <h3 className="text-base sm:text-lg font-semibold">
+                Appointments for Today
+              </h3>
+              <p className="text-2xl sm:text-3xl font-bold mt-2">
+                {loading.stats ? "..." : stats.todayAppointments}
+              </p>
+            </div>
+          </div>
+
+          {/* Bottom Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-3 h-full min-h-0">
+            {/* Appointment Requests */}
+            <div className="lg:col-span-2 p-4 sm:p-6 rounded-xl shadow border bg-card flex flex-col min-h-0">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  Appointment Requests
+                </h2>
+                <button
+                  onClick={() => navigate("/admin/appointments")}
+                  className="text-blue-600 text-sm font-semibold hover:underline"
+                >
+                  See All
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                {loading.appointments ? (
+                  <div className="flex h-full items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+                  </div>
+                ) : pendingAppointments.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground">
+                    No pending appointment requests
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm min-w-[500px]">
                       <thead>
                         <tr className="border-b border-border text-muted-foreground">
                           <th className="p-2">Patient Name</th>
@@ -283,33 +289,37 @@ const AdminDashboard = () => {
                         ))}
                       </tbody>
                     </table>
-                  )}
-                </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Recent Patients */}
+            <div className="p-4 sm:p-6 rounded-xl shadow border bg-card flex flex-col min-h-0">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  Recent Patients
+                </h2>
+                <button
+                  onClick={() => navigate("/admin/patients")}
+                  className="text-blue-600 text-sm font-semibold hover:underline"
+                >
+                  See All
+                </button>
               </div>
 
-              {/* Recent Patients */}
-              <div className="p-4 rounded-xl shadow border bg-card flex flex-col min-h-0">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">Recent Patients</h2>
-                  <button
-                    onClick={() => navigate("/admin/patients")}
-                    className="text-blue-600 text-sm font-semibold hover:underline"
-                  >
-                    See All
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-auto">
-                  {loading.patients ? (
-                    <div className="flex h-full items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
-                    </div>
-                  ) : recentPatients.length === 0 ? (
-                    <p className="text-center py-8 text-muted-foreground">
-                      No recent patients
-                    </p>
-                  ) : (
-                    <table className="w-full text-left text-sm">
+              <div className="flex-1 overflow-auto">
+                {loading.patients ? (
+                  <div className="flex h-full items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+                  </div>
+                ) : recentPatients.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground">
+                    No recent patients
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm min-w-[300px]">
                       <thead>
                         <tr className="border-b border-border text-muted-foreground">
                           <th className="p-2">Name</th>
@@ -330,57 +340,59 @@ const AdminDashboard = () => {
                         ))}
                       </tbody>
                     </table>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* RIGHT COLUMN – SYSTEM LOGS */}
-          <aside className="lg:col-span-1">
-            <div
-              className="rounded-xl shadow p-6 bg-card flex flex-col"
-              style={{ height: LOGS_HEIGHT }}
-            >
-              <h2 className="text-xl font-semibold mb-4">System Logs</h2>
-
-              <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                {logs.length === 0 && !loading.logs ? (
-                  <p className="text-center text-muted-foreground">
-                    No logs yet.
-                  </p>
-                ) : (
-                  <>
-                    {logs.map((log) => (
-                      <div
-                        key={log._id}
-                        className="border-l-4 border-blue-500 pl-4"
-                      >
-                        <p className="font-medium text-foreground">
-                          {log.message}
-                        </p>
-                        <span className="text-sm text-muted-foreground">
-                          {log.createdByName} • {formatLogTime(log.createdAt)}
-                        </span>
-                      </div>
-                    ))}
-
-                    {/* Infinite Scroll Trigger */}
-                    {hasMoreLogs && (
-                      <div
-                        ref={setLogsEndRef}
-                        className="py-2 text-center text-sm text-muted-foreground"
-                      >
-                        Loading more...
-                      </div>
-                    )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>
-          </aside>
-        </main>
-      </div>
+          </div>
+        </section>
+
+        {/* RIGHT COLUMN – SYSTEM LOGS */}
+        <aside className="lg:col-span-1 mt-4 lg:mt-0">
+          <div
+            className="rounded-xl shadow p-4 sm:p-6 bg-card flex flex-col h-[400px] "
+            style={{ height: LOGS_HEIGHT }}
+          >
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
+              System Logs
+            </h2>
+
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+              {logs.length === 0 && !loading.logs ? (
+                <p className="text-center text-muted-foreground">
+                  No logs yet.
+                </p>
+              ) : (
+                <>
+                  {logs.map((log) => (
+                    <div
+                      key={log._id}
+                      className="border-l-4 border-blue-500 pl-4"
+                    >
+                      <p className="font-medium text-foreground text-sm sm:text-base">
+                        {log.message}
+                      </p>
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        {log.createdByName} • {formatLogTime(log.createdAt)}
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Infinite Scroll Trigger */}
+                  {hasMoreLogs && (
+                    <div
+                      ref={setLogsEndRef}
+                      className="py-2 text-center text-sm text-muted-foreground"
+                    >
+                      Loading more...
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </aside>
+      </main>
     </div>
   );
 };

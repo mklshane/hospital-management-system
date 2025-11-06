@@ -137,7 +137,7 @@ const PatientLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
+                className="w-full mt-5 py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
               >
                 {loading ? "Signing in..." : "Login"}
               </button>
@@ -150,14 +150,9 @@ const PatientLogin = () => {
               <div className="flex-grow border-t border-[#cecececa]"></div>
             </div>
 
-            {/* Admin / Doctor Buttons */}
+            {/* Doctor Button */}
             <div className="flex gap-3">
-              <button
-                className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                onClick={() => navigate("/admin/login")}
-              >
-                Admin
-              </button>
+              
               <button
                 className="flex-1 py-2 border border-[#cecececa] text-black rounded-lg text-sm font-medium hover:bg-gray-100 transition"
                 onClick={() => navigate("/doctor/login")}
