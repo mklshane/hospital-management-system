@@ -19,6 +19,7 @@ import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/Doctor/AppointmentCard";
 import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
 import CollapsibleSection from "../../components/Doctor/CollapsibleSection";
+import MedicalRecordsSection from "../../components/Doctor/MedicalRecordsSection";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorAppointments = () => {
@@ -193,7 +194,7 @@ const DoctorAppointments = () => {
     <div className="min-h-screen flex flex-col pb-10">
       <div className="flex-1 grid grid-cols-12 gap-5 overflow-hidden min-h-0">
         {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col max-h-[95vh] shadow-sm overflow-hidden">
+        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col max-h-[95vh] shadow-sm overflow-y-auto">
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-4 right-4 z-50 max-w-xs">
@@ -334,7 +335,7 @@ const DoctorAppointments = () => {
           </div>
 
           {/* Dynamic Columns */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 gap-6 flex-1 overflow-y-auto pr-2">
             {selectedFilters.map((filterKey) => {
               const statusData = statusOptions.find((s) => s.key === filterKey);
               const list = filteredAppointments[filterKey] || [];
@@ -531,22 +532,7 @@ const DoctorAppointments = () => {
                   <p className="text-sm text-muted-foreground">No past appointments recorded.</p>
                 </CollapsibleSection>
 
-                <CollapsibleSection 
-                  title="Medical Records History" 
-                  badge="1"
-                  badgeColor="bg-cyan-400"
-                  defaultOpen={false}
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-ui-muted/30 rounded-lg">
-                      <div>
-                        <p className="font-medium text-foreground">250 Diabetes / Diabetes mellitus</p>
-                        <p className="text-xs text-muted-foreground">Dr. Edward. Preliminary diagnosis</p>
-                      </div>
-                      <button className="text-xs text-blue hover:underline">View</button>
-                    </div>
-                  </div>
-                </CollapsibleSection>
+                <MedicalRecordsSection />
               </>
             )}
           </div>
