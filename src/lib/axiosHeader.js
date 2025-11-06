@@ -36,7 +36,6 @@ axiosHeader.interceptors.response.use(
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("userType");
-      window.location.href = "/login";
     }
     return Promise.reject({
       message: error.response?.data?.message || "An error occurred",
