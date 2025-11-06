@@ -426,11 +426,11 @@ const DoctorAppointments = () => {
                     </div>
                   </div>
 
-                  <div className="bg-ui-muted/50 rounded-xl p-4 space-y-4 border border-ui-border/50">
-                    <div className="flex items-center justify-between">
+                  <div className="bg-ui-muted/50 rounded-xl pt-2 space-y-4 ">
+                    <div className="flex items-center grid-cols-2">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-blue rounded-lg text-white">
-                          <Calendar className="w-5 h-5" />
+                        <div className="p-2.5 rounded-lg text-white">
+                          <Calendar className="w-5 h-5 text-blue" />
                         </div>
                         <div>
                           <p className="text-xs uppercase tracking-wider text-muted-foreground">Date</p>
@@ -439,9 +439,9 @@ const DoctorAppointments = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-indigo-600 rounded-lg text-white">
-                          <Clock className="w-5 h-5" />
+                      <div className="flex items-center gap-3 pl-15">
+                        <div className="p-2.5 rounded-lg text-white">
+                          <Clock className="w-5 h-5 text-indigo-500" />
                         </div>
                         <div>
                           <p className="text-xs uppercase tracking-wider text-muted-foreground">Time</p>
@@ -452,8 +452,8 @@ const DoctorAppointments = () => {
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-ui-border/50">
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">
+                    <div className="pt-2">
+                      <p className="text-xs tracking-wider text-muted-foreground mb-1.5">
                         Patient Notes
                       </p>
                       <p className="text-sm text-foreground leading-relaxed">
