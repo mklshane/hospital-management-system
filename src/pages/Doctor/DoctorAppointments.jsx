@@ -191,9 +191,9 @@ const DoctorAppointments = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-10">
-      <div className="flex-1 grid grid-cols-12 overflow-y-auto gap-5">
+      <div className="flex-1 grid grid-cols-12 gap-5 overflow-hidden min-h-0">
         {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col overflow-y-auto max-h-[95vh] relative">
+        <div className="scrollbar col-span-9 bg-ui-card rounded-2xl p-6 flex flex-col max-h-[95vh] shadow-sm overflow-hidden">
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-4 right-4 z-50 max-w-xs">
@@ -372,7 +372,7 @@ const DoctorAppointments = () => {
         </div>
 
         {/* RIGHT SECTION - DETAILS */}
-        <div className="col-span-3 bg-ui-card rounded-2xl p-6 flex flex-col h-full overflow-y-auto shadow-sm">
+        <div className="col-span-3 bg-ui-card rounded-2xl p-6 flex flex-col max-h-[95vh] shadow-sm overflow-hidden">
           {/* Fixed Header */}
           <header className="flex items-center justify-between mb-4 pb-3 border-b border-ui-border">
             <h2 className="text-xl font-bold font-montserrat text-foreground flex items-center gap-2">
@@ -381,7 +381,7 @@ const DoctorAppointments = () => {
           </header>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto pr-2 space-y-5">
+          <div className="scrollbar flex-1 min-h-0 overflow-y-auto pr-3 space-y-5 pb-20">
             {!selectedAppointment ? (
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                 <div className="p-4 bg-ui-muted/50 rounded-full mb-4">
@@ -547,65 +547,67 @@ const DoctorAppointments = () => {
                     </div>
                   </div>
                 </CollapsibleSection>
-
-                {/* ---------- STICKY ACTION BAR ---------- */}
-                <div className="sticky bottom-0 -mx-6 mt-6 bg-gradient-to-t from-ui-card via-ui-card to-transparent pt-6">
-                  <div className="px-6 pb-2 space-y-3">
-                    {/* PENDING */}
-                    {selectedAppointment.status === "Pending" && (
-                      <>
-                        <button
-                          onClick={() => updateStatus(selectedAppointment._id, "Scheduled")}
-                          className="w-full bg-blue hover:bg-blue-light text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          Accept Appointment
-                        </button>
-                        <button
-                          onClick={() => updateStatus(selectedAppointment._id, "Rejected")}
-                          className="w-full border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
-                        >
-                          <XCircle className="w-5 h-5" />
-                          Reject Appointment
-                        </button>
-                      </>
-                    )}
-
-                    {/* SCHEDULED */}
-                    {selectedAppointment.status === "Scheduled" && (
-                      <>
-                        <button
-                          onClick={() => setIsRecordModalOpen(true)}
-                          className="w-full bg-gradient-to-r from-indigo-600 to-blue hover:from-indigo-700 hover:to-blue-light text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                        >
-                          <FileText className="w-5 h-5" />
-                          Add Medical Record
-                        </button>
-                        <button
-                          onClick={() => updateStatus(selectedAppointment._id, "Completed")}
-                          className="w-full border border-green-300 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
-                        >
-                          <CheckCircle className="w-5 h-5" />
-                          Mark as Completed
-                        </button>
-                      </>
-                    )}
-
-                    {/* FINAL STATES */}
-                    {(selectedAppointment.status === "Completed" ||
-                      selectedAppointment.status === "Rejected" ||
-                      selectedAppointment.status === "Cancelled") && (
-                      <div className="text-center py-4">
-                        <p className="text-sm text-muted-foreground">
-                          This appointment is {selectedAppointment.status.toLowerCase()}.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </>
             )}
           </div>
+
+          {/* ---------- STICKY ACTION BAR ---------- */}
+{selectedAppointment && (
+  <div className="sticky bottom-0 -mx-6 mt-6 bg-gradient-to-t from-ui-card via-ui-card to-transparent pt-6">
+    <div className="px-6 pb-6 space-y-3">
+      {/* PENDING */}
+      {selectedAppointment.status === "Pending" && (
+        <>
+          <button
+            onClick={() => updateStatus(selectedAppointment._id, "Scheduled")}
+            className="w-full bg-blue hover:bg-blue-light text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+          >
+            <CheckCircle className="w-5 h-5" />
+            Accept Appointment
+          </button>
+          <button
+            onClick={() => updateStatus(selectedAppointment._id, "Rejected")}
+            className="w-full border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
+          >
+            <XCircle className="w-5 h-5" />
+            Reject Appointment
+          </button>
+        </>
+      )}
+
+      {/* SCHEDULED */}
+      {selectedAppointment.status === "Scheduled" && (
+        <>
+          <button
+            onClick={() => setIsRecordModalOpen(true)}
+            className="w-full bg-indigo-600 hover:from-indigo-700 hover:to-blue-light text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+          >
+            <FileText className="w-5 h-5" />
+            Add Medical Record
+          </button>
+          <button
+            onClick={() => updateStatus(selectedAppointment._id, "Completed")}
+            className="w-full border border-green-300 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2"
+          >
+            <CheckCircle className="w-5 h-5" />
+            Mark as Completed
+          </button>
+        </>
+      )}
+
+      {/* FINAL STATES */}
+      {(selectedAppointment.status === "Completed" ||
+        selectedAppointment.status === "Rejected" ||
+        selectedAppointment.status === "Cancelled") && (
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground">
+            This appointment is {selectedAppointment.status.toLowerCase()}.
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+)}
 
           {/* Medical Record Modal */}
           <MedicalRecordModal
