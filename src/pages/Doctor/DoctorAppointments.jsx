@@ -376,27 +376,8 @@ const DoctorAppointments = () => {
           {/* Fixed Header */}
           <header className="flex items-center justify-between mb-4 pb-3 border-b border-ui-border">
             <h2 className="text-xl font-bold font-montserrat text-foreground flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue" />
               Appointment Details
             </h2>
-            {selectedAppointment && (
-              <div
-                className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
-                  selectedAppointment.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
-                    : selectedAppointment.status === "Scheduled"
-                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                    : selectedAppointment.status === "Completed"
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                    : selectedAppointment.status === "Cancelled"
-                    ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
-                    : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
-                }`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                {selectedAppointment.status}
-              </div>
-            )}
           </header>
 
           {/* Scrollable Content */}
@@ -412,10 +393,38 @@ const DoctorAppointments = () => {
               <>
                 {/* ---------- ALWAYS VISIBLE: SCHEDULE ---------- */}
                 <section className="space-y-3">
-                  <h4 className="font-semibold text-foreground flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue" />
-                    Appointment Schedule
-                  </h4>
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 rounded-full bg-blue flex items-center justify-center text-xl font-bold text-white shadow-md">
+                      {selectedAppointment.patient?.name
+                        ?.split(" ")
+                        .map((n) => n[0].toUpperCase())
+                        .join("")
+                        .slice(0, 2)}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {selectedAppointment.patient?.name}
+                      </h3>
+                      {selectedAppointment && (
+                      <div
+                        className={`w-25 px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+                          selectedAppointment.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                            : selectedAppointment.status === "Scheduled"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                            : selectedAppointment.status === "Completed"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                            : selectedAppointment.status === "Cancelled"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                            : "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300"
+                        }`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                        {selectedAppointment.status}
+                    </div>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="bg-ui-muted/50 rounded-xl p-4 space-y-4 border border-ui-border/50">
                     <div className="flex items-center justify-between">
@@ -466,78 +475,64 @@ const DoctorAppointments = () => {
                   title="Patient Details" 
                   defaultOpen={false}
                 >
-                  <div className="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-5 border border-blue-200/50 dark:border-blue-800/30">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-full bg-blue flex items-center justify-center text-xl font-bold text-white shadow-md">
-                        {selectedAppointment.patient?.name
-                          ?.split(" ")
-                          .map((n) => n[0].toUpperCase())
-                          .join("")
-                          .slice(0, 2)}
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {selectedAppointment.patient?.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          Patient ID: #{selectedAppointment.patient?._id?.slice(-6).toUpperCase()}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
-                      {selectedAppointment.patient?.age && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
-                            <span className="text-xs font-medium text-muted-foreground">Age</span>
-                          </div>
-                          <span className="font-medium text-foreground">{selectedAppointment.patient.age} yrs</span>
+                  <div className="grid grid-cols-2 gap-3 mt-4 text-sm">
+                    {selectedAppointment.patient?.age && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
+                          <span className="text-xs font-medium text-muted-foreground">Age</span>
                         </div>
-                      )}
-                      {selectedAppointment.patient?.gender && (
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
-                            <span className="text-xs font-medium text-muted-foreground">
-                              {selectedAppointment.patient.gender === "male" ? "M" : "F"}
-                            </span>
-                          </div>
-                          <span className="font-medium text-foreground capitalize">
-                            {selectedAppointment.patient.gender}
+                        <span className="font-medium text-foreground">{selectedAppointment.patient.age} yrs</span>
+                      </div>
+                    )}
+                    {selectedAppointment.patient?.gender && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {selectedAppointment.patient.gender === "male" ? "M" : "F"}
                           </span>
                         </div>
-                      )}
-                      {selectedAppointment.patient?.contact && (
-                        <div className="flex items-center gap-2 col-span-2">
-                          <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                          <a
-                            href={`tel:${selectedAppointment.patient.contact}`}
-                            className="font-medium text-foreground hover:text-blue transition"
-                          >
-                            {selectedAppointment.patient.contact}
-                          </a>
+                        <span className="font-medium text-foreground capitalize">
+                          {selectedAppointment.patient.gender}
+                        </span>
+                      </div>
+                    )}
+                    {selectedAppointment.patient?.contact && (
+                      <div className="flex items-center gap-2 col-span-2">
+                        <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
                         </div>
-                      )}
-                      {selectedAppointment.patient?.email && (
-                        <div className="flex items-center gap-2 col-span-2">
-                          <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                          <a
-                            href={`mailto:${selectedAppointment.patient.email}`}
-                            className="font-medium text-foreground hover:text-blue transition truncate"
-                          >
-                            {selectedAppointment.patient.email}
-                          </a>
+                        <a
+                          href={`tel:${selectedAppointment.patient.contact}`}
+                          className="font-medium text-foreground hover:text-blue transition"
+                        >
+                          {selectedAppointment.patient.contact}
+                        </a>
+                      </div>
+                    )}
+                    {selectedAppointment.patient?.email && (
+                      <div className="flex items-center gap-2 col-span-2">
+                        <div className="w-8 h-8 rounded-lg bg-ui-muted flex items-center justify-center">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
                         </div>
-                      )}
-                    </div>
+                        <a
+                          href={`mailto:${selectedAppointment.patient.email}`}
+                          className="font-medium text-foreground hover:text-blue transition truncate"
+                        >
+                          {selectedAppointment.patient.email}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </CollapsibleSection>
 
                 <CollapsibleSection
-                  title="New Diagnosis"
+                  title="Appointment History"
+                >
+                  <p className="text-sm text-muted-foreground">No past appointments recorded.</p>
+                </CollapsibleSection>
+
+                <CollapsibleSection 
+                  title="Medical Records History" 
                   badge="1"
                   badgeColor="bg-cyan-400"
                   defaultOpen={false}
@@ -551,10 +546,6 @@ const DoctorAppointments = () => {
                       <button className="text-xs text-blue hover:underline">View</button>
                     </div>
                   </div>
-                </CollapsibleSection>
-
-                <CollapsibleSection title="Current Medications" defaultOpen={false}>
-                  <p className="text-sm text-muted-foreground">No medications recorded.</p>
                 </CollapsibleSection>
 
                 {/* ---------- STICKY ACTION BAR ---------- */}
