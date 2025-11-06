@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("userType");
-    window.location.href = "/login";
   };
 
   const isAuthenticated = () => !!user;
