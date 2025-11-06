@@ -37,11 +37,11 @@ const AppointmentCard = ({ appt, onClick, formatDate }) => {
       </div>
 
       {/* Bottom: Date, Time, Notes */}
-      <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+      <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
         <p className="flex items-center gap-1.5">
-          <span><CalendarClock className="w-4 h-4 text-foreground" /></span> 
-          <span className="font-medium text-gray-800 dark:text-gray-200">
-            {formatDate(appt.appointment_date)} | {appt.appointment_time}
+          <span><CalendarClock className="w-4 h-4" /></span> 
+          <span className="font-medium text-gray-500 dark:text-gray-400">
+            {formatDate(appt.appointment_date)} • {appt.appointment_time}
           </span>
         </p>
         {appt.notes && (
