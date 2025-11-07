@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom"; // ← ADDED
 
 const SidebarContext = createContext(undefined);
 
@@ -151,12 +152,20 @@ export const MobileSidebar = ({ className, children, ...props }) => {
 export const SidebarLink = ({ link, className, onClick, ...props }) => {
   const { open, animate } = useSidebar();
   const { setOpen } = useSidebar();
+  const navigate = useNavigate(); // ← ADDED
 
   const handleClick = (e) => {
     e.preventDefault();
+
+    // Run custom onClick if provided (e.g. logout)
     if (onClick) {
       onClick();
     }
+    // Otherwise, navigate using href if valid
+    else if (link.href && link.href !== "#") {
+      navigate(link.href);
+    }
+
     // Close mobile sidebar after navigation
     if (window.innerWidth < 768) {
       setOpen(false);

@@ -18,7 +18,6 @@ import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import DoctorMedicalRecords from "./pages/Doctor/DoctorMedicalRecords";
-import DoctorPatients from "./pages/Doctor/DoctorPatients";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import DoctorsList from "./pages/Admin/DoctorsList";
@@ -105,7 +104,7 @@ function App() {
           }
         />
         <Route
-          path="/doctor/medical-records"
+          path="/doctor/record"
           element={
             <ProtectedRoute allowedUserTypes={["doctor"]}>
               <DoctorLayout>
@@ -114,16 +113,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/doctor/patients"
-          element={
-            <ProtectedRoute allowedUserTypes={["doctor"]}>
-              <DoctorLayout>
-                <DoctorPatients />
-              </DoctorLayout>
-            </ProtectedRoute>
-          }
-        />
+        
 
         {/* Admin Routes with Nested Layout */}
         <Route

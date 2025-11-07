@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { RefreshCw, Search } from "lucide-react";
 import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  isSameDay,
-} from "date-fns";
+  RefreshCw,
+  Search,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  Users,
+} from "lucide-react";
 import { api } from "../../lib/axiosHeader";
-import AppointmentCard from "../../components/AppointmentCard";
-import AppointmentRequestCard from "../../components/AppointmentRequestCard";
+import AppointmentCard from "../../components/Doctor/AppointmentCard";
+import AppointmentRequestCard from "../../components/Doctor/AppointmentRequestCard";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorDashboard = () => {
@@ -17,31 +17,68 @@ const DoctorDashboard = () => {
   const [scheduledAppointments, setScheduledAppointments] = useState([]);
   const [requests, setRequests] = useState([]);
   const [allAppointments, setAllAppointments] = useState([]);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
-  const [calendarLoading, setCalendarLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
 
-  const doctorData = {
-    name: "Dr. Juan De La Cruz",
-    specialization: "General Medicine",
-  };
+  const [doctorInfo, setDoctorInfo] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [doctorLoading, setDoctorLoading] = useState(true);
 
-  const statsData = [
-    { label: "Today's Appointments", value: 12 },
-    { label: "Pending Approvals", value: 5 },
-    { label: "Completed Appointments", value: 7 },
-    { label: "Assigned Patients", value: 23 },
-  ];
+  // API: Fetch doctor profile and stats
+  const fetchDoctorProfile = async () => {
+    try {
+      setDoctorLoading(true);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const doctorId = user?._id;
+
+      if (!doctorId) throw new Error("Doctor ID not found");
+
+      const docRes = await api.get(`/doctor/${doctorId}`);
+      const { name, specialization } = docRes.data.doctor;
+      setDoctorInfo({ name, specialization });
+
+      const apptRes = await api.get("/appointment");
+      const allAppts = apptRes.data.appointments || [];
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const todayAppts = allAppts.filter((a) => a.appointment_date === today);
+      const scheduled = todayAppts.filter(
+        (a) => a.status === "Scheduled"
+      ).length;
+      const pendingAll = allAppts.filter((a) => a.status === "Pending").length;
+      const completedAll = allAppts.filter(
+        (a) => a.status === "Completed"
+      ).length;
+
+      const uniquePatients = new Set(allAppts.map((a) => a.patient?._id)).size;
+
+      setStats({
+        today: scheduled,
+        pending: pendingAll,
+        completed: completedAll,
+        patients: uniquePatients,
+      });
+    } catch (err) {
+      console.error("Error loading doctor profile / stats:", err);
+      setDoctorInfo({
+        name: "Dr. Juan De La Cruz",
+        specialization: "General Medicine",
+      });
+      setStats({ today: 0, pending: 0, completed: 0, patients: 0 });
+    } finally {
+      setDoctorLoading(false);
+    }
+  };
 
   // API: Fetch today's scheduled appointments
   const fetchTodayAppointments = async () => {
     try {
       setLoading(true);
       const res = await api.get("/appointment");
-      const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+      const today = new Date().toISOString().split("T")[0];
 
       const todayScheduled = (res.data.appointments || [])
         .filter(
@@ -87,29 +124,6 @@ const DoctorDashboard = () => {
     }
   };
 
-  // API: Fetch all scheduled appointments for calendar
-  const fetchCalendarAppointments = async () => {
-    try {
-      setCalendarLoading(true);
-      const res = await api.get("/appointment");
-
-      const scheduled = (res.data.appointments || [])
-        .filter((appt) => appt.status === "Scheduled")
-        .map((appt) => ({
-          _id: appt._id,
-          patient: appt.patient,
-          appointment_date: appt.appointment_date,
-          appointment_time: appt.appointment_time,
-        }));
-
-      setAllAppointments(scheduled);
-    } catch (err) {
-      console.error("Error fetching calendar data:", err);
-    } finally {
-      setCalendarLoading(false);
-    }
-  };
-
   // API: Update appointment status
   const handleStatusUpdate = async (id, newStatus) => {
     setActionLoading((prev) => ({ ...prev, [id]: true }));
@@ -127,9 +141,9 @@ const DoctorDashboard = () => {
 
   // Initial data fetch
   useEffect(() => {
+    fetchDoctorProfile();
     fetchTodayAppointments();
     fetchPendingRequests();
-    fetchCalendarAppointments();
   }, []);
 
   // Search filter
@@ -140,189 +154,176 @@ const DoctorDashboard = () => {
       appt.notes?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Calendar component
-  const Calendar = () => {
-    const start = startOfMonth(currentMonth);
-    const end = endOfMonth(currentMonth);
-    const days = eachDayOfInterval({ start, end });
-    const appointmentDates = allAppointments.map((a) => a.appointment_date);
-
-    return (
-      <div className="bg-ui-muted rounded-lg p-4 h-full flex flex-col">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-3">
-          <button
-            onClick={() =>
-              setCurrentMonth(
-                (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1)
-              )
-            }
-            className="p-1 rounded hover:bg-blue/20 transition text-foreground text-lg font-bold"
-            aria-label="Previous month"
-          >
-            &lt;
-          </button>
-          <h3 className="text-sm font-semibold font-montserrat text-foreground">
-            {format(currentMonth, "MMM yyyy")}
-          </h3>
-          <button
-            onClick={() =>
-              setCurrentMonth(
-                (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1)
-              )
-            }
-            className="p-1 rounded hover:bg-blue/20 transition text-foreground text-lg font-bold"
-            aria-label="Next month"
-          >
-            &gt;
-          </button>
-        </div>
-
-        {/* Weekdays */}
-        <div className="grid grid-cols-7 text-xs text-muted-foreground mb-1">
-          {["S", "M", "T", "W", "T", "F", "S"].map((d) => (
-            <div key={d} className="text-center">
-              {d}
-            </div>
-          ))}
-        </div>
-
-        {/* Days */}
-        <div className="grid grid-cols-7 gap-1 text-xs flex-1">
-          {/* Empty cells */}
-          {Array.from({ length: start.getDay() }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-
-          {/* Days */}
-          {days.map((day) => {
-            const dateStr = format(day, "yyyy-MM-dd");
-            const hasAppt = appointmentDates.includes(dateStr);
-            const isToday = isSameDay(day, new Date());
-
-            return (
-              <div
-                key={dateStr}
-                className={`
-                  aspect-square flex items-center justify-center rounded-full transition relative
-                  ${isToday ? "ring-2 ring-blue-light" : ""}
-                `}
-                title={
-                  hasAppt
-                    ? `${
-                        appointmentDates.filter((d) => d === dateStr).length
-                      } appointment(s)`
-                    : ""
-                }
-              >
-                {hasAppt && (
-                  <div className="absolute inset-0 rounded-full bg-blue opacity-20 scale-90"></div>
-                )}
-                <span
-                  className={`
-                    relative z-10 text-sm font-medium
-                    ${hasAppt ? "text-blue font-bold" : "text-foreground"}
-                    ${isToday ? "text-blue font-bold" : ""}
-                  `}
-                >
-                  {format(day, "d")}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden pb-10">
-      {/* Upper Left - Doctor Info and Statistics */}
-      <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold font-montserrat">
-              {doctorData.name}
-            </h1>
-            <p className="text-blue-light font-figtree">
-              {doctorData.specialization}
-            </p>
+    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-background">
+      {/* Left Column - Stats (Top) and Today's Appointments (Bottom) */}
+
+      {/* Stats Section - Top Left */}
+      <div className="col-span-9 row-span-1 bg-blue rounded-xl p-4 text-white flex flex-col min-h-0">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+          <div className="space-y-1">
+            {doctorLoading ? (
+              <>
+                <div className="h-7 w-48 bg-white/20 rounded animate-pulse"></div>
+                <div className="h-4 w-32 bg-white/15 rounded animate-pulse"></div>
+              </>
+            ) : (
+              <>
+                <h1 className="text-xl font-bold font-montserrat">
+                  {doctorInfo?.name ?? "Dr. Unknown"}
+                </h1>
+                <p className="text-blue-light font-figtree text-sm">
+                  {doctorInfo?.specialization ?? "—"}
+                </p>
+              </>
+            )}
           </div>
 
-          {/* Universal Theme Toggle */}
-          <ThemeToggle />
+          <div className="scale-90">
+            <ThemeToggle />
+          </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-4 gap-4 flex-1">
-          {statsData.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-blue-light rounded-xl p-4 flex flex-col justify-center h-full"
-            >
-              <p className="text-md font-figtree opacity-90 mb-1">
-                {stat.label}
-              </p>
-              <p className="text-4xl font-bold font-montserrat">{stat.value}</p>
-            </div>
-          ))}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+          {doctorLoading || !stats
+            ? /* ----- SKELETON ----- */
+              [...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-white/20 rounded-full animate-pulse"></div>
+                    <div className="h-3 w-20 bg-white/30 rounded animate-pulse"></div>
+                  </div>
+                  <div className="h-8 w-16 bg-white/20 rounded animate-pulse"></div>
+                </div>
+              ))
+            : /* ----- REAL STATS – PROPERLY SIZED ----- */
+              [
+                {
+                  label: "Today's Appointments",
+                  value: stats.today,
+                  icon: <Clock className="w-4 h-4" />,
+                  bg: "bg-blue-500",
+                },
+                {
+                  label: "Pending Approvals",
+                  value: stats.pending,
+                  icon: <AlertCircle className="w-4 h-4" />,
+                  bg: "bg-amber-500",
+                },
+                {
+                  label: "Completed Appointments",
+                  value: stats.completed,
+                  icon: <CheckCircle2 className="w-4 h-4" />,
+                  bg: "bg-emerald-500",
+                },
+                {
+                  label: "Assigned Patients",
+                  value: stats.patients,
+                  icon: <Users className="w-4 h-4" />,
+                  bg: "bg-indigo-500",
+                },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20 transition-all duration-200 hover:bg-white/15"
+                >
+                  {/* Icon + Label */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`${stat.bg} text-white p-1.5 rounded-full`}>
+                      {stat.icon}
+                    </div>
+                    <p className="text-xs font-figtree opacity-90 leading-tight">
+                      {stat.label}
+                    </p>
+                  </div>
+
+                  {/* PROPERLY SIZED VALUE */}
+                  <p className="text-2xl font-bold font-montserrat leading-none">
+                    {stat.value}
+                  </p>
+                </div>
+              ))}
         </div>
       </div>
 
-      {/* Upper Right - Calendar */}
-      <div className="col-span-3 row-span-1 bg-ui-card rounded-2xl flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-hidden">
-          {calendarLoading ? (
-            <p className="text-center text-muted-foreground py-8">
-              Loading calendar...
+      {/* Right Column - Appointment Requests (Full Height) - NARROWER */}
+      <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card rounded-xl min-h-0">
+        <div className="p-3 border-b border-ui-border shrink-0">
+          <h2 className="text-base font-semibold text-foreground font-montserrat">
+            Appointment Requests
+          </h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+          {requestsLoading ? (
+            <p className="text-center text-muted-foreground py-6 text-xs">
+              Loading requests...
+            </p>
+          ) : requests.length === 0 ? (
+            <p className="text-center text-muted-foreground py-6 text-xs">
+              No pending requests.
             </p>
           ) : (
-            <Calendar />
+            requests.map((req) => (
+              <AppointmentRequestCard
+                key={req._id}
+                request={req}
+                onApprove={(id) => handleStatusUpdate(id, "Scheduled")}
+                onReject={(id) => handleStatusUpdate(id, "Rejected")}
+                loading={actionLoading[req._id]}
+              />
+            ))
           )}
         </div>
       </div>
 
-      {/* Lower Left - Appointments Card with Search */}
-      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
+      {/* Today's Appointments - Bottom Left */}
+      <div className="col-span-9 row-span-1 bg-ui-card rounded-xl overflow-hidden flex flex-col min-h-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-ui-border shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">
-            Today's Appointment
+            Today's Appointments
           </h2>
 
           {/* Search Bar */}
-          <div className="flex items-center gap-2 w-full sm:w-1/2 lg:w-1/3">
-            <div className="relative flex-1">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 min-w-[200px]">
               <input
                 type="text"
                 placeholder="Search name, date, notes..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
+                className="w-full px-3 py-2 pl-9 bg-ui-muted border border-ui-border rounded-lg text-sm text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-1 focus:ring-ui-ring"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
             </div>
 
             {/* Refresh Button */}
             <button
               onClick={fetchTodayAppointments}
               disabled={loading}
-              className="p-2 h-10 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 h-9 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
               title="Refresh"
             >
               <RefreshCw
-                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+                className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
               />
             </button>
           </div>
         </div>
 
         {/* Appointment List */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
           {loading ? (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-muted-foreground py-8 text-sm">
               Loading today's appointments...
             </p>
           ) : scheduledAppointments.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-center text-muted-foreground py-8 text-sm">
               No scheduled appointments for today.
             </p>
           ) : (
@@ -337,37 +338,6 @@ const DoctorDashboard = () => {
                     year: "numeric",
                   })
                 }
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Lower Right - Appointment Requests */}
-      <div className="col-span-3 row-span-1 flex flex-col overflow-hidden">
-        <div className="p-6 border-b border-ui-border">
-          <h2 className="text-lg font-semibold text-foreground font-montserrat">
-            Appointment Requests
-          </h2>
-        </div>
-
-        <div className="scrollbar flex-1 overflow-y-auto p-6 space-y-3">
-          {requestsLoading ? (
-            <p className="text-center text-muted-foreground py-8">
-              Loading requests...
-            </p>
-          ) : requests.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No pending requests.
-            </p>
-          ) : (
-            requests.map((req) => (
-              <AppointmentRequestCard
-                key={req._id}
-                request={req}
-                onApprove={(id) => handleStatusUpdate(id, "Scheduled")}
-                onReject={(id) => handleStatusUpdate(id, "Rejected")}
-                loading={actionLoading[req._id]}
               />
             ))
           )}

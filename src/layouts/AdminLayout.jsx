@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Logo, LogoIcon } from "./Logo";
 
 export default function AdminLayout() {
@@ -27,15 +27,6 @@ export default function AdminLayout() {
     }
   };
 
-  const handleNavigation = (href, onClick) => {
-    if (onClick) {
-      onClick();
-    } else if (href !== "#") {
-      navigate(href);
-      setOpen(false); // Close mobile sidebar after navigation
-    }
-  };
-
   const getUserInitials = () => {
     if (!user) return "A";
     if (user.name) {
@@ -48,7 +39,6 @@ export default function AdminLayout() {
     return "A";
   };
 
-  // Sidebar Navigation Links
   const links = [
     {
       label: "Dashboard",
@@ -109,7 +99,7 @@ export default function AdminLayout() {
                 <SidebarLink
                   key={idx}
                   link={link}
-                  onClick={() => handleNavigation(link.href, link.onClick)}
+                  onClick={link.onClick}
                   className={cn(
                     "px-2 py-3 rounded-lg flex items-center gap-2 transition-all duration-200",
                     link.onClick
@@ -123,10 +113,9 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          {/* ADMIN PROFILE – ICON + LABEL (NO CLICK) */}
+          {/* ADMIN PROFILE */}
           <div className="pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700">
             <div className="flex items-center gap-3 px-2 py-3">
-              {/* Avatar with "A" */}
               <div
                 className={cn(
                   "h-8 w-8 bg-blue-600 min-w-8 shrink-0 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-neutral-200 dark:ring-neutral-700"
@@ -135,7 +124,6 @@ export default function AdminLayout() {
                 {getUserInitials()}
               </div>
 
-              {/* Admin Label – only when sidebar is open */}
               {open && (
                 <div>
                   <p className="text-sm font-medium text-foreground">
@@ -149,7 +137,7 @@ export default function AdminLayout() {
         </SidebarBody>
       </Sidebar>
 
-      {/* Main Content - Adjusted for mobile header */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         <main className="flex-1 overflow-hidden px-4 sm:px-3 md:px-4 pt-5 md:pt-2 pb-4 md:py-3">
           <Outlet />
