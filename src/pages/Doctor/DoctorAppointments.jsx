@@ -19,6 +19,7 @@ import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/Doctor/AppointmentCard";
 import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
 import CollapsibleSection from "../../components/Doctor/CollapsibleSection";
+import AppointmentHistorySection from "../../components/Doctor/AppointmentHistorySection";
 import MedicalRecordsSection from "../../components/Doctor/MedicalRecordsSection";
 import ThemeToggle from "../../components/ThemeToggle";
 
@@ -526,11 +527,11 @@ const DoctorAppointments = () => {
                   </div>
                 </CollapsibleSection>
 
-                <CollapsibleSection
-                  title="Appointment History"
-                >
-                  <p className="text-sm text-muted-foreground">No past appointments recorded.</p>
-                </CollapsibleSection>
+                <AppointmentHistorySection
+                  key={selectedAppointment?.patient?._id}
+                  patientId={selectedAppointment.patient?._id}
+                  patientName={selectedAppointment.patient?.name}
+                />
 
                 <MedicalRecordsSection
                   patientId={selectedAppointment.patient?._id}
