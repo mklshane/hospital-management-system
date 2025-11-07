@@ -532,7 +532,10 @@ const DoctorAppointments = () => {
                   <p className="text-sm text-muted-foreground">No past appointments recorded.</p>
                 </CollapsibleSection>
 
-                <MedicalRecordsSection />
+                <MedicalRecordsSection
+                  patientId={selectedAppointment.patient?._id}
+                  patientName={selectedAppointment.patient?.name}
+                />
               </>
             )}
           </div>
