@@ -83,19 +83,44 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
         ) : (
           records.map((record) => {
             const date = format(new Date(record.appointment.appointment_date), "dd MMM yyyy");
+            const time = record.appointment?.appointment_time || "—";
+
             return (
               <div
                 key={record._id}
-                className="flex items-center justify-between p-3 bg-ui-muted/30 rounded-lg hover:bg-ui-muted/50 transition"
+                className="flex items-start justify-between p-3 bg-ui-muted/30 rounded-lg hover:bg-ui-muted/50 transition gap-3"
               >
-                <div>
+                <div className="flex-1">
+                  {/* Diagnosis */}
                   <p className="font-medium text-foreground">{record.diagnosis}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Dr. {record.doctor?.name || "—"} • {date}
+
+                  {/* Symptoms */}
+                  {record.symptoms && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      <span className="font-medium">Symptoms:</span> {record.symptoms}
+                    </p>
+                  )}
+
+                  {/* Prescriptions */}
+                  {record.prescriptions?.length > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      <span className="font-medium">Rx:</span>
+                      <span className="ml-1">
+                        {record.prescriptions
+                          .map((p) => `${p.medicine} (${p.dosage}, ${p.duration})`)
+                          .join(" • ")}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Doctor + Date + Time */}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Dr. {record.doctor?.name || "—"} • {date} • {time}
                   </p>
                 </div>
+
                 <button className="text-xs text-blue hover:underline font-medium">
-                  View
+                  Edit
                 </button>
               </div>
             );
