@@ -9,74 +9,84 @@ const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
 
   const { name, age, gender } = patient;
 
-  const formatTime = (dateStr, timeStr) => {
-    try {
-      const date = new Date(`${dateStr}T${timeStr}`);
-      return format(date, "MMM d, yyyy • h:mm a");
-    } catch {
-      return "Invalid date";
-    }
-  };
-
   return (
-    <div className="bg-white border border-ui-border rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200 group">
-      {/* Patient Info + Avatar */}
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {/* Avatar with Initial */}
-          <div className="w-11 h-11 bg-blue text-white rounded-full flex items-center justify-center font-semibold text-sm">
-            {name?.charAt(0).toUpperCase() || <User className="w-5 h-5" />}
+    <div className="bg-ui-surface border border-ui-border rounded-lg p-3 shadow-xs hover:shadow-sm transition-all duration-200 hover:translate-y-[-1px] hover:border-blue-300">
+      {/* Details Section - Two Columns - SMALLER */}
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        {/* Left Column - Patient Info */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue text-white rounded-full flex items-center justify-center font-semibold text-xs">
+              {name?.charAt(0).toUpperCase() || <User className="w-4 h-4" />}
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-foreground font-montserrat text-xs truncate">
+                {name}
+              </p>
+              <p className="text-[10px] text-muted-foreground font-figtree">
+                {age} {gender}
+              </p>
+            </div>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground font-montserrat text-sm truncate">
-              {name}
-            </p>
-            <p className="text-xs text-muted-foreground font-figtree">
-              {age} {gender}
-            </p>
-            {notes && (
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 font-figtree">
+          {notes && (
+            <div>
+              <p className="text-[10px] text-muted-foreground font-figtree mb-0.5">
+                Notes:
+              </p>
+              <p className="text-[10px] text-foreground font-figtree bg-ui-muted rounded px-1.5 py-0.5 line-clamp-2">
                 {notes}
               </p>
-            )}
-            {/* Date & Time (Small Icons) */}
-            <div className="text-xs text-muted-foreground font-figtree">
-              <div className="flex items-center mt-1 mb-1">
-                <Calendar className="w-3.5 h-3.5 mr-1" />
-                <span>{format(new Date(appointment_date), "MMM d, yyyy")}</span>
-              </div>
-              <div className="flex items-center">
-                <Clock className="w-3.5 h-3.5 mr-1" />
-                <span>{appointment_time}</span>
-              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Column - Date & Time */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3 h-3 text-muted-foreground" />
+            <div>
+              <p className="text-xs font-medium text-foreground">
+                {format(new Date(appointment_date), "MMM d")}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Date</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-3 h-3 text-muted-foreground" />
+            <div>
+              <p className="text-xs font-medium text-foreground">
+                {appointment_time}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Time</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Action Buttons (appear on hover) */}
-        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => onApprove(_id)}
-            disabled={loading}
-            className="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Approve"
-          >
-            {loading ? (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            ) : (
-              <Check className="w-4 h-4" />
-            )}
-          </button>
-          <button
-            onClick={() => onReject(_id)}
-            disabled={loading}
-            className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Reject"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+      {/* Action Buttons - Smaller */}
+      <div className="flex gap-1.5 pt-2 border-t border-ui-border">
+        <button
+          onClick={() => onApprove(_id)}
+          disabled={loading}
+          className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-600/30 text-emerald-700 border border-emerald-500/30 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <div className="w-3 h-3 border-2 border-emerald-400 border-t-emerald-700 rounded-full animate-spin"></div>
+          ) : (
+            <Check className="w-3 h-3" />
+          )}
+          Accept
+        </button>
+        <button
+          onClick={() => onReject(_id)}
+          disabled={loading}
+          className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-red-500/10 hover:bg-red-500/30 text-red-700 border border-red-500/30 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <X className="w-3 h-3" />
+          Reject
+        </button>
       </div>
     </div>
   );

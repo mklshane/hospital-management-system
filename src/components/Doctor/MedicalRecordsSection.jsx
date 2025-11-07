@@ -68,14 +68,14 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
   if (loading) {
     return (
       <CollapsibleSection title={title} badge="..." badgeColor="bg-cyan-400" defaultOpen={false}>
-        <p className="p-3 text-sm text-muted-foreground">Loading records...</p>
+        <p className=" text-sm text-muted-foreground">Loading records...</p>
       </CollapsibleSection>
     );
   }
 
   return (
     <CollapsibleSection title={title} badge={records.length.toString()} badgeColor="bg-cyan-400" defaultOpen={false}>
-      <div className="space-y-3 p-2">
+      <div className="space-y-1 p-2">
         {records.length === 0 ? (
           <p className="text-center text-sm text-muted-foreground py-2">
             No records yet. Your doctor will add one after your appointment.
@@ -88,7 +88,7 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
             return (
               <div
                 key={record._id}
-                className="flex items-start justify-between p-3 bg-ui-muted/30 rounded-lg hover:bg-ui-muted/50 transition gap-3"
+                className="flex items-start justify-between px-3 py-2 bg-ui-muted rounded-lg hover:bg-ui-muted/50 transition gap-3"
               >
                 <div className="flex-1">
                   {/* Diagnosis */}

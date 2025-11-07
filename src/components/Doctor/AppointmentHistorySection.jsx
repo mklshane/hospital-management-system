@@ -18,7 +18,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
     if (!patientId) {
     return (
         <CollapsibleSection title={title} badge="0" badgeColor="bg-blue-700" defaultOpen={false}>
-        <p className="p-3 text-sm text-muted-foreground">
+        <p className="pt-3 text-sm text-muted-foreground">
             Select a patient to view history.
         </p>
         </CollapsibleSection>
@@ -75,7 +75,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
     return (
       <div
         key={appt._id}
-        className="flex flex-col p-3 bg-ui-muted/30 rounded-lg hover:bg-ui-muted/50 transition"
+        className="flex flex-col py-2 px-4 bg-ui-muted rounded-lg hover:bg-ui-muted/50 transition"
       >
         <p className="font-medium text-foreground">Dr. {doctor}</p>
 

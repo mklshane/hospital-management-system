@@ -23,7 +23,7 @@ const CollapsibleSection = ({
       {/* Header */}
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-3 px-0 text-left hover:bg-ui-muted/30 transition-colors"
+        className="w-full flex items-center justify-between pt-2 text-left hover:bg-ui-muted/30 transition-colors"
       >
         <div className="flex items-center gap-3 flex-1">
           <h5 className="font-medium text-foreground text-sm">{title}</h5>
