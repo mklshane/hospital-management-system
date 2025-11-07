@@ -570,7 +570,7 @@ const DoctorAppointments = () => {
         <>
           <button
             onClick={() => setIsRecordModalOpen(true)}
-            className="w-full bg-indigo-600 hover:from-indigo-700 hover:to-blue-light text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+            className="w-full bg-blue-700 hover:from-indigo-700 hover:to-blue-light text-white py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
           >
             <FileText className="w-5 h-5" />
             Add Medical Record

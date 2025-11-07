@@ -17,7 +17,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
     // Add safety check
     if (!patientId) {
     return (
-        <CollapsibleSection title={title} badge="0" badgeColor="bg-amber-400" defaultOpen={false}>
+        <CollapsibleSection title={title} badge="0" badgeColor="bg-blue-700" defaultOpen={false}>
         <p className="p-3 text-sm text-muted-foreground">
             Select a patient to view history.
         </p>
@@ -95,7 +95,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
   // ---- final render ---------------------------------------------------------
   if (!patientId) {
     return (
-      <CollapsibleSection title={title} badge="0" badgeColor="bg-amber-400" defaultOpen={false}>
+      <CollapsibleSection title={title} badge="0" badgeColor="bg-blue-700" defaultOpen={false}>
         <p className="p-3 text-sm text-muted-foreground">
           Please log in to view appointment history.
         </p>
@@ -105,7 +105,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
 
   if (loading) {
     return (
-      <CollapsibleSection title={title} badge="..." badgeColor="bg-amber-400" defaultOpen={false}>
+      <CollapsibleSection title={title} badge="..." badgeColor="bg-blue-700" defaultOpen={false}>
         <p className="p-3 text-sm text-muted-foreground">Loading appointments...</p>
       </CollapsibleSection>
     );
@@ -115,7 +115,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
     <CollapsibleSection
       title={title}
       badge={appointments.length.toString()}
-      badgeColor="bg-amber-400"
+      badgeColor="bg-blue-700"
       defaultOpen={false}
     >
       <div className="space-y-3 p-2">
