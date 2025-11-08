@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/axiosHeader";
 import DeleteModal from "@/components/Common/DeleteModal";
+import { getStatusColor } from "@/utils/statusColors";
 
 const AppointmentDetailsModal = ({
   isOpen,
@@ -23,23 +24,6 @@ const AppointmentDetailsModal = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Scheduled":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "Completed":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-      case "Cancelled":
-        return "bg-red-500/10 text-red-600 border-red-500/20";
-      case "Pending":
-        return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-      case "Rejected":
-        return "bg-gray-500/10 text-gray-600 border-gray-500/20";
-      default:
-        return "bg-gray-500/10 text-gray-600 border-gray-500/20";
-    }
-  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

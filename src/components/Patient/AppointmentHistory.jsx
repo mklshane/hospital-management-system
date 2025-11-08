@@ -8,6 +8,7 @@ export default function AppointmentHistory({
   searchTerm,
   setSearchTerm,
   onNewAppointment,
+  onAppointmentClick, // Add this new prop
 }) {
   const filteredAppointments = appointments
     .filter((apt) => apt.patient?._id === appointments[0]?.patient?._id)
@@ -59,7 +60,11 @@ export default function AppointmentHistory({
               </p>
             ) : (
               filteredAppointments.map((apt) => (
-                <AppointmentCard key={apt._id} apt={apt} />
+                <AppointmentCard
+                  key={apt._id}
+                  apt={apt}
+                  onClick={() => onAppointmentClick(apt)} // Add onClick here
+                />
               ))
             )}
           </div>

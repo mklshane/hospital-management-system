@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
+import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
 import { api } from "@/lib/axiosHeader";
 import DeleteModal from "@/components/Common/DeleteModal";
 
@@ -42,6 +43,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
     contact: "",
     specialization: "",
   });
+  const [scheduleTime, setScheduleTime] = useState([]);
 
   const genders = ["Male", "Female", "Other"];
 
@@ -55,6 +57,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
         contact: doctor.contact || "",
         specialization: doctor.specialization || "",
       });
+      setScheduleTime(doctor.schedule_time || []);
     }
     setIsEditing(false);
   }, [doctor]);
@@ -67,7 +70,12 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await api.put(`/doctor/${doctor._id}`, formData);
+      const payload = {
+        ...formData,
+        schedule_time: scheduleTime,
+      };
+
+      await api.put(`/doctor/${doctor._id}`, payload);
       alert("Doctor updated successfully!");
       setIsEditing(false);
       onClose();
@@ -104,6 +112,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
       contact: doctor.contact || "",
       specialization: doctor.specialization || "",
     });
+    setScheduleTime(doctor.schedule_time || []);
     setIsEditing(false);
   };
 
@@ -136,7 +145,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-ui-card p-6 shadow-xl transition-all border border-ui-border">
+                <Dialog.Panel className="w-full max-w-4xl transform rounded-2xl bg-ui-card p-6 shadow-xl transition-all border border-ui-border max-h-[90vh] overflow-y-auto">
                   {/* Header */}
                   <div className="flex items-center justify-between mb-6">
                     <Dialog.Title className="text-xl font-bold text-foreground">
@@ -190,7 +199,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            disabled // Email shouldn't be editable
+                            disabled
                           />
                           <Input
                             label="Contact"
@@ -298,27 +307,49 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                     </div>
 
                     {/* Schedule Times */}
-                    {doctor.schedule_time &&
-                      doctor.schedule_time.length > 0 && (
-                        <div className="space-y-3">
-                          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-blue" />
-                            Available Schedule
-                          </h3>
-                          <div className="p-4 bg-ui-muted rounded-lg">
-                            <div className="flex flex-wrap gap-2">
-                              {doctor.schedule_time.map((time, index) => (
-                                <span
-                                  key={index}
-                                  className="px-3 py-1 bg-blue/10 text-blue rounded-full text-sm"
-                                >
-                                  {time}
-                                </span>
-                              ))}
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-blue" />
+                        Available Schedule
+                        {scheduleTime.length > 0 && (
+                          <span className="text-sm font-normal text-muted-foreground">
+                            ({scheduleTime.length} slots)
+                          </span>
+                        )}
+                      </h3>
+
+                      {isEditing ? (
+                        <TimeSlotSelector
+                          selectedSlots={scheduleTime}
+                          onSlotsChange={setScheduleTime}
+                        />
+                      ) : (
+                        <div className="p-4 bg-ui-muted rounded-lg">
+                          {scheduleTime.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                              {scheduleTime.map((time, index) => {
+                                // Convert single time to display format
+                                const displayTime = time.includes("-")
+                                  ? time
+                                  : `${time} - ${getEndTime(time)}`;
+                                return (
+                                  <span
+                                    key={index}
+                                    className="px-3 py-2 bg-blue/10 text-blue rounded-lg text-sm text-center"
+                                  >
+                                    {displayTime}
+                                  </span>
+                                );
+                              })}
                             </div>
-                          </div>
+                          ) : (
+                            <p className="text-muted-foreground text-center py-2">
+                              No schedule times configured
+                            </p>
+                          )}
                         </div>
                       )}
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
@@ -333,7 +364,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                         </button>
                         <button
                           onClick={handleSave}
-                          disabled={loading}
+                          disabled={loading || scheduleTime.length === 0}
                           className="px-5 py-2 bg-blue hover:bg-blue/90 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                           <Save className="w-4 h-4" />
@@ -371,5 +402,33 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
     </>
   );
 };
+
+// Helper function to get end time for display
+function getEndTime(startTime) {
+  const [time, period] = startTime.split(" ");
+  const [hourStr, minuteStr] = time.split(":");
+  let hour = parseInt(hourStr);
+  const minute = parseInt(minuteStr);
+
+  let endHour = hour;
+  let endMinute = minute + 30;
+  let endPeriod = period;
+
+  if (endMinute >= 60) {
+    endHour += 1;
+    endMinute = 0;
+  }
+
+  if (endHour === 12 && period === "AM") {
+    endPeriod = "PM";
+  } else if (endHour === 12 && period === "PM") {
+    endPeriod = "AM";
+  } else if (endHour > 12) {
+    endHour -= 12;
+    endPeriod = "PM";
+  }
+
+  return `${endHour}:${endMinute.toString().padStart(2, "0")} ${endPeriod}`;
+}
 
 export default DoctorDetailsModal;
