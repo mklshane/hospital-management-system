@@ -1,26 +1,16 @@
-
 import { Calendar, Clock, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { getStatusColor } from "@/utils/statusColors";
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Completed":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "Cancelled":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "Rejected":
-      return "bg-red-100 text-red-800 border-red-200";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
-  }
-};
-
-export default function AppointmentCard({ apt }) {
+export default function AppointmentCard({ apt, onClick }) {
   const formatDate = (date) => format(new Date(date), "MMM d, yyyy");
   const formatTime = (time) => time;
 
   return (
-    <div className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer">
+    <div
+      className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer"
+      onClick={onClick} 
+    >
       <div className="flex items-center gap-3 mb-3">
         <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm">
           {apt.doctor?.name?.charAt(0) || "D"}
