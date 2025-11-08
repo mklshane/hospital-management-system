@@ -8,15 +8,16 @@ export default function AppointmentCard({ apt, onClick }) {
 
   return (
     <div
-      className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer"
-      onClick={onClick} 
+      className="h-40 border-2 border-blue-100 dark:border-blue-700/20 rounded-xl p-4 hover:shadow-md transition cursor-pointer flex flex-col bg-blue-100/30 dark:bg-blue-950/25"
+      onClick={onClick}
     >
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm">
+      {/* Doctor + Status */}
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 bg-blue-200 border dark:bg-gray-700 rounded-full flex items-center justify-center text-black dark:text-gray-300 font-bold text-sm flex-shrink-0">
           {apt.doctor?.name?.charAt(0) || "D"}
         </div>
-        <div className="flex-1">
-          <p className="font-semibold text-gray-800 text-sm">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-primary text-sm truncate">
             Dr. {apt.doctor?.name || "Unknown"}
           </p>
           <span
@@ -29,21 +30,24 @@ export default function AppointmentCard({ apt, onClick }) {
         </div>
       </div>
 
-      <div className="text-xs text-gray-600 space-y-1">
+      {/* Date & Time */}
+      <div className="text-xs text-primary space-y-1.5 flex-1">
         <p className="flex items-center gap-1">
-          <Calendar className="w-3.5 h-3.5" />
-          {formatDate(apt.appointment_date)}
+          <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-gray-500" />
+          <span className="truncate">{formatDate(apt.appointment_date)}</span>
         </p>
         <p className="flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5" />
-          {formatTime(apt.appointment_time)}
+          <Clock className="w-3.5 h-3.5 flex-shrink-0 text-gray-500" />
+          <span>{formatTime(apt.appointment_time)}</span>
         </p>
-        <p className="flex items-start gap-1">
-          <FileText className="w-3.5 h-3.5 mt-0.5" />
-          <span className="line-clamp-2 text-xs">
+
+        {/* Notes - Truncated to 2 lines */}
+        <div className="flex items-start gap-1">
+          <FileText className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-500" />
+          <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-400">
             {apt.notes || "No notes"}
-          </span>
-        </p>
+          </p>
+        </div>
       </div>
     </div>
   );
