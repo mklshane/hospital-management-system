@@ -1,65 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import PatientDetailsModal from "@/components/Admin/PatientDetailsModal";
 import PatientCard from "@/components/Admin/PatientCard";
 import SearchBar from "@/components/Common/SearchBar";
-import { api } from "@/lib/axiosHeader";
-import toast from "react-hot-toast"; // Import toast
+import { useApiData } from "@/hooks/useApiData";
+import { useSearch } from "@/hooks/useSearch";
+import { useModal } from "@/hooks/useModal";
 
 const PatientsList = () => {
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [patients, setPatients] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const {
+    data: patients,
+    filteredData: filteredPatients,
+    loading,
+    refetch,
+  } = useApiData("/patient", {
+    entityName: "patients",
+    dataKey: "patients",
+  });
 
-  // Fetch patients on component mount
-  useEffect(() => {
-    fetchPatients();
-  }, []);
+  const { searchQuery, handleSearch, filteredData } = useSearch(patients, [
+    "name",
+    "email",
+    "contact",
+    "gender",
+    "address",
+  ]);
 
-  const fetchPatients = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/patient");
-      setPatients(response.data.patients);
-      setFilteredPatients(response.data.patients);
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-      toast.error("Failed to fetch patients"); // Changed to toast
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = (searchQuery) => {
-    if (!searchQuery.trim()) {
-      setFilteredPatients(patients);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase().trim();
-    const filtered = patients.filter(
-      (patient) =>
-        patient.name?.toLowerCase().includes(query) ||
-        patient.email?.toLowerCase().includes(query) ||
-        patient.contact?.includes(query) ||
-        patient.gender?.toLowerCase().includes(query) ||
-        patient.address?.toLowerCase().includes(query)
-    );
-    setFilteredPatients(filtered);
-  };
+  const detailsModal = useModal();
 
   const handleViewPatient = (patient) => {
-    setSelectedPatient(patient);
-    setIsDetailsModalOpen(true);
+    detailsModal.open(patient);
   };
 
   const handleModalClose = () => {
-    setIsDetailsModalOpen(false);
-    setSelectedPatient(null);
-    fetchPatients(); // Refresh the list when modal closes
+    detailsModal.close();
+    refetch();
   };
+
+  // Use filteredData from useSearch when searching, otherwise use filteredPatients from useApiData
+  const displayData = searchQuery ? filteredData : filteredPatients || [];
 
   return (
     <>
@@ -85,9 +64,9 @@ const PatientsList = () => {
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue"></div>
             </div>
-          ) : filteredPatients.length === 0 ? (
+          ) : displayData.length === 0 ? (
             <div className="text-center py-12">
-              {patients.length === 0 ? (
+              {!patients || patients.length === 0 ? (
                 <p className="text-muted-foreground text-lg">
                   No patients found
                 </p>
@@ -107,15 +86,14 @@ const PatientsList = () => {
               {/* Results Count */}
               <div className="mb-4 flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
-                  Showing {filteredPatients.length} of {patients.length}{" "}
-                  patients
+                  Showing {displayData.length} of {patients.length} patients
                 </p>
               </div>
 
               {/* Patients List - Fixed scrolling container */}
               <div className="h-[calc(100vh-215px)] overflow-y-auto">
                 <div className="space-y-3 pr-2 pb-6">
-                  {filteredPatients.map((patient) => (
+                  {displayData.map((patient) => (
                     <PatientCard
                       key={patient._id}
                       patient={patient}
@@ -131,9 +109,9 @@ const PatientsList = () => {
 
       {/* Details & Edit Modal */}
       <PatientDetailsModal
-        isOpen={isDetailsModalOpen}
+        isOpen={detailsModal.isOpen}
         onClose={handleModalClose}
-        patient={selectedPatient}
+        patient={detailsModal.selectedItem}
         onDelete={handleModalClose}
       />
     </>
