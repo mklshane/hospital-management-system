@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-const LOGS_HEIGHT = "calc(100vh - 80px)";
+const LOGS_HEIGHT = "calc(100vh - 50px)";
 
 const SystemLogs = () => {
   const [logs, setLogs] = useState([]);
