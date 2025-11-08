@@ -7,15 +7,12 @@ import {
   Clock,
   User,
   Stethoscope,
-  Mail,
-  Phone,
-  MapPin,
-  Trash2,
   Edit2,
   Save,
 } from "lucide-react";
 import { api } from "@/lib/axiosHeader";
 import { getStatusColor } from "@/utils/statusColors";
+import toast from "react-hot-toast";
 
 const PatientAppointmentDetailsModal = ({
   isOpen,
@@ -60,12 +57,12 @@ const PatientAppointmentDetailsModal = ({
       await api.put(`/appointment/${appointment._id}`, {
         status: "Cancelled",
       });
-      alert("Appointment cancelled successfully!");
+      toast.success("Appointment cancelled successfully!"); 
       onUpdate?.();
       onClose();
     } catch (error) {
       console.error("Error cancelling appointment:", error);
-      alert("Failed to cancel appointment");
+      toast.error("Failed to cancel appointment"); 
     } finally {
       setLoading(false);
     }
@@ -73,7 +70,7 @@ const PatientAppointmentDetailsModal = ({
 
   const handleReschedule = async () => {
     if (!formData.appointment_date || !formData.appointment_time) {
-      alert("Please select both date and time");
+      toast.error("Please select both date and time"); 
       return;
     }
 
@@ -83,33 +80,19 @@ const PatientAppointmentDetailsModal = ({
         appointment_date: formData.appointment_date,
         appointment_time: formData.appointment_time,
       });
-      alert("Appointment rescheduled successfully!");
+      toast.success("Appointment rescheduled successfully!"); 
       onUpdate?.();
       setIsEditing(false);
       onClose();
     } catch (error) {
       console.error("Error rescheduling appointment:", error);
-      alert("Failed to reschedule appointment");
+      toast.error("Failed to reschedule appointment"); 
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    setLoading(true);
-    try {
-      await api.delete(`/appointment/${appointment._id}`);
-      alert("Appointment deleted successfully!");
-      setShowDeleteModal(false);
-      onUpdate?.();
-      onClose();
-    } catch (error) {
-      console.error("Error deleting appointment:", error);
-      alert("Failed to delete appointment");
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -356,7 +339,6 @@ const PatientAppointmentDetailsModal = ({
                           >
                             Close
                           </button>
-                          
                         </>
                       )}
                     </div>
@@ -367,8 +349,6 @@ const PatientAppointmentDetailsModal = ({
           </div>
         </Dialog>
       </Transition>
-
-      
     </>
   );
 };
