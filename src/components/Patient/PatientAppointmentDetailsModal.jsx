@@ -10,9 +10,8 @@ import {
   Edit2,
   Save,
 } from "lucide-react";
-import { api } from "@/lib/axiosHeader";
 import { getStatusColor } from "@/utils/statusColors";
-import toast from "react-hot-toast";
+import { useCrudOperations } from "@/hooks/useCrudOperations";
 
 const PatientAppointmentDetailsModal = ({
   isOpen,
@@ -20,12 +19,16 @@ const PatientAppointmentDetailsModal = ({
   appointment,
   onUpdate,
 }) => {
-  const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     appointment_date: "",
     appointment_time: "",
   });
+
+  const { update: updateAppointment, loading } = useCrudOperations(
+    "appointment",
+    onUpdate
+  );
 
   useEffect(() => {
     if (appointment) {
@@ -52,47 +55,39 @@ const PatientAppointmentDetailsModal = ({
       return;
     }
 
-    setLoading(true);
-    try {
-      await api.put(`/appointment/${appointment._id}`, {
+    const success = await updateAppointment(
+      appointment._id,
+      {
         status: "Cancelled",
-      });
-      toast.success("Appointment cancelled successfully!"); 
-      onUpdate?.();
+      },
+      `/appointment/${appointment._id}`
+    );
+
+    if (success) {
       onClose();
-    } catch (error) {
-      console.error("Error cancelling appointment:", error);
-      toast.error("Failed to cancel appointment"); 
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleReschedule = async () => {
     if (!formData.appointment_date || !formData.appointment_time) {
-      toast.error("Please select both date and time"); 
+      toast.error("Please select both date and time");
       return;
     }
 
-    setLoading(true);
-    try {
-      await api.put(`/appointment/${appointment._id}`, {
+    const success = await updateAppointment(
+      appointment._id,
+      {
         appointment_date: formData.appointment_date,
         appointment_time: formData.appointment_time,
-      });
-      toast.success("Appointment rescheduled successfully!"); 
-      onUpdate?.();
+      },
+      `/appointment/${appointment._id}`
+    );
+
+    if (success) {
       setIsEditing(false);
       onClose();
-    } catch (error) {
-      console.error("Error rescheduling appointment:", error);
-      toast.error("Failed to reschedule appointment"); 
-    } finally {
-      setLoading(false);
     }
   };
-
-  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

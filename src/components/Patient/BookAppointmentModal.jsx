@@ -1,7 +1,6 @@
 import { X } from "lucide-react";
 import { format } from "date-fns";
-import toast from "react-hot-toast";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 export default function BookAppointmentModal({
   isOpen,
