@@ -16,6 +16,7 @@ import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
 import { api } from "@/lib/axiosHeader";
 import DeleteModal from "@/components/Common/DeleteModal";
+import toast from "react-hot-toast"; // Import toast
 
 const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -55,12 +56,12 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
     setLoading(true);
     try {
       await api.put(`/patient/${patient._id}`, formData);
-      alert("Patient updated successfully!");
+      toast.success("Patient updated successfully!"); // Changed to toast
       setIsEditing(false);
       onClose();
     } catch (error) {
       console.error("Error updating patient:", error);
-      alert("Failed to update patient");
+      toast.error("Failed to update patient"); // Changed to toast
     } finally {
       setLoading(false);
     }
@@ -73,12 +74,12 @@ const PatientDetailsModal = ({ isOpen, onClose, patient, onDelete }) => {
   const handleDeleteConfirm = async () => {
     try {
       await api.delete(`/patient/${patient._id}`);
-      alert("Patient deleted successfully!");
+      toast.success("Patient deleted successfully!"); // Changed to toast
       setShowDeleteModal(false);
       onClose();
     } catch (error) {
       console.error("Error deleting patient:", error);
-      alert("Failed to delete patient");
+      toast.error("Failed to delete patient"); // Changed to toast
     }
   };
 
