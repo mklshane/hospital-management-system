@@ -1,25 +1,57 @@
-import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/axiosHeader";
-import { Plus } from "lucide-react";
-import ThemeToggle from "@/components/ThemeToggle";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 import PatientProfile from "@/components/Patient/PatientProfile";
 import AppointmentHistory from "@/components/Patient/AppointmentHistory";
 import BookAppointmentModal from "@/components/Patient/BookAppointmentModal";
 import PatientAppointmentDetailsModal from "@/components/Patient/PatientAppointmentDetailsModal";
+import Calendar from "@/components/Patient/Calendar";
+
 import { usePatientAppointments } from "@/hooks/usePatientAppointments";
+import { useApiData } from "@/hooks/useApiData";
+import { useModal } from "@/hooks/useModal";
+import { useCrudOperations } from "@/hooks/useCrudOperations";
+import { useSearch } from "@/hooks/useSearch";
 
 export default function PatientDashboard() {
   const { user } = useAuth();
-  const { appointments, loading, refetch } = usePatientAppointments(user?._id);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [doctors, setDoctors] = useState([]);
+
+  // Fetch appointments
+  const {
+    appointments,
+    loading: appointmentsLoading,
+    refetch: refetchAppointments,
+  } = usePatientAppointments(user?._id);
+
+  // Fetch doctors
+  const {
+    data: doctors,
+    loading: doctorsLoading,
+    refetch: refetchDoctors,
+  } = useApiData("/doctor", {
+    entityName: "doctors",
+    dataKey: "doctors",
+  });
+
+  // Search
+  const {
+    searchQuery,
+    handleSearch,
+    filteredData: filteredAppointments,
+  } = useSearch(appointments, ["doctor.name", "appointment_date", "notes"]);
+
+  // Modals
+  const bookAppointmentModal = useModal();
+  const appointmentDetailsModal = useModal();
+
+  // CRUD
+  const { create, loading: submitting } = useCrudOperations(
+    "appointment",
+    refetchAppointments
+  );
+
+  // Form
   const [form, setForm] = useState({
     doctor_id: "",
     appointment_date: "",
@@ -27,123 +59,104 @@ export default function PatientDashboard() {
     notes: "",
   });
 
-  const fetchDoctors = async () => {
-    try {
-      const { data } = await api.get("/doctor");
-      setDoctors(data.doctors || []);
-    } catch {
-      toast.error("Failed to load doctors");
-    }
-  };
-
-  const handleOpenModal = () => {
-    fetchDoctors();
-    setModalOpen(true);
+  // Handlers
+  const handleOpenBookModal = () => {
+    refetchDoctors();
+    bookAppointmentModal.open();
   };
 
   const handleAppointmentClick = (appointment) => {
-    setSelectedAppointment(appointment);
-    setDetailsModalOpen(true);
+    appointmentDetailsModal.open(appointment);
   };
 
   const handleCloseDetailsModal = () => {
-    setDetailsModalOpen(false);
-    setSelectedAppointment(null);
+    appointmentDetailsModal.close();
   };
 
   const handleAppointmentUpdate = () => {
-    refetch(); // Refresh the appointments list
+    refetchAppointments();
   };
 
-  const handleChange = (e) => {
+  const handleFormChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmitAppointment = async (e) => {
     e.preventDefault();
     if (!form.doctor_id || !form.appointment_date || !form.appointment_time) {
       toast.error("Please fill all required fields");
       return;
     }
 
-    setSubmitting(true);
-    try {
-      await api.post("/appointment", {
+    const success = await create(
+      {
         doctor_id: form.doctor_id,
         patient_id: user._id,
         appointment_date: form.appointment_date,
         appointment_time: form.appointment_time,
         notes: form.notes,
-      });
-      toast.success("Appointment booked!");
-      await refetch();
-      setModalOpen(false);
+      },
+      "/appointment"
+    );
+
+    if (success) {
+      bookAppointmentModal.close();
       setForm({
         doctor_id: "",
         appointment_date: "",
         appointment_time: "",
         notes: "",
       });
-    } catch (err) {
-      toast.error(err?.data?.message || "Booking failed");
-    } finally {
-      setSubmitting(false);
+      toast.success("Appointment booked!");
     }
   };
 
   return (
-    <>
-      <div className="min-h-full rounded-2xl border border-neutral-200 bg-primary-foreground shadow-sm dark:border-neutral-800 dark:bg-neutral-900 p-4 sm:p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">
-              Patient Dashboard
-            </h1>
-            <div className="flex gap-4">
-              <button
-                onClick={handleOpenModal}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition"
-              >
-                <Plus className="w-4 h-4" />
-                New Appointment
-              </button>
-              <ThemeToggle />
+    <div className="min-h-90 bg-primary-foreground rounded-2xl p-4 md:p-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sidebar: Profile + Calendar (50/50 split) */}
+          <aside className="lg:col-span-3 flex flex-col gap-4 h-full">
+            <div className="h-[38%] min-h-0">
+              <PatientProfile user={user} />
             </div>
-          </div>
+            <div className="flex-1 min-h-0">
+              <Calendar appointments={appointments} />
+            </div>
+          </aside>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <PatientProfile user={user} />
+          {/* Main: Appointment History */}
+          <main className="lg:col-span-9">
             <AppointmentHistory
-              appointments={appointments}
-              loading={loading}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onNewAppointment={handleOpenModal}
+              appointments={filteredAppointments}
+              loading={appointmentsLoading}
+              searchTerm={searchQuery}
+              setSearchTerm={handleSearch}
+              onNewAppointment={handleOpenBookModal}
               onAppointmentClick={handleAppointmentClick}
             />
-          </div>
+          </main>
         </div>
       </div>
 
-      {/* Book Appointment Modal */}
+      {/* Modals */}
       <BookAppointmentModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={bookAppointmentModal.isOpen}
+        onClose={bookAppointmentModal.close}
         doctors={doctors}
         form={form}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
+        onChange={handleFormChange}
+        onSubmit={handleSubmitAppointment}
         submitting={submitting}
       />
 
-      {/* Appointment Details Modal */}
       <PatientAppointmentDetailsModal
-        isOpen={detailsModalOpen}
+        isOpen={appointmentDetailsModal.isOpen}
         onClose={handleCloseDetailsModal}
-        appointment={selectedAppointment}
+        appointment={appointmentDetailsModal.selectedItem}
         onUpdate={handleAppointmentUpdate}
       />
-    </>
+    </div>
   );
 }
