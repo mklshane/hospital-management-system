@@ -4,9 +4,13 @@ import CreateDoctorModal from "@/components/Admin/CreateDoctorModal";
 import DoctorDetailsModal from "@/components/Admin/DoctorDetailsModal";
 import DoctorCard from "@/components/Admin/DoctorCard";
 import SearchBar from "@/components/Common/SearchBar";
+import FilterDropdown from "@/components/Common/FilterDropdown";
+import ActiveFilters from "@/components/Common/ActiveFilters";
 import DeleteModal from "@/components/Common/DeleteModal";
 import { useApiData } from "@/hooks/useApiData";
 import { useSearch } from "@/hooks/useSearch";
+import { useFilter } from "@/hooks/useFilter";
+import { useSort } from "@/hooks/useSort";
 import { useModal } from "@/hooks/useModal";
 import { useCrudOperations } from "@/hooks/useCrudOperations";
 
@@ -16,15 +20,53 @@ const DoctorsList = () => {
     filteredData: filteredDoctors,
     loading,
     refetch,
-  } = useApiData("/doctor", { entityName: "doctors" });
+  } = useApiData("/doctor", {
+    entityName: "doctors",
+    dataKey: "doctors",
+  });
 
-  const { searchQuery, handleSearch, filteredData } = useSearch(doctors, [
+  const {
+    searchQuery,
+    handleSearch,
+    filteredData: searchFilteredData,
+  } = useSearch(doctors, [
     "name",
     "email",
     "specialization",
     "contact",
     "gender",
   ]);
+
+  // Filter config for doctors
+  const doctorFilterConfig = {
+    specialization: {
+      type: "select",
+      label: "Specialization",
+      options: [
+        { value: "Cardiology", label: "Cardiology" },
+        { value: "Dermatology", label: "Dermatology" },
+        { value: "Neurology", label: "Neurology" },
+        { value: "Pediatrics", label: "Pediatrics" },
+        { value: "Orthopedics", label: "Orthopedics" },
+        { value: "Gynecology", label: "Gynecology" },
+      ],
+    },
+  };
+
+  const {
+    filteredData: filterFilteredData,
+    filters,
+    updateFilter,
+    clearFilter,
+    clearAllFilters,
+    hasActiveFilters,
+  } = useFilter(
+    searchQuery ? searchFilteredData : filteredDoctors || [],
+    doctorFilterConfig
+  );
+
+  const { sortedData, sortField, sortOrder, handleSort } =
+    useSort(filterFilteredData);
 
   const createModal = useModal();
   const detailsModal = useModal();
@@ -63,8 +105,7 @@ const DoctorsList = () => {
     deleteModal.close();
   };
 
-  // Use filteredData from useSearch hook when searching, otherwise use filteredDoctors from useApiData
-  const displayData = searchQuery ? filteredData : filteredDoctors || [];
+  const displayData = sortedData;
 
   return (
     <>
@@ -96,13 +137,30 @@ const DoctorsList = () => {
         </header>
 
         <main className="flex-1 p-6">
-          <div className="mb-3">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search doctors by name, email, specialization, contact..."
-              className="max-w-lg"
+          <div className="flex gap-4 mb-3">
+            <div className="flex-1">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search doctors by name, email, specialization, contact..."
+                className="max-w-lg"
+              />
+            </div>
+            <FilterDropdown
+              label="Specialization"
+              options={doctorFilterConfig.specialization.options}
+              value={filters.specialization}
+              onChange={(value) => updateFilter("specialization", value)}
+              onClear={() => clearFilter("specialization")}
+              className="w-48"
             />
           </div>
+
+          <ActiveFilters
+            filters={filters}
+            filterConfig={doctorFilterConfig}
+            onClearFilter={clearFilter}
+            onClearAll={clearAllFilters}
+          />
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
@@ -125,10 +183,10 @@ const DoctorsList = () => {
               ) : (
                 <>
                   <p className="text-muted-foreground text-lg mb-2">
-                    No doctors match your search
+                    No doctors match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Try adjusting your search terms
+                    Try adjusting your search terms or filters
                   </p>
                 </>
               )}
@@ -138,6 +196,10 @@ const DoctorsList = () => {
               <div className="mb-2 flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
                   Showing {displayData.length} of {doctors.length} doctors
+                  {sortField &&
+                    ` • Sorted by ${sortField} ${
+                      sortOrder === "asc" ? "↑" : "↓"
+                    }`}
                 </p>
               </div>
 
