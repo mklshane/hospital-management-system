@@ -1,10 +1,11 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
 import { api } from "@/lib/axiosHeader";
 import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
+import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -19,14 +20,6 @@ const SPECIALIZATIONS = [
   "Radiology",
 ];
 
-const TIME_SLOTS = Array.from({ length: 48 }, (_, i) => {
-  const hour = Math.floor(i / 2) + 8;
-  const minute = i % 2 === 0 ? "00" : "30";
-  const period = hour < 12 ? "AM" : "PM";
-  const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-  return `${displayHour}:${minute} ${period}`;
-});
-
 const CreateDoctorModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -38,9 +31,8 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
     gender: "",
     contact: "",
     specialization: "",
-    startTime: "",
-    endTime: "",
   });
+  const [scheduleTime, setScheduleTime] = useState([]);
 
   // Reset form when modal opens
   useEffect(() => {
@@ -53,9 +45,8 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
         gender: "",
         contact: "",
         specialization: "",
-        startTime: "",
-        endTime: "",
       });
+      setScheduleTime([]);
       setStep(1);
     }
   }, [isOpen]);
@@ -68,17 +59,9 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const schedule_time = useMemo(() => {
-    if (!formData.startTime || !formData.endTime) return [];
-    const startIdx = TIME_SLOTS.indexOf(formData.startTime);
-    const endIdx = TIME_SLOTS.indexOf(formData.endTime);
-    if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) return [];
-    return TIME_SLOTS.slice(startIdx, endIdx + 1);
-  }, [formData.startTime, formData.endTime]);
-
   const handleSubmit = async () => {
-    if (schedule_time.length === 0) {
-      alert("Please select a valid time range");
+    if (scheduleTime.length === 0) {
+      alert("Please select at least one time slot for the doctor's schedule");
       return;
     }
 
@@ -86,7 +69,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
     try {
       const payload = {
         ...formData,
-        schedule_time,
+        schedule_time: scheduleTime,
       };
 
       await api.post("/auth/doctor/register", payload);
@@ -126,7 +109,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl transform rounded-2xl bg-ui-card p-8 shadow-xl transition-all border border-ui-border">
+              <Dialog.Panel className="w-full max-w-4xl transform rounded-2xl bg-ui-card p-8 shadow-xl transition-all border border-ui-border">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-xl font-semibold text-foreground">
@@ -206,47 +189,13 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                     </div>
                   )}
 
-                  {/* Step 2: Time Range */}
+                  {/* Step 2: Schedule Time */}
                   {step === 2 && (
-                    <div className="space-y-5 py-2">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Select
-                          label="Start Time"
-                          name="startTime"
-                          value={formData.startTime}
-                          onChange={handleChange}
-                          options={TIME_SLOTS}
-                          required
-                          placeholder="Select start time"
-                        />
-                        <Select
-                          label="End Time"
-                          name="endTime"
-                          value={formData.endTime}
-                          onChange={handleChange}
-                          options={TIME_SLOTS}
-                          required
-                          placeholder="Select end time"
-                        />
-                      </div>
-
-                      {schedule_time.length > 0 && (
-                        <div className="p-3 bg-ui-muted rounded-lg border border-ui-border">
-                          <p className="text-sm font-medium text-foreground mb-2">
-                            Selected Slots ({schedule_time.length})
-                          </p>
-                          <div className="flex flex-wrap gap-1 text-xs">
-                            {schedule_time.map((t) => (
-                              <span
-                                key={t}
-                                className="px-2 py-1 bg-blue/10 text-blue rounded-full"
-                              >
-                                {t}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                    <div className="space-y-4 py-2">
+                      <TimeSlotSelector
+                        selectedSlots={scheduleTime}
+                        onSlotsChange={setScheduleTime}
+                      />
                     </div>
                   )}
 
@@ -312,7 +261,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                     ) : (
                       <button
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loading || scheduleTime.length === 0}
                         className="px-5 py-2 bg-blue hover:bg-blue/90 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading ? "Creating..." : "Create Account"}
