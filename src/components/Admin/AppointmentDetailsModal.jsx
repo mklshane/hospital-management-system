@@ -7,14 +7,12 @@ import {
   Clock,
   User,
   Stethoscope,
-  Mail,
-  Phone,
-  MapPin,
   Trash2,
 } from "lucide-react";
 import { api } from "@/lib/axiosHeader";
 import DeleteModal from "@/components/Common/DeleteModal";
 import { getStatusColor } from "@/utils/statusColors";
+import toast from "react-hot-toast";
 
 const AppointmentDetailsModal = ({
   isOpen,
@@ -43,12 +41,12 @@ const AppointmentDetailsModal = ({
     setLoading(true);
     try {
       await api.delete(`/appointment/${appointment._id}`);
-      alert("Appointment deleted successfully!");
+      toast.success("Appointment deleted successfully!");
       setShowDeleteModal(false);
       onClose();
     } catch (error) {
       console.error("Error deleting appointment:", error);
-      alert("Failed to delete appointment");
+      toast.error("Failed to delete appointment"); 
     } finally {
       setLoading(false);
     }
@@ -90,7 +88,6 @@ const AppointmentDetailsModal = ({
                       Appointment Details
                     </Dialog.Title>
                     <div className="flex items-center gap-2">
-                   
                       <button
                         onClick={onClose}
                         className="text-muted-foreground hover:text-foreground transition-colors"
