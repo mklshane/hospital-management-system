@@ -147,12 +147,14 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        placeholder="John Doe"
                         required
                       />
                       <Input
                         label="Email"
                         name="email"
                         type="email"
+                        placeholder="example@gmail.com"
                         value={formData.email}
                         onChange={handleChange}
                         required
@@ -160,6 +162,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                       <Input
                         label="Contact"
                         name="contact"
+                        placeholder="0912345678"
                         value={formData.contact}
                         onChange={handleChange}
                       />
@@ -208,6 +211,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                         label="Password"
                         name="password"
                         type="password"
+                        placeholder="*******"
                         value={formData.password}
                         onChange={handleChange}
                         required
