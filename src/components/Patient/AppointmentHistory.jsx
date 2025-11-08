@@ -1,5 +1,6 @@
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import AppointmentCard from "./AppointmentCard";
+import NewAppointmentButton from "./NewAppointmentButton";
 
 export default function AppointmentHistory({
   appointments,
@@ -8,56 +9,60 @@ export default function AppointmentHistory({
   setSearchTerm,
   onNewAppointment,
 }) {
-  const filtered = appointments
-    .filter((apt) => !["Pending", "Scheduled"].includes(apt.status))
+  const filteredAppointments = appointments
+    .filter((apt) => apt.patient?._id === appointments[0]?.patient?._id)
     .filter((apt) => {
-      const s = searchTerm.toLowerCase();
+      const search = searchTerm.toLowerCase();
       return (
-        apt.doctor?.name?.toLowerCase().includes(s) ||
-        apt.appointment_date.includes(s) ||
-        apt.notes?.toLowerCase().includes(s)
+        apt.doctor?.name?.toLowerCase().includes(search) ||
+        new Date(apt.appointment_date)
+          .toLocaleDateString()
+          .toLowerCase()
+          .includes(search) ||
+        apt.notes?.toLowerCase().includes(search)
       );
     });
 
   return (
-    <div className="bg-white dark:bg-[#242938] rounded-2xl shadow-sm">
-      <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Appointment History
-        </h3>
-        <div className="relative w-80">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-[#323948] rounded-lg"
-          />
-          <Search className="absolute left-3 top-2.5 text-gray-400" size={20} />
-        </div>
-      </div>
-      <div className="p-6">
-        <div className="grid grid-cols-3 gap-4">
-          <div
-            onClick={onNewAppointment}
-            className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl h-48 flex items-center justify-center cursor-pointer hover:border-blue-400 transition"
-          >
-            <Plus size={48} className="text-gray-400" />
+    <div className="lg:col-span-9">
+      <div className="bg-ui-card rounded-2xl shadow-lg border-2 p-6 h-full min-h-[500px] flex flex-col">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h3 className="text-xl font-bold text-primary">
+            Appointment History
+          </h3>
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search for name, date, notes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-          {loading ? (
-            [...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="h-48 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"
-              />
-            ))
-          ) : filtered.length === 0 ? (
-            <p className="col-span-3 text-center text-gray-500 py-8">
-              No appointments
-            </p>
-          ) : (
-            filtered.map((apt) => <AppointmentCard key={apt._id} apt={apt} />)
-          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <NewAppointmentButton onClick={onNewAppointment} />
+
+            {loading ? (
+              [...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-36 bg-gray-100 rounded-xl animate-pulse"
+                />
+              ))
+            ) : filteredAppointments.length === 0 ? (
+              <p className="col-span-full text-center text-gray-500 py-12">
+                No past appointments
+              </p>
+            ) : (
+              filteredAppointments.map((apt) => (
+                <AppointmentCard key={apt._id} apt={apt} />
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
