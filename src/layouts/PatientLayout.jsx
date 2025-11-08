@@ -11,12 +11,15 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { Logo, LogoIcon } from "./Logo";
 import { ListCollapse } from "lucide-react";
+import LogoutConfirmModal from "@/components/Common/LogoutConfirmModal";
 
 export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation(); // For active link highlighting
+  const location = useLocation(); 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const getUserInitials = () => {
     if (!user) return "U";
@@ -35,11 +38,15 @@ export default function DashboardLayout({ children }) {
   };
 
   const handleLogout = async () => {
+    setLoggingOut(true);
     try {
       await logout();
-      // Optional: navigate("/login") or similar
-    } catch (error) {
-      console.error("Logout failed:", error);
+      navigate("/login");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoggingOut(false);
+      setShowLogoutModal(false);
     }
   };
 
@@ -71,7 +78,7 @@ export default function DashboardLayout({ children }) {
       icon: (
         <IconArrowLeft className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
-      onClick: handleLogout,
+      onClick: () => setShowLogoutModal(true),
     },
   ];
 
@@ -133,7 +140,13 @@ export default function DashboardLayout({ children }) {
 
       <main className="flex-1 overflow-y-auto p-2 md:p-4">
         {/* <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"> */}
-          {children}
+        {children}
+        <LogoutConfirmModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={handleLogout}
+          loading={loggingOut}
+        />
         {/* </div> */}
       </main>
     </div>

@@ -9,21 +9,28 @@ import {
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom"; // ← Added useLocation
+import { useNavigate, useLocation } from "react-router-dom";
+import LogoutConfirmModal from "@/components/Common/LogoutConfirmModal";
 import { Logo, LogoIcon } from "./Logo";
 
 export default function DoctorLayout({ children }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation(); // ← For active state
+  const location = useLocation();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const handleLogout = async () => {
+    setLoggingOut(true);
     try {
       await logout();
-      navigate("/doctor/login"); // Optional: redirect after logout
-    } catch (error) {
-      console.error("Logout failed:", error);
+      navigate("/doctor/login");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoggingOut(false);
+      setShowLogoutModal(false);
     }
   };
 
@@ -71,7 +78,7 @@ export default function DoctorLayout({ children }) {
       icon: (
         <IconArrowLeft className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
-      onClick: handleLogout,
+      onClick: () => setShowLogoutModal(true),
     },
   ];
 
@@ -128,7 +135,15 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content */}
-      <main className="flex-1 p-4 overflow-hidden">{children}</main>
+      <main className="flex-1 p-4 overflow-hidden">
+        {children}
+        <LogoutConfirmModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={handleLogout}
+          loading={loggingOut}
+        />
+      </main>
     </div>
   );
 }
