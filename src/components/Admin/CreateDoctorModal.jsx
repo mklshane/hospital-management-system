@@ -6,7 +6,7 @@ import { api } from "@/lib/axiosHeader";
 import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
 import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
-import toast from "react-hot-toast"; // Import toast
+import toast from "react-hot-toast"; 
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -35,7 +35,6 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
   });
   const [scheduleTime, setScheduleTime] = useState([]);
 
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -64,7 +63,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
     if (scheduleTime.length === 0) {
       toast.error(
         "Please select at least one time slot for the doctor's schedule"
-      ); // Changed to toast
+      );
       return;
     }
 
@@ -76,11 +75,11 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
       };
 
       await api.post("/auth/doctor/register", payload);
-      toast.success("Doctor created successfully!"); // Changed to toast
+      toast.success("Doctor created successfully!"); 
       onClose();
     } catch (error) {
       console.error("Error creating doctor:", error);
-      toast.error(error.message || "Failed to create doctor"); // Changed to toast
+      toast.error(error.message || "Failed to create doctor"); 
     } finally {
       setLoading(false);
     }
