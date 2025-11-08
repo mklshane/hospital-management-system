@@ -6,7 +6,7 @@ import RecentPatients from "@/components/Admin/Dashboard/RecentPatients";
 import SystemLogs from "@/components/Admin/Dashboard/SystemLogs";
 import { useApiData } from "@/hooks/useApiData";
 
-const LOGS_HEIGHT = "calc(100vh - 80px)";
+const LOGS_HEIGHT = "calc(100vh - 50px)";
 
 const AdminDashboard = () => {
   // Use custom hooks for data fetching
