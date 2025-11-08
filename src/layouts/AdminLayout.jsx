@@ -11,21 +11,29 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Logo, LogoIcon } from "./Logo";
+import LogoutConfirmModal from "@/components/Common/LogoutConfirmModal";
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/admin/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+   const handleLogout = async () => {
+     setLoggingOut(true);
+     try {
+       await logout();
+       navigate("/ops-hub/signin");
+     } catch (e) {
+       console.error(e);
+     } finally {
+       setLoggingOut(false);
+       setShowLogoutModal(false);
+     }
+   };
+
 
   const getUserInitials = () => {
     if (!user) return "A";
@@ -74,7 +82,7 @@ export default function AdminLayout() {
       icon: (
         <IconArrowLeft className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
-      onClick: handleLogout,
+      onClick: () => setShowLogoutModal(true),
     },
   ];
 
@@ -141,6 +149,12 @@ export default function AdminLayout() {
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         <main className="flex-1 overflow-hidden px-4 sm:px-3 md:px-4 pt-5 md:pt-2 pb-4 md:py-3">
           <Outlet />
+           <LogoutConfirmModal
+                    isOpen={showLogoutModal}
+                    onClose={() => setShowLogoutModal(false)}
+                    onConfirm={handleLogout}
+                    loading={loggingOut}
+                  />
         </main>
       </div>
     </div>
