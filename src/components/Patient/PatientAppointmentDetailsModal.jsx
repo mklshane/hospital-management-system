@@ -13,7 +13,7 @@ import {
 import { getStatusColor } from "@/utils/statusColors";
 import { useCrudOperations } from "@/hooks/useCrudOperations";
 import toast from "react-hot-toast";
-import DeleteModal from "@/components/common/DeleteModal"; // <-- Add this import
+import DeleteModal from "../Common/DeleteModal";
 
 // ──────────────────────────────────────────────────────────────
 // 1. TIME-SLOT GENERATOR (Copied from BookAppointmentModal)
