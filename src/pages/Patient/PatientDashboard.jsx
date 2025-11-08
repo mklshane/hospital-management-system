@@ -34,12 +34,14 @@ export default function PatientDashboard() {
     dataKey: "doctors",
   });
 
-  // Search
   const {
     searchQuery,
     handleSearch,
     filteredData: filteredAppointments,
-  } = useSearch(appointments, ["doctor.name", "appointment_date", "notes"]);
+  } = useSearch(
+    appointments.filter((apt) => apt.status !== "Cancelled"), 
+    ["doctor.name", "appointment_date", "notes"]
+  );
 
   // Modals
   const bookAppointmentModal = useModal();
@@ -47,7 +49,7 @@ export default function PatientDashboard() {
 
   // CRUD
   const { create, loading: submitting } = useCrudOperations(
-    "appointment",
+    "Appointment",
     refetchAppointments
   );
 
@@ -108,7 +110,6 @@ export default function PatientDashboard() {
         appointment_time: "",
         notes: "",
       });
-      toast.success("Appointment booked!");
     }
   };
 

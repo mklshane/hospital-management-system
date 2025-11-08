@@ -1,6 +1,5 @@
 import { Search, Plus } from "lucide-react";
 import AppointmentCard from "./AppointmentCard";
-import NewAppointmentButton from "./NewAppointmentButton";
 import ThemeToggle from "@/components/ThemeToggle";
 export default function AppointmentHistory({
   appointments,
