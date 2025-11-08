@@ -12,7 +12,100 @@ import {
 } from "lucide-react";
 import { getStatusColor } from "@/utils/statusColors";
 import { useCrudOperations } from "@/hooks/useCrudOperations";
+import toast from "react-hot-toast";
+import DeleteModal from "@/components/common/DeleteModal"; // <-- Add this import
 
+// ──────────────────────────────────────────────────────────────
+// 1. TIME-SLOT GENERATOR (Copied from BookAppointmentModal)
+// ──────────────────────────────────────────────────────────────
+const generateTimeSlots = (scheduleTimes) => {
+  const slots = [];
+
+  if (!Array.isArray(scheduleTimes) || scheduleTimes.length === 0) return slots;
+
+  scheduleTimes.forEach((time) => {
+    if (time.includes("-")) {
+      const [startTime] = time.split(" - ");
+      slots.push({
+        value: convertTo24Hour(startTime),
+        label: time,
+        display: time,
+      });
+    } else {
+      const [timeStr, period] = time.split(" ");
+      const [hourStr, minuteStr] = timeStr.split(":");
+      let hour = parseInt(hourStr);
+      const minute = parseInt(minuteStr);
+
+      let endHour = hour;
+      let endMinute = minute + 30;
+      let endPeriod = period;
+      if (endMinute >= 60) {
+        endHour += 1;
+        endMinute = 0;
+      }
+      if (endHour === 12 && period === "AM") endPeriod = "PM";
+      else if (endHour === 12 && period === "PM") endPeriod = "AM";
+      else if (endHour > 12) {
+        endHour -= 12;
+        endPeriod = "PM";
+      }
+
+      const displayTime = `${time} - ${endHour}:${endMinute
+        .toString()
+        .padStart(2, "0")} ${endPeriod}`;
+
+      const hour24 =
+        period === "PM" && hour !== 12
+          ? hour + 12
+          : hour === 12 && period === "AM"
+          ? 0
+          : hour;
+      const time24 = `${hour24.toString().padStart(2, "0")}:${minute
+        .toString()
+        .padStart(2, "0")}`;
+
+      slots.push({
+        value: time24,
+        label: displayTime,
+        display: displayTime,
+      });
+    }
+  });
+
+  slots.sort((a, b) => {
+    const toMins = (t) => {
+      const [time, period] = t.split(" ");
+      const [h, m] = time.split(":").map(Number);
+      const hh =
+        period === "PM" && h !== 12
+          ? h + 12
+          : h === 12 && period === "AM"
+          ? 0
+          : h;
+      return hh * 60 + m;
+    };
+    return toMins(a.label.split(" - ")[0]) - toMins(b.label.split(" - ")[0]);
+  });
+
+  return slots;
+};
+
+const convertTo24Hour = (timeStr) => {
+  const [time, period] = timeStr.split(" ");
+  const [hourStr, minuteStr] = time.split(":");
+  let hour = parseInt(hourStr);
+  const minute = parseInt(minuteStr);
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+  return `${hour.toString().padStart(2, "0")}:${minute
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+// ──────────────────────────────────────────────────────────────
+// 2. MAIN MODAL COMPONENT
+// ──────────────────────────────────────────────────────────────
 const PatientAppointmentDetailsModal = ({
   isOpen,
   onClose,
@@ -20,16 +113,19 @@ const PatientAppointmentDetailsModal = ({
   onUpdate,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [formData, setFormData] = useState({
     appointment_date: "",
     appointment_time: "",
   });
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   const { update: updateAppointment, loading } = useCrudOperations(
-    "appointment",
+    "Appointment",
     onUpdate
   );
 
+  // Reset form when appointment changes
   useEffect(() => {
     if (appointment) {
       setFormData({
@@ -39,6 +135,16 @@ const PatientAppointmentDetailsModal = ({
       setIsEditing(false);
     }
   }, [appointment]);
+
+  // Generate slots when editing
+  useEffect(() => {
+    if (isEditing && appointment?.doctor?.schedule_time?.length > 0) {
+      const slots = generateTimeSlots(appointment.doctor.schedule_time);
+      setAvailableSlots(slots);
+    } else {
+      setAvailableSlots([]);
+    }
+  }, [isEditing, appointment?.doctor?.schedule_time]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -50,20 +156,18 @@ const PatientAppointmentDetailsModal = ({
     });
   };
 
-  const handleCancelAppointment = async () => {
-    if (!window.confirm("Are you sure you want to cancel this appointment?")) {
-      return;
-    }
+  const handleCancelClick = () => {
+    setShowCancelModal(true);
+  };
 
+  const handleConfirmCancel = async () => {
     const success = await updateAppointment(
       appointment._id,
-      {
-        status: "Cancelled",
-      },
+      { status: "Cancelled" },
       `/appointment/${appointment._id}`
     );
-
     if (success) {
+      setShowCancelModal(false);
       onClose();
     }
   };
@@ -137,7 +241,7 @@ const PatientAppointmentDetailsModal = ({
                         <button
                           onClick={() => setIsEditing(true)}
                           className="p-2 text-muted-foreground hover:text-blue hover:bg-blue/10 rounded-lg transition-colors"
-                          title="Reschedule Appointment"
+                          title="Reschedule"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -151,9 +255,9 @@ const PatientAppointmentDetailsModal = ({
                     </div>
                   </div>
 
-                  {/* Appointment Information */}
+                  {/* Main Content */}
                   <div className="space-y-6">
-                    {/* Status and Basic Info */}
+                    {/* Status + Date/Time */}
                     <div className="flex items-center justify-between p-4 bg-ui-muted rounded-lg">
                       <div
                         className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(
@@ -162,117 +266,117 @@ const PatientAppointmentDetailsModal = ({
                       >
                         {appointment.status}
                       </div>
-                      <div className="flex items-center gap-4 text-sm">
-                        {isEditing ? (
-                          <div className="flex items-center gap-4">
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-muted-foreground">
-                                Date
-                              </label>
-                              <input
-                                type="date"
-                                name="appointment_date"
-                                value={formData.appointment_date}
-                                onChange={handleInputChange}
-                                min={today}
-                                className="px-2 py-1 border border-ui-border rounded text-sm"
-                              />
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-muted-foreground">
-                                Time
-                              </label>
-                              <input
-                                type="time"
+
+                      {isEditing ? (
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs text-muted-foreground">
+                              Date
+                            </label>
+                            <input
+                              type="date"
+                              name="appointment_date"
+                              value={formData.appointment_date}
+                              onChange={handleInputChange}
+                              min={today}
+                              className="px-2 py-1 border border-ui-border rounded text-sm"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs text-muted-foreground">
+                              Time
+                            </label>
+                            {availableSlots.length > 0 ? (
+                              <select
                                 name="appointment_time"
                                 value={formData.appointment_time}
                                 onChange={handleInputChange}
-                                className="px-2 py-1 border border-ui-border rounded text-sm"
-                              />
-                            </div>
+                                className="px-2 py-1 border border-ui-border rounded text-sm w-44"
+                              >
+                                <option value="">-- Select slot --</option>
+                                {availableSlots.map((slot) => (
+                                  <option key={slot.value} value={slot.value}>
+                                    {slot.display}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <div className="px-2 py-1 text-xs text-gray-500 bg-gray-50 rounded border">
+                                No slots available
+                              </div>
+                            )}
                           </div>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-2 text-foreground">
-                              <Calendar className="w-4 h-4 text-blue" />
-                              <span>
-                                {formatDate(appointment.appointment_date)}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-foreground">
-                              <Clock className="w-4 h-4 text-blue" />
-                              <span>{appointment.appointment_time}</span>
-                            </div>
-                          </>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Calendar className="w-4 h-4 text-blue" />
+                            <span>
+                              {formatDate(appointment.appointment_date)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-foreground">
+                            <Clock className="w-4 h-4 text-blue" />
+                            <span>{appointment.appointment_time}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Doctor and Patient Information */}
+                    {/* Doctor & Patient Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Doctor Information */}
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                           <Stethoscope className="w-5 h-5 text-blue" />
-                          Doctor Information
+                          Doctor
                         </h3>
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-sm">
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Name
-                            </p>
-                            <p className="text-foreground font-medium">
+                            <p className="text-muted-foreground">Name</p>
+                            <p className="font-medium">
                               Dr. {appointment.doctor?.name}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground">
                               Specialization
                             </p>
-                            <p className="text-foreground font-medium">
+                            <p className="font-medium">
                               {appointment.doctor?.specialization}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Email
-                            </p>
-                            <p className="text-foreground font-medium">
+                            <p className="text-muted-foreground">Email</p>
+                            <p className="font-medium">
                               {appointment.doctor?.email}
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Patient Information */}
                       <div className="space-y-4">
                         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                           <User className="w-5 h-5 text-blue" />
-                          Your Information
+                          You
                         </h3>
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-sm">
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Name
-                            </p>
-                            <p className="text-foreground font-medium">
+                            <p className="text-muted-foreground">Name</p>
+                            <p className="font-medium">
                               {appointment.patient?.name}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Email
-                            </p>
-                            <p className="text-foreground font-medium">
+                            <p className="text-muted-foreground">Email</p>
+                            <p className="font-medium">
                               {appointment.patient?.email}
                             </p>
                           </div>
                           {appointment.patient?.contact && (
                             <div>
-                              <p className="text-sm text-muted-foreground">
-                                Contact
-                              </p>
-                              <p className="text-foreground font-medium">
+                              <p className="text-muted-foreground">Contact</p>
+                              <p className="font-medium">
                                 {appointment.patient.contact}
                               </p>
                             </div>
@@ -281,7 +385,6 @@ const PatientAppointmentDetailsModal = ({
                       </div>
                     </div>
 
-                    {/* Notes */}
                     {appointment.notes && (
                       <div className="pt-4 border-t border-ui-border">
                         <h3 className="text-lg font-semibold text-foreground mb-3">
@@ -299,7 +402,7 @@ const PatientAppointmentDetailsModal = ({
                     <div>
                       {canModify && (
                         <button
-                          onClick={handleCancelAppointment}
+                          onClick={handleCancelClick} // ← Open DeleteModal
                           disabled={loading}
                           className="px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors font-medium disabled:opacity-50"
                         >
@@ -319,7 +422,7 @@ const PatientAppointmentDetailsModal = ({
                           </button>
                           <button
                             onClick={handleReschedule}
-                            disabled={loading}
+                            disabled={loading || availableSlots.length === 0}
                             className="px-5 py-2 bg-blue hover:bg-blue/90 text-white rounded-lg transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
                           >
                             <Save className="w-4 h-4" />
@@ -327,14 +430,12 @@ const PatientAppointmentDetailsModal = ({
                           </button>
                         </>
                       ) : (
-                        <>
-                          <button
-                            onClick={onClose}
-                            className="px-5 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors"
-                          >
-                            Close
-                          </button>
-                        </>
+                        <button
+                          onClick={onClose}
+                          className="px-5 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors"
+                        >
+                          Close
+                        </button>
                       )}
                     </div>
                   </div>
@@ -344,6 +445,21 @@ const PatientAppointmentDetailsModal = ({
           </div>
         </Dialog>
       </Transition>
+
+      {/* ── DELETE CONFIRMATION MODAL ── */}
+      <DeleteModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleConfirmCancel}
+        title="Cancel Appointment"
+        description="Are you sure you want to cancel this appointment? This action cannot be undone."
+        confirmText="Yes, Cancel"
+        cancelText="No, Keep It"
+        loading={loading}
+        itemName={`Appointment on ${formatDate(
+          appointment.appointment_date
+        )} at ${appointment.appointment_time}`}
+      />
     </>
   );
 };
