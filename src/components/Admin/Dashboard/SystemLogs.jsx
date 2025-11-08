@@ -1,23 +1,28 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
+import { useCrudOperations } from "@/hooks/useCrudOperations";
+import { format } from "date-fns";
 
 const LOGS_HEIGHT = "calc(100vh - 50px)";
 
+const formatLogTime = (iso) => {
+  const date = new Date(iso);
+  return format(date, "MMM d, yyyy • HH:mm");
+};
+
 const SystemLogs = () => {
   const [logs, setLogs] = useState([]);
-  const [hasMoreLogs, setHasMoreLogs] = useState(true);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [hasMoreLogs, setHasMoreLogs] = useState(true);
   const logsEndRef = useRef(null);
 
-  // Safe ref assignment
+  const { loading } = useCrudOperations("logs");
+
   const setLogsEndRef = useCallback((node) => {
     logsEndRef.current = node;
   }, []);
 
-  /* ── FETCH LOGS (PAGINATED) ── */
   const fetchLogs = async (reset = false) => {
     try {
-      setLoading(!reset);
       const { api } = await import("@/lib/axiosHeader");
       const res = await api.get(`/logs?page=${reset ? 1 : page}&limit=20`);
       const newLogs = res.data.logs || [];
@@ -28,17 +33,13 @@ const SystemLogs = () => {
       else setPage((p) => p + 1);
     } catch (e) {
       console.error("Failed to load logs", e);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Initial load for logs
   useEffect(() => {
     fetchLogs(true);
   }, []);
 
-  // Infinite scroll observer for logs
   useEffect(() => {
     if (!hasMoreLogs || loading) return;
 
@@ -52,34 +53,16 @@ const SystemLogs = () => {
     );
 
     const currentNode = logsEndRef.current;
-    if (currentNode) {
-      observer.observe(currentNode);
-    }
+    if (currentNode) observer.observe(currentNode);
 
     return () => {
-      if (currentNode) {
-        observer.unobserve(currentNode);
-      }
+      if (currentNode) observer.unobserve(currentNode);
     };
-  }, [hasMoreLogs, loading, logs]);
-
-  const formatLogTime = (iso) => {
-    const now = Date.now();
-    const diff = now - new Date(iso).getTime();
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    return new Date(iso).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  }, [hasMoreLogs, loading]);
 
   return (
     <div
-      className="rounded-xl shadow p-4 sm:p-6 bg-card flex flex-col h-[400px] "
+      className="rounded-xl shadow p-4 sm:p-6 bg-card flex flex-col"
       style={{ height: LOGS_HEIGHT }}
     >
       <h2 className="text-lg sm:text-xl font-semibold mb-4">System Logs</h2>
@@ -94,19 +77,22 @@ const SystemLogs = () => {
                 <p className="font-medium text-foreground text-sm sm:text-base">
                   {log.message}
                 </p>
-                <span className="text-xs sm:text-sm text-muted-foreground">
-                  {log.createdByName} • {formatLogTime(log.createdAt)}
-                </span>
+
+                {/* Name + Full Date & Time */}
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-1">
+                  <span className="font-medium">{log.createdByName}</span>
+                  <span className="text-muted-foreground/70">•</span>
+                  <span>{formatLogTime(log.createdAt)}</span>
+                </div>
               </div>
             ))}
 
-            {/* Infinite Scroll Trigger */}
             {hasMoreLogs && (
               <div
                 ref={setLogsEndRef}
                 className="py-2 text-center text-sm text-muted-foreground"
               >
-                Loading more...
+                {loading ? "Loading..." : "Load more..."}
               </div>
             )}
           </>
