@@ -1,4 +1,4 @@
-// components/Patient/AppointmentCard.jsx
+
 import { Calendar, Clock, FileText } from "lucide-react";
 import { format } from "date-fns";
 
