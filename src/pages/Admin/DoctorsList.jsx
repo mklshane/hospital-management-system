@@ -6,6 +6,7 @@ import DoctorCard from "@/components/Admin/DoctorCard";
 import SearchBar from "@/components/Common/SearchBar";
 import DeleteModal from "@/components/Common/DeleteModal";
 import { api } from "@/lib/axiosHeader";
+import toast from "react-hot-toast"; // Import toast
 
 const DoctorsList = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -32,7 +33,7 @@ const DoctorsList = () => {
       setFilteredDoctors(response.data.doctors);
     } catch (error) {
       console.error("Error fetching doctors:", error);
-      alert("Failed to fetch doctors");
+      toast.error("Failed to fetch doctors"); // Changed to toast
     } finally {
       setLoading(false);
     }
@@ -84,13 +85,13 @@ const DoctorsList = () => {
     setDeleteLoading(true);
     try {
       await api.delete(`/doctor/${doctorToDelete._id}`);
-      alert("Doctor deleted successfully!");
+      toast.success("Doctor deleted successfully!"); // Changed to toast
       setIsDeleteModalOpen(false);
       setDoctorToDelete(null);
       fetchDoctors();
     } catch (error) {
       console.error("Error deleting doctor:", error);
-      alert("Failed to delete doctor");
+      toast.error("Failed to delete doctor"); // Changed to toast
     } finally {
       setDeleteLoading(false);
     }
