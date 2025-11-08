@@ -17,6 +17,7 @@ import Select from "@/components/Common/Select";
 import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
 import { api } from "@/lib/axiosHeader";
 import DeleteModal from "@/components/Common/DeleteModal";
+import toast from "react-hot-toast";
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -76,12 +77,12 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
       };
 
       await api.put(`/doctor/${doctor._id}`, payload);
-      alert("Doctor updated successfully!");
+      toast.success("Doctor updated successfully!");
       setIsEditing(false);
       onClose();
     } catch (error) {
       console.error("Error updating doctor:", error);
-      alert("Failed to update doctor");
+      toast.error("Failed to update doctor"); 
     } finally {
       setLoading(false);
     }
@@ -94,12 +95,12 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
   const handleDeleteConfirm = async () => {
     try {
       await api.delete(`/doctor/${doctor._id}`);
-      alert("Doctor deleted successfully!");
+      toast.success("Doctor deleted successfully!");
       setShowDeleteModal(false);
       onClose();
     } catch (error) {
       console.error("Error deleting doctor:", error);
-      alert("Failed to delete doctor");
+      toast.error("Failed to delete doctor"); 
     }
   };
 
