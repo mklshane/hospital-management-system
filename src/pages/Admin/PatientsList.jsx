@@ -4,6 +4,7 @@ import PatientDetailsModal from "@/components/Admin/PatientDetailsModal";
 import PatientCard from "@/components/Admin/PatientCard";
 import SearchBar from "@/components/Common/SearchBar";
 import { api } from "@/lib/axiosHeader";
+import toast from "react-hot-toast"; // Import toast
 
 const PatientsList = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -25,7 +26,7 @@ const PatientsList = () => {
       setFilteredPatients(response.data.patients);
     } catch (error) {
       console.error("Error fetching patients:", error);
-      alert("Failed to fetch patients");
+      toast.error("Failed to fetch patients"); // Changed to toast
     } finally {
       setLoading(false);
     }
