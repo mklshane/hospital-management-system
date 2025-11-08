@@ -128,9 +128,9 @@ export default function DashboardLayout({ children }) {
 
       {/* Page content with refined styling */}
       <main className="flex-1 overflow-y-auto p-2 md:p-4">
-        <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900">
+        {/* <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"> */}
           {children}
-        </div>
+        {/* </div> */}
       </main>
     </div>
   );
