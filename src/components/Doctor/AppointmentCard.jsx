@@ -1,31 +1,8 @@
 import { CalendarClock, NotepadText } from "lucide-react";
+import { getStatusConfig } from "@/utils/statusColors";
 
 const AppointmentCard = ({ appt, onClick, formatDate }) => {
-  const statusConfig = {
-    Pending: {
-      color: "text-yellow-600",
-      bg: "bg-yellow-100",
-      dot: "bg-yellow-500",
-    },
-    Scheduled: {
-      color: "text-blue-600",
-      bg: "bg-blue-100",
-      dot: "bg-blue-500",
-    },
-    Completed: {
-      color: "text-green-600",
-      bg: "bg-green-100",
-      dot: "bg-green-500",
-    },
-    Cancelled: {
-      color: "text-gray-600",
-      bg: "bg-gray-100",
-      dot: "bg-gray-500",
-    },
-    Rejected: { color: "text-red-600", bg: "bg-red-100", dot: "bg-red-500" },
-  };
-
-  const config = statusConfig[appt.status] || statusConfig.Pending;
+  const config = getStatusConfig(appt.status);
 
   return (
     <div
