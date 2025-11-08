@@ -2,24 +2,26 @@ import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
+  IconHome,
+  IconCalendarUser,
+  IconClipboardHeart,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // ← Added useLocation
 import { Logo, LogoIcon } from "./Logo";
 
 export default function DoctorLayout({ children }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // ← For active state
 
   const handleLogout = async () => {
     try {
       await logout();
+      navigate("/doctor/login"); // Optional: redirect after logout
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -46,21 +48,21 @@ export default function DoctorLayout({ children }) {
       label: "Dashboard",
       href: "/doctor/dashboard",
       icon: (
-        <IconBrandTabler className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+        <IconHome className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
       label: "Appointments",
       href: "/doctor/appointments",
       icon: (
-        <IconUserBolt className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+        <IconCalendarUser className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
-      label: "Settings",
-      href: "/settings",
+      label: "Medical Records",
+      href: "/doctor/record",
       icon: (
-        <IconSettings className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
+        <IconClipboardHeart className="h-5 w-5 min-w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-300" />
       ),
     },
     {
@@ -74,20 +76,16 @@ export default function DoctorLayout({ children }) {
   ];
 
   return (
-    <div
-      className={cn(
-        "flex w-full h-screen overflow-hidden bg-ui-surface"
-      )}
-    >
+    <div className={cn("flex w-full h-screen overflow-hidden bg-ui-surface")}>
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
+        <SidebarBody className="justify-between gap-10 bg-blue-50 dark:bg-neutral-950 border-r-2 border-neutral-200 dark:border-neutral-800 transition-all duration-300">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-            {/* Logo Section with better spacing */}
+            {/* Logo Section */}
             <div className="mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
               {open ? <Logo /> : <LogoIcon />}
             </div>
 
-            {/* Navigation Links with improved spacing */}
+            {/* Navigation Links */}
             <div className="flex flex-col gap-1">
               {links.map((link, idx) => (
                 <SidebarLink
@@ -95,21 +93,23 @@ export default function DoctorLayout({ children }) {
                   link={link}
                   onClick={link.onClick}
                   className={cn(
-                    "px-1 py-3 rounded-lg transition-colors duration-200",
+                    "px-2.5 py-3 rounded-lg transition-colors duration-200",
                     link.onClick
                       ? "hover:bg-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
-                      : "hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                      : location.pathname === link.href
+                      ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
+                      : "hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-700 dark:hover:text-blue-400"
                   )}
                 />
               ))}
             </div>
           </div>
 
-          {/* User Profile Section with enhanced styling */}
+          {/* User Profile Section */}
           <div className="pt-4 mt-4 border-t border-neutral-200 dark:border-neutral-700">
             <SidebarLink
               link={{
-                label: user?.name || user?.username || "Admin",
+                label: user?.name || user?.username || "Doctor",
                 href: "/profile",
                 icon: (
                   <div
@@ -127,12 +127,8 @@ export default function DoctorLayout({ children }) {
         </SidebarBody>
       </Sidebar>
 
-      {/* Page content with refined styling */}
-      <main className="flex-1 overflow-hidden px-8 py-5">
-        {/* <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"> */}
-          {children}
-        {/* </div> */}
-      </main>
+      {/* Page content */}
+      <main className="flex-1 p-4 overflow-hidden">{children}</main>
     </div>
   );
 }

@@ -1,6 +1,4 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import Dashboard from "./pages/Patient/PatientDashboard";
 import Profile from "./pages/Patient/PatientProfile";
 import Settings from "./pages/Settings.jsx";
@@ -11,18 +9,28 @@ import PatientLogin from "./pages/Authentication/PatientLogin";
 import DoctorLogin from "./pages/Authentication/DoctorLogin";
 import AdminLogin from "./pages/Authentication/AdminLogin";
 import SignUp from "./pages/Authentication/SignUp";
-import { ProtectedRoute, PublicRoute } from "./components/guards/ProtectedRoutes";
+import {
+  ProtectedRoute,
+  PublicRoute,
+} from "./components/guards/ProtectedRoutes";
 import { Navigate } from "react-router-dom";
 import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
+import DoctorMedicalRecords from "./pages/Doctor/DoctorMedicalRecords";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import DoctorsList from "./pages/Admin/DoctorsList";
+import PatientsList from "./pages/Admin/PatientsList";
+import AppointmentsList from "./pages/Admin/AppointmentsList";
+import PatientAppointment from "./pages/Patient/PatientAppointment";
+import PatientMedical from "./pages/Patient/PatientMedical";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route
           path="/"
           element={
@@ -48,7 +56,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/login"
+          path="/ops-hub/signin"
           element={
             <PublicRoute restrictedTo={["admin"]}>
               <AdminLogin />
@@ -64,6 +72,7 @@ function App() {
           }
         />
 
+        {/* Patient Routes */}
         <Route
           path="/dashboard"
           element={
@@ -74,6 +83,40 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedUserTypes={["patient", "doctor", "admin"]}>
+              <DashboardLayout>
+                <Profile />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/appointments"
+          element={
+            <ProtectedRoute allowedUserTypes={["patient"]}>
+              <DashboardLayout>
+                <PatientAppointment />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/records"
+          element={
+            <ProtectedRoute allowedUserTypes={["patient"]}>
+              <DashboardLayout>
+                <PatientMedical />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Doctor Routes */}
         <Route
           path="/doctor/dashboard"
           element={
@@ -95,15 +138,32 @@ function App() {
           }
         />
         <Route
-          path="/admin/dashboard"
+          path="/doctor/record"
           element={
-            <ProtectedRoute allowedUserTypes={["admin"]}>
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
+            <ProtectedRoute allowedUserTypes={["doctor"]}>
+              <DoctorLayout>
+                <DoctorMedicalRecords />
+              </DoctorLayout>
             </ProtectedRoute>
           }
         />
+
+        {/* Admin Routes with Nested Layout */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedUserTypes={["admin"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="doctors" element={<DoctorsList />} />
+          <Route path="patients" element={<PatientsList />} />
+          <Route path="appointments" element={<AppointmentsList />} />
+        </Route>
+
         <Route
           path="/profile"
           element={

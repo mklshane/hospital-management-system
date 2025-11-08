@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/axiosHeader";
 import AuthNav from "../../components/Authentication/Nav";
@@ -11,19 +11,14 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError("");
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,27 +27,12 @@ const AdminLogin = () => {
 
     try {
       const res = await api.post("/auth/admin/login", formData);
+      const { user, token } = res.data;
 
-      if (!res.data.user) {
-        const userData = res.data.user || res.data.admin || res.data;
-
-        if (!userData || typeof userData !== "object") {
-          throw new Error("Invalid user data in response");
-        }
-
-        await login(userData, "admin");
-      } else {
-        await login(res.data.user, "admin");
-      }
-
+      login(user, "admin", token);
       navigate("/admin/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Login failed. Please try again.";
-      setError(errorMessage);
+      setError(error.message || "Login failed.");
     } finally {
       setLoading(false);
     }
@@ -60,17 +40,13 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Navbar */}
       <div className="w-full">
         <AuthNav />
       </div>
-
-      {/* Content */}
       <div className="flex flex-1 items-center justify-center py-8 px-4 mt-5">
-        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50">
-          {/* Left Section */}
-          <div className=" hidden w-[85%] mx-auto lg:flex items-start justify-center p-10 relative rounded-2xl bg-gradient-to-br from-blue-400 via-blue-700 to-blue-200">
-            <div className="text-white max-w-sm z-10 ">
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50 gap-4">
+          <div className="hidden lg:flex items-start justify-center p-10 relative rounded-2xl bg-gradient-to-br from-blue-400 via-blue-700 to-blue-200">
+            <div className="text-white max-w-sm z-10">
               <h2 className="text-lg">Welcome, Admin!</h2>
               <h1 className="text-2xl font-semibold mt-2">
                 Manage users, system settings, and records all in one secure
@@ -82,9 +58,10 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="p-10 w-[100%] mx-auto border-2 rounded-2xl">
-            <h2 className="text-2xl font-semibold mb-1">Admin Login</h2>
+          <div className="p-10 py-22 w-full mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
+            <h2 className="text-2xl font-semibold mb-1 text-black">
+              Admin Login
+            </h2>
             <p className="text-gray-600 mb-6 text-sm">
               Enter your credentials to access the admin dashboard
             </p>
@@ -96,83 +73,60 @@ const AdminLogin = () => {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Email Address
-                  </label>
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Email Address
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="w-full text-black mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <div className="relative">
                   <input
-                    name="email"
-                    type="email"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
                     required
-                    placeholder="you@example.com"
-                    value={formData.email}
+                    placeholder="********"
+                    value={formData.password}
                     onChange={handleChange}
                     disabled={loading}
-                    className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full text-black mt-1 px-4 py-2 border border-[#cecececa] rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
                   />
-                </div>
-
-                <div className="relative">
-                  <label className="text-sm font-medium text-gray-700">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      placeholder="********"
-                      value={formData.password}
-                      onChange={handleChange}
-                      disabled={loading}
-                      className="w-full mt-1 px-4 py-2 border rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center mt-1"
-                      disabled={loading}
-                    >
-                      {showPassword ? (
-                        <Eye className="h-5 w-5 text-gray-500" />
-                      ) : (
-                        <EyeOff className="h-5 w-5 text-gray-500" />
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    disabled={loading}
+                  >
+                    {showPassword ? (
+                      <Eye className="h-5 w-5 text-gray-500" />
+                    ) : (
+                      <EyeOff className="h-5 w-5 text-gray-500" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
+                className="w-full mt-5 py-2 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition disabled:opacity-50"
               >
                 {loading ? "Signing in..." : "Login"}
               </button>
             </form>
-
-            <div className="flex items-center my-6">
-              <div className="flex-grow border-t"></div>
-              <span className="px-4 text-sm text-gray-500">or login as</span>
-              <div className="flex-grow border-t"></div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                onClick={() => navigate("/doctor/login")}
-              >
-                Doctor
-              </button>
-              <button
-                className="flex-1 py-2 border rounded-lg text-sm font-medium hover:bg-gray-100 transition"
-                onClick={() => navigate("/login")}
-              >
-                Patient
-              </button>
-            </div>
           </div>
         </div>
       </div>

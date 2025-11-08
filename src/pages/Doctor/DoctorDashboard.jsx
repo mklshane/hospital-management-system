@@ -1,194 +1,348 @@
-import React, { useState, useEffect } from 'react';
-import { Moon, Sun } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  RefreshCw,
+  Search,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  Users,
+} from "lucide-react";
+import { api } from "../../lib/axiosHeader";
+import AppointmentCard from "../../components/Doctor/AppointmentCard";
+import AppointmentRequestCard from "../../components/Doctor/AppointmentRequestCard";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorDashboard = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [scheduledAppointments, setScheduledAppointments] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
 
-  // Toggle dark mode
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+  const [loading, setLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
+
+  const [doctorInfo, setDoctorInfo] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [doctorLoading, setDoctorLoading] = useState(true);
+
+  // API: Fetch doctor profile and stats
+  const fetchDoctorProfile = async () => {
+    try {
+      setDoctorLoading(true);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const doctorId = user?._id;
+
+      if (!doctorId) throw new Error("Doctor ID not found");
+
+      const docRes = await api.get(`/doctor/${doctorId}`);
+      const { name, specialization } = docRes.data.doctor;
+      setDoctorInfo({ name, specialization });
+
+      const apptRes = await api.get("/appointment");
+      const allAppts = apptRes.data.appointments || [];
+
+      const today = new Date().toISOString().split("T")[0];
+
+      const todayAppts = allAppts.filter((a) => a.appointment_date === today);
+      const scheduled = todayAppts.filter(
+        (a) => a.status === "Scheduled"
+      ).length;
+      const pendingAll = allAppts.filter((a) => a.status === "Pending").length;
+      const completedAll = allAppts.filter(
+        (a) => a.status === "Completed"
+      ).length;
+
+      const uniquePatients = new Set(allAppts.map((a) => a.patient?._id)).size;
+
+      setStats({
+        today: scheduled,
+        pending: pendingAll,
+        completed: completedAll,
+        patients: uniquePatients,
+      });
+    } catch (err) {
+      console.error("Error loading doctor profile / stats:", err);
+      setDoctorInfo({
+        name: "Dr. Juan De La Cruz",
+        specialization: "General Medicine",
+      });
+      setStats({ today: 0, pending: 0, completed: 0, patients: 0 });
+    } finally {
+      setDoctorLoading(false);
     }
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }, [isDarkMode]);
-  
-  // Mock data
-  const doctorData = {
-    name: "Dr. Juan De La Cruz",
-    specialization: "General Medicine"
   };
 
-  const statsData = [
-    { label: "Today's Appointments", value: 12 },
-    { label: "Pending Approvals", value: 5 },
-    { label: "Completed Appointments", value: 7 },
-    { label: "Assigned Patients", value: 23 }
-  ];
+  // API: Fetch today's scheduled appointments
+  const fetchTodayAppointments = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/appointment");
+      const today = new Date().toISOString().split("T")[0];
 
-  const appointmentsData = [
-    {
-      patientName: "Maria Dela Cruz",
-      status: "Pending",
-      date: "Oct 12, 2025",
-      time: "09:30 AM – 10:00 AM",
-      notes: "Complains of persistent cough and mild fever"
-    },
-    {
-      patientName: "John Santos",
-      status: "Approved",
-      date: "Oct 10, 2025",
-      time: "02:00 PM – 02:30 PM",
-      notes: "Routine blood pressure check-up"
-    },
-    {
-      patientName: "John Santos",
-      status: "Approved",
-      date: "Oct 10, 2025",
-      time: "02:00 PM – 02:30 PM",
-      notes: "Routine blood pressure check-up"
-    }
-  ];
+      const todayScheduled = (res.data.appointments || [])
+        .filter(
+          (appt) =>
+            appt.status === "Scheduled" && appt.appointment_date === today
+        )
+        .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
 
-  const appointmentRequests = [
-    {
-      patientName: "Maria Dela Cruz",
-      age: 32,
-      gender: "Female",
-      time: "Today, 09:30 AM",
-      symptoms: "Fever and cough for 3 days"
-    },
-    {
-      patientName: "John Doe",
-      age: 40,
-      gender: "Male", 
-      time: "Today, 10:00 AM",
-      symptoms: "Routine checkup"
+      setScheduledAppointments(todayScheduled);
+    } catch (err) {
+      console.error("Error fetching today's appointments:", err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // API: Fetch pending appointment requests
+  const fetchPendingRequests = async () => {
+    try {
+      setRequestsLoading(true);
+      const res = await api.get("/appointment");
+
+      const pending = (res.data.appointments || [])
+        .filter((appt) => appt.status === "Pending")
+        .map((appt) => ({
+          _id: appt._id,
+          patient: appt.patient,
+          appointment_date: appt.appointment_date,
+          appointment_time: appt.appointment_time,
+          notes: appt.notes,
+        }))
+        .sort((a, b) => {
+          const dateA = new Date(a.appointment_date + " " + a.appointment_time);
+          const dateB = new Date(b.appointment_date + " " + b.appointment_time);
+          return dateA - dateB;
+        });
+
+      setRequests(pending);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  // API: Update appointment status
+  const handleStatusUpdate = async (id, newStatus) => {
+    setActionLoading((prev) => ({ ...prev, [id]: true }));
+    try {
+      await api.put(`/appointment/${id}`, { status: newStatus });
+      await fetchPendingRequests();
+      await fetchTodayAppointments();
+    } catch (err) {
+      console.error(`Failed to ${newStatus} appointment:`, err);
+      alert("Action failed. Please try again.");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchDoctorProfile();
+    fetchTodayAppointments();
+    fetchPendingRequests();
+  }, []);
+
+  // Search filter
+  const filteredAppointments = scheduledAppointments.filter(
+    (appt) =>
+      appt.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appt.appointment_date.includes(searchTerm) ||
+      appt.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[0.8fr_1.2fr] gap-4 overflow-hidden">
-      
-      {/* Upper Left - Blue Background Section */}
-      <div className="col-span-9 row-span-1 bg-blue rounded-2xl p-6 text-white flex flex-col overflow-hidden">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold font-montserrat">{doctorData.name}</h1>
-            <p className="text-blue-light font-figtree">{doctorData.specialization}</p>
+    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-background">
+      {/* Left Column - Stats (Top) and Today's Appointments (Bottom) */}
+
+      {/* Stats Section - Top Left */}
+      <div className="col-span-9 row-span-1 bg-blue rounded-xl p-4 text-white flex flex-col min-h-0">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+          <div className="space-y-1">
+            {doctorLoading ? (
+              <>
+                <div className="h-7 w-48 bg-white/20 rounded animate-pulse"></div>
+                <div className="h-4 w-32 bg-white/15 rounded animate-pulse"></div>
+              </>
+            ) : (
+              <>
+                <h1 className="text-xl font-bold font-montserrat">
+                  {doctorInfo?.name ?? "Dr. Unknown"}
+                </h1>
+                <p className="text-blue-light font-figtree text-sm">
+                  {doctorInfo?.specialization ?? "—"}
+                </p>
+              </>
+            )}
           </div>
 
-          <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="p-2 bg-blue-light/20 rounded-full hover:bg-blue-light/40 transition"
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? (
-              <Sun className="w-5 h-5 text-white" />
-            ) : (
-              <Moon className="w-5 h-5 text-white" />
-            )}
-          </button>
+          <div className="scale-90">
+            <ThemeToggle />
+          </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-4 gap-4 flex-1">
-          {statsData.map((stat, index) => (
-            <div key={index} className="bg-blue-light rounded-xl p-4 flex flex-col justify-center h-full">
-              <p className="text-md font-figtree opacity-90 mb-1">{stat.label}</p>
-              <p className="text-4xl font-bold font-montserrat">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Upper Right - Calendar Section */}
-      <div className="col-span-3 row-span-1 rounded-2xl p-4 overflow-hidden">
-        {/* <h2 className="text-lg font-semibold text-foreground font-montserrat mb-4">Calendar</h2> */}
-        <div className="bg-ui-muted rounded-lg p-4 text-center">
-          {/* Calendar Grid */}
-          <div className="bg-ui-muted rounded-lg">
-            {/* Month Header */}
-            <div className="flex justify-between items-center mb-4">
-              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&lt;</button>
-              <h3 className="text-md font-semibold font-montserrat text-foreground dark:text-white">October 2025</h3>
-              <button className="px-2 py-1 rounded hover:bg-blue-light/20 transition">&gt;</button>
-            </div>
-
-            {/* Week Days */}
-            <div className="grid grid-cols-7 text-sm font-figtree text-muted-foreground dark:text-gray-300 mb-2">
-              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((day) => (
-                <div key={day} className="text-center">{day}</div>
-              ))}
-            </div>
-
-            {/* Days Grid */}
-            <div className="grid grid-cols-7 gap-2 text-sm">
-              {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+        {/* Stats Grid */}
+        <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+          {doctorLoading || !stats
+            ? /* ----- SKELETON ----- */
+              [...Array(4)].map((_, i) => (
                 <div
-                  key={day}
-                  className="p-2 rounded hover:bg-blue-light/20 dark:hover:bg-blue-600 transition text-center cursor-pointer"
+                  key={i}
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20"
                 >
-                  {day}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-white/20 rounded-full animate-pulse"></div>
+                    <div className="h-3 w-20 bg-white/30 rounded animate-pulse"></div>
+                  </div>
+                  <div className="h-8 w-16 bg-white/20 rounded animate-pulse"></div>
+                </div>
+              ))
+            : /* ----- REAL STATS – PROPERLY SIZED ----- */
+              [
+                {
+                  label: "Today's Appointments",
+                  value: stats.today,
+                  icon: <Clock className="w-4 h-4" />,
+                  bg: "bg-blue-500",
+                },
+                {
+                  label: "Pending Approvals",
+                  value: stats.pending,
+                  icon: <AlertCircle className="w-4 h-4" />,
+                  bg: "bg-amber-500",
+                },
+                {
+                  label: "Completed Appointments",
+                  value: stats.completed,
+                  icon: <CheckCircle2 className="w-4 h-4" />,
+                  bg: "bg-emerald-500",
+                },
+                {
+                  label: "Assigned Patients",
+                  value: stats.patients,
+                  icon: <Users className="w-4 h-4" />,
+                  bg: "bg-indigo-500",
+                },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20 transition-all duration-200 hover:bg-white/15"
+                >
+                  {/* Icon + Label */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`${stat.bg} text-white p-1.5 rounded-full`}>
+                      {stat.icon}
+                    </div>
+                    <p className="text-xs font-figtree opacity-90 leading-tight">
+                      {stat.label}
+                    </p>
+                  </div>
+
+                  {/* PROPERLY SIZED VALUE */}
+                  <p className="text-2xl font-bold font-montserrat leading-none">
+                    {stat.value}
+                  </p>
                 </div>
               ))}
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* Lower Left - Appointments Card with Search */}
-      <div className="col-span-9 row-span-1 bg-ui-card rounded-2xl shadow-sm border border-ui-border overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-ui-border h-[72px] shrink-0">
-          <h2 className="text-lg font-semibold text-foreground font-montserrat">Today's Appointment</h2>
-        
-        {/* Search Bar */}
-        <div className="relative w-full sm:w-1/2 lg:w-1/4">
-            <input
-              type="text"
-              placeholder="Search for name, date, notes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 pl-10 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-2 focus:ring-ui-ring"
-            />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+      {/* Right Column - Appointment Requests (Full Height) - NARROWER */}
+      <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card rounded-xl min-h-0">
+        <div className="p-3 border-b border-ui-border shrink-0">
+          <h2 className="text-base font-semibold text-foreground font-montserrat">
+            Appointment Requests
+          </h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+          {requestsLoading ? (
+            <p className="text-center text-muted-foreground py-6 text-xs">
+              Loading requests...
+            </p>
+          ) : requests.length === 0 ? (
+            <p className="text-center text-muted-foreground py-6 text-xs">
+              No pending requests.
+            </p>
+          ) : (
+            requests.map((req) => (
+              <AppointmentRequestCard
+                key={req._id}
+                request={req}
+                onApprove={(id) => handleStatusUpdate(id, "Scheduled")}
+                onReject={(id) => handleStatusUpdate(id, "Rejected")}
+                loading={actionLoading[req._id]}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Today's Appointments - Bottom Left */}
+      <div className="col-span-9 row-span-1 bg-ui-card rounded-xl overflow-hidden flex flex-col min-h-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-ui-border shrink-0">
+          <h2 className="text-lg font-semibold text-foreground font-montserrat">
+            Today's Appointments
+          </h2>
+
+          {/* Search Bar */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 min-w-[200px]">
+              <input
+                type="text"
+                placeholder="Search name, date, notes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3 py-2 pl-9 bg-ui-muted border border-ui-border rounded-lg text-sm text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-1 focus:ring-ui-ring"
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
             </div>
+
+            {/* Refresh Button */}
+            <button
+              onClick={fetchTodayAppointments}
+              disabled={loading}
+              className="p-2 h-9 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              title="Refresh"
+            >
+              <RefreshCw
+                className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
+              />
+            </button>
           </div>
         </div>
 
         {/* Appointment List */}
-        <div className="flex-1 overflow-y-auto p-6">
-          
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+          {loading ? (
+            <p className="text-center text-muted-foreground py-8 text-sm">
+              Loading today's appointments...
+            </p>
+          ) : scheduledAppointments.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8 text-sm">
+              No scheduled appointments for today.
+            </p>
+          ) : (
+            filteredAppointments.map((appt) => (
+              <AppointmentCard
+                key={appt._id}
+                appt={appt}
+                formatDate={(dateStr) =>
+                  new Date(dateStr).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                }
+              />
+            ))
+          )}
         </div>
       </div>
-
-      {/* Lower Right - Appointment Requests */}
-      <div className="col-span-3 row-span-1 rounded-2xl flex flex-col overflow-hidden">
-        <div className="p-6 border-b border-ui-border">
-          <h2 className="text-lg font-semibold text-foreground font-montserrat">Appointment Requests</h2>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* requests list goes here */}
-        </div>
-      </div>
-
     </div>
   );
 };
