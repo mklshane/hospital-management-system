@@ -6,6 +6,7 @@ import { api } from "@/lib/axiosHeader";
 import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
 import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
+import toast from "react-hot-toast"; 
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -34,7 +35,6 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
   });
   const [scheduleTime, setScheduleTime] = useState([]);
 
-  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -61,7 +61,9 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
 
   const handleSubmit = async () => {
     if (scheduleTime.length === 0) {
-      alert("Please select at least one time slot for the doctor's schedule");
+      toast.error(
+        "Please select at least one time slot for the doctor's schedule"
+      );
       return;
     }
 
@@ -73,11 +75,11 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
       };
 
       await api.post("/auth/doctor/register", payload);
-      alert("Doctor created successfully!");
+      toast.success("Doctor created successfully!"); 
       onClose();
     } catch (error) {
       console.error("Error creating doctor:", error);
-      alert(error.message || "Failed to create doctor");
+      toast.error(error.message || "Failed to create doctor"); 
     } finally {
       setLoading(false);
     }
@@ -145,12 +147,14 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
+                        placeholder="John Doe"
                         required
                       />
                       <Input
                         label="Email"
                         name="email"
                         type="email"
+                        placeholder="example@gmail.com"
                         value={formData.email}
                         onChange={handleChange}
                         required
@@ -158,6 +162,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                       <Input
                         label="Contact"
                         name="contact"
+                        placeholder="0912345678"
                         value={formData.contact}
                         onChange={handleChange}
                       />
@@ -206,6 +211,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                         label="Password"
                         name="password"
                         type="password"
+                        placeholder="*******"
                         value={formData.password}
                         onChange={handleChange}
                         required

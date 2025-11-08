@@ -4,6 +4,7 @@ import AppointmentDetailsModal from "@/components/Admin/AppointmentDetailsModal"
 import AppointmentCard from "@/components/Admin/AppointmentCard";
 import SearchBar from "@/components/Common/SearchBar";
 import { api } from "@/lib/axiosHeader";
+import toast from "react-hot-toast";
 
 const AppointmentsList = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -25,7 +26,7 @@ const AppointmentsList = () => {
       setFilteredAppointments(response.data.appointments);
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      alert("Failed to fetch appointments");
+      toast.error("Failed to fetch appointments");
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ const AppointmentsList = () => {
   const handleModalClose = () => {
     setIsDetailsModalOpen(false);
     setSelectedAppointment(null);
-    fetchAppointments(); // Refresh the list when modal closes
+    fetchAppointments();
   };
 
   return (
