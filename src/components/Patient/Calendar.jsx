@@ -4,15 +4,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const Calendar = ({ appointments = [] }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Month & Year
   const month = currentDate.toLocaleString("default", { month: "long" });
   const year = currentDate.getFullYear();
 
-  // First day of month (0 = Sun, 1 = Mon, ...)
   const firstDayOfMonth = new Date(year, currentDate.getMonth(), 1).getDay();
   const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
 
-  // Navigation
   const prevMonth = () => {
     setCurrentDate(new Date(year, currentDate.getMonth() - 1, 1));
   };
@@ -21,16 +18,16 @@ const Calendar = ({ appointments = [] }) => {
     setCurrentDate(new Date(year, currentDate.getMonth() + 1, 1));
   };
 
-  // Check if a date has appointments
-  const hasAppointment = (day) => {
-    const dateStr = new Date(year, currentDate.getMonth(), day)
-      .toISOString()
-      .split("T")[0];
+  const hasScheduledAppointment = (day) => {
+    const monthStr = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+    const dateStr = `${year}-${monthStr}-${dayStr}`;
+
     return appointments.some((apt) => {
       const aptDate = new Date(apt.appointment_date)
         .toISOString()
         .split("T")[0];
-      return aptDate === dateStr;
+      return aptDate === dateStr && apt.status !== "Cancelled";
     });
   };
 
@@ -45,7 +42,6 @@ const Calendar = ({ appointments = [] }) => {
 
   return (
     <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
-      {/* Header: Month + Arrows */}
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
@@ -68,7 +64,6 @@ const Calendar = ({ appointments = [] }) => {
         </button>
       </div>
 
-      {/* Weekday Labels */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
           <div
@@ -80,17 +75,14 @@ const Calendar = ({ appointments = [] }) => {
         ))}
       </div>
 
-      {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-1 flex-1 text-xs">
-        {/* Empty cells before first day */}
         {Array.from({ length: firstDayOfMonth }).map((_, i) => (
           <div key={`empty-start-${i}`} />
         ))}
 
-        {/* Days of the month */}
         {Array.from({ length: daysInMonth }, (_, i) => {
           const day = i + 1;
-          const hasAppt = hasAppointment(day);
+          const hasAppt = hasScheduledAppointment(day);
           const today = isToday(day);
 
           return (
@@ -116,12 +108,11 @@ const Calendar = ({ appointments = [] }) => {
         })}
       </div>
 
-      {/* Legend – Always visible, inside container */}
       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
         <div className="flex justify-center gap-4 text-xs text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 border-2 border-blue-500 rounded" />
-            <span>Appointment</span>
+            <span>Scheduled</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 bg-blue-100 rounded" />
