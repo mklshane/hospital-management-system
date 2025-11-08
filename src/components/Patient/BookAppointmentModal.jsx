@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
+import { generateTimeSlots, convertTo24Hour } from "@/utils/timeSlots";
 
 export default function BookAppointmentModal({
   isOpen,
@@ -14,7 +15,6 @@ export default function BookAppointmentModal({
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
 
-  // Reset when modal closes
   useEffect(() => {
     if (!isOpen) {
       setSelectedDoctor(null);
@@ -22,7 +22,6 @@ export default function BookAppointmentModal({
     }
   }, [isOpen]);
 
-  // Update selected doctor when form.doctor_id changes
   useEffect(() => {
     if (form.doctor_id) {
       const doctor = doctors.find((doc) => doc._id === form.doctor_id);
@@ -47,108 +46,9 @@ export default function BookAppointmentModal({
     }
   }, [selectedDoctor]);
 
-  // Generate 30-minute time slots from doctor's schedule with end times
-  const generateTimeSlots = (scheduleTimes) => {
-    const slots = [];
-
-    scheduleTimes.forEach((time) => {
-      // If the time already includes a dash (from the new format), use it as is
-      if (time.includes("-")) {
-        const [startTime, endTime] = time.split(" - ");
-        slots.push({
-          value: convertTo24Hour(startTime),
-          label: time, // Use the original format like "8:00 AM - 8:30 AM"
-          display: time,
-        });
-      } else {
-        // For legacy format (single time), calculate end time
-        const [timeStr, period] = time.split(" ");
-        const [hourStr, minuteStr] = timeStr.split(":");
-
-        let hour = parseInt(hourStr);
-        const minute = parseInt(minuteStr);
-
-        // Calculate end time
-        let endHour = hour;
-        let endMinute = minute + 30;
-        let endPeriod = period;
-
-        if (endMinute >= 60) {
-          endHour += 1;
-          endMinute = 0;
-        }
-
-        // Handle period changes
-        if (endHour === 12 && period === "AM") {
-          endPeriod = "PM";
-        } else if (endHour === 12 && period === "PM") {
-          endPeriod = "AM";
-        } else if (endHour > 12) {
-          endHour -= 12;
-          endPeriod = "PM";
-        }
-
-        const displayTime = `${time} - ${endHour}:${endMinute
-          .toString()
-          .padStart(2, "0")} ${endPeriod}`;
-
-        // Convert to 24-hour format for value
-        let hour24 = hour;
-        if (period === "PM" && hour !== 12) hour24 += 12;
-        if (period === "AM" && hour === 12) hour24 = 0;
-
-        const time24 = `${hour24.toString().padStart(2, "0")}:${minute
-          .toString()
-          .padStart(2, "0")}`;
-
-        slots.push({
-          value: time24,
-          label: displayTime,
-          display: displayTime,
-        });
-      }
-    });
-
-    // Sort slots chronologically
-    slots.sort((a, b) => {
-      const getMinutes = (timeStr) => {
-        const timeValue = timeStr.includes("-")
-          ? timeStr.split(" - ")[0]
-          : timeStr;
-        const [time, period] = timeValue.split(" ");
-        const [hourStr, minuteStr] = time.split(":");
-        let hour = parseInt(hourStr);
-        const minute = parseInt(minuteStr);
-
-        if (period === "PM" && hour !== 12) hour += 12;
-        if (period === "AM" && hour === 12) hour = 0;
-
-        return hour * 60 + minute;
-      };
-
-      return getMinutes(a.label) - getMinutes(b.label);
-    });
-
-    return slots;
-  };
-
-  // Helper function to convert time to 24-hour format
-  const convertTo24Hour = (timeStr) => {
-    const [time, period] = timeStr.split(" ");
-    const [hourStr, minuteStr] = time.split(":");
-    let hour = parseInt(hourStr);
-    const minute = parseInt(minuteStr);
-
-    if (period === "PM" && hour !== 12) hour += 12;
-    if (period === "AM" && hour === 12) hour = 0;
-
-    return `${hour.toString().padStart(2, "0")}:${minute
-      .toString()
-      .padStart(2, "0")}`;
-  };
 
   const handleDoctorChange = (e) => {
-    onChange(e); // Call parent's onChange first
+    onChange(e); 
   };
 
   const handleTimeChange = (e) => {
