@@ -25,7 +25,9 @@ export const useCrudOperations = (entityName, refetch) => {
   const update = async (id, data, endpoint) => {
     setLoading(true);
     try {
-      await api.put(`${endpoint}/${id}`, data);
+      // if endpoint already includes id, don't append it again
+      const url = endpoint.includes(id) ? endpoint : `${endpoint}/${id}`;
+      await api.put(url, data);
       toast.success(`${entityName} updated successfully!`);
       refetch?.();
       return true;
@@ -37,6 +39,7 @@ export const useCrudOperations = (entityName, refetch) => {
       setLoading(false);
     }
   };
+
 
   const deleteItem = async (id, endpoint) => {
     setDeleteLoading(true);
