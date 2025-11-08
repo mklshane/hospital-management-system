@@ -3,8 +3,12 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AppointmentDetailsModal from "@/components/Admin/AppointmentDetailsModal";
 import AppointmentCard from "@/components/Admin/AppointmentCard";
 import SearchBar from "@/components/Common/SearchBar";
+import FilterDropdown from "@/components/Common/FilterDropdown";
+import ActiveFilters from "@/components/Common/ActiveFilters";
 import { useApiData } from "@/hooks/useApiData";
 import { useSearch } from "@/hooks/useSearch";
+import { useFilter } from "@/hooks/useFilter";
+import { useSort } from "@/hooks/useSort";
 import { useModal } from "@/hooks/useModal";
 
 const AppointmentsList = () => {
@@ -18,7 +22,11 @@ const AppointmentsList = () => {
     dataKey: "appointments",
   });
 
-  const { searchQuery, handleSearch, filteredData } = useSearch(appointments, [
+  const {
+    searchQuery,
+    handleSearch,
+    filteredData: searchFilteredData,
+  } = useSearch(appointments, [
     "doctor.name",
     "patient.name",
     "doctor.specialization",
@@ -28,7 +36,72 @@ const AppointmentsList = () => {
     "appointment_time",
   ]);
 
+  // Filter config for appointments - only status with correct options
+  const appointmentFilterConfig = {
+    status: {
+      type: "select",
+      label: "Status",
+      options: [
+        { value: "Scheduled", label: "Scheduled" },
+        { value: "Completed", label: "Completed" },
+        { value: "Cancelled", label: "Cancelled" },
+        { value: "Pending", label: "Pending" },
+        { value: "Rejected", label: "Rejected" },
+      ],
+    },
+  };
+
+  const {
+    filteredData: filterFilteredData,
+    filters,
+    updateFilter,
+    clearFilter,
+    clearAllFilters,
+    hasActiveFilters,
+  } = useFilter(
+    searchQuery ? searchFilteredData : filteredAppointments || [],
+    appointmentFilterConfig
+  );
+
+  const { sortedData, sortField, sortOrder, handleSort } = useSort(
+    filterFilteredData,
+    "appointment_time",
+    "asc"
+  );
+
   const detailsModal = useModal();
+
+  // Sort options - only date options
+  const appointmentSortOptions = [
+    { value: "appointment_time-asc", label: "Date: Oldest First" },
+    { value: "appointment_time-desc", label: "Date: Newest First" },
+  ];
+
+  // Handle sort selection
+  const handleSortSelection = (value) => {
+    if (value === "") {
+      handleSort(""); // Clear sort
+      return;
+    }
+
+    const [field, order] = value.split("-");
+    handleSort(field, order); // Set both field and order
+  };
+
+  // Get current sort value for dropdown
+  const getCurrentSortValue = () => {
+    if (!sortField) return "";
+    return `${sortField}-${sortOrder}`;
+  };
+
+  // Get display label for current sort
+  const getSortDisplayLabel = () => {
+    if (!sortField) return "";
+    const currentOption = appointmentSortOptions.find(
+      (opt) => opt.value === getCurrentSortValue()
+    );
+    return currentOption ? currentOption.label : "";
+  };
 
   const handleViewAppointment = (appointment) => {
     detailsModal.open(appointment);
@@ -39,8 +112,7 @@ const AppointmentsList = () => {
     refetch();
   };
 
-  // Use filteredData from useSearch when searching, otherwise use filteredAppointments from useApiData
-  const displayData = searchQuery ? filteredData : filteredAppointments || [];
+  const displayData = sortedData;
 
   return (
     <>
@@ -55,14 +127,38 @@ const AppointmentsList = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {/* Search Bar */}
-          <div className="mb-3">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search appointments by doctor, patient, specialization, status..."
-              className="max-w-xl"
+          <div className="flex gap-4 mb-3">
+            <div className="flex-1">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search appointments by doctor, patient, specialization, status..."
+                className="max-w-xl"
+              />
+            </div>
+            <FilterDropdown
+              label="Status"
+              options={appointmentFilterConfig.status.options}
+              value={filters.status}
+              onChange={(value) => updateFilter("status", value)}
+              onClear={() => clearFilter("status")}
+              className="w-40"
+            />
+            <FilterDropdown
+              label="Sort by"
+              options={appointmentSortOptions}
+              value={getCurrentSortValue()}
+              onChange={handleSortSelection}
+              onClear={() => handleSortSelection("")}
+              className="w-48"
             />
           </div>
+
+          <ActiveFilters
+            filters={filters}
+            filterConfig={appointmentFilterConfig}
+            onClearFilter={clearFilter}
+            onClearAll={clearAllFilters}
+          />
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
@@ -77,10 +173,10 @@ const AppointmentsList = () => {
               ) : (
                 <>
                   <p className="text-muted-foreground text-lg mb-2">
-                    No appointments match your search
+                    No appointments match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Try adjusting your search terms
+                    Try adjusting your search terms or filters
                   </p>
                 </>
               )}
@@ -92,6 +188,7 @@ const AppointmentsList = () => {
                 <p className="text-sm text-muted-foreground">
                   Showing {displayData.length} of {appointments.length}{" "}
                   appointments
+                  {sortField && ` • ${getSortDisplayLabel()}`}
                 </p>
               </div>
 
