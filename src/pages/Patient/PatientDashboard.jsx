@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import PatientProfile from "@/components/Patient/PatientProfile";
 import AppointmentHistory from "@/components/Patient/AppointmentHistory";
 import BookAppointmentModal from "@/components/Patient/BookAppointmentModal";
+import PatientAppointmentDetailsModal from "@/components/Patient/PatientAppointmentDetailsModal";
 import { usePatientAppointments } from "@/hooks/usePatientAppointments";
 
 export default function PatientDashboard() {
@@ -15,6 +16,8 @@ export default function PatientDashboard() {
   const { appointments, loading, refetch } = usePatientAppointments(user?._id);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [doctors, setDoctors] = useState([]);
   const [form, setForm] = useState({
@@ -36,6 +39,20 @@ export default function PatientDashboard() {
   const handleOpenModal = () => {
     fetchDoctors();
     setModalOpen(true);
+  };
+
+  const handleAppointmentClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const handleAppointmentUpdate = () => {
+    refetch(); // Refresh the appointments list
   };
 
   const handleChange = (e) => {
@@ -103,11 +120,13 @@ export default function PatientDashboard() {
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               onNewAppointment={handleOpenModal}
+              onAppointmentClick={handleAppointmentClick}
             />
           </div>
         </div>
       </div>
 
+      {/* Book Appointment Modal */}
       <BookAppointmentModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -116,6 +135,14 @@ export default function PatientDashboard() {
         onChange={handleChange}
         onSubmit={handleSubmit}
         submitting={submitting}
+      />
+
+      {/* Appointment Details Modal */}
+      <PatientAppointmentDetailsModal
+        isOpen={detailsModalOpen}
+        onClose={handleCloseDetailsModal}
+        appointment={selectedAppointment}
+        onUpdate={handleAppointmentUpdate}
       />
     </>
   );
