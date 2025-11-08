@@ -3,8 +3,12 @@ import ThemeToggle from "@/components/ThemeToggle";
 import PatientDetailsModal from "@/components/Admin/PatientDetailsModal";
 import PatientCard from "@/components/Admin/PatientCard";
 import SearchBar from "@/components/Common/SearchBar";
+import FilterDropdown from "@/components/Common/FilterDropdown";
+import ActiveFilters from "@/components/Common/ActiveFilters";
 import { useApiData } from "@/hooks/useApiData";
 import { useSearch } from "@/hooks/useSearch";
+import { useFilter } from "@/hooks/useFilter";
+import { useSort } from "@/hooks/useSort";
 import { useModal } from "@/hooks/useModal";
 
 const PatientsList = () => {
@@ -18,15 +22,75 @@ const PatientsList = () => {
     dataKey: "patients",
   });
 
-  const { searchQuery, handleSearch, filteredData } = useSearch(patients, [
+  const {
+    searchQuery,
+    handleSearch,
+    filteredData: searchFilteredData,
+  } = useSearch(patients, ["name", "email", "contact", "gender", "address"]);
+
+  // Filter config for patients
+  const patientFilterConfig = {
+    gender: {
+      type: "select",
+      label: "Gender",
+      options: [
+        { value: "Male", label: "Male" },
+        { value: "Female", label: "Female" },
+        { value: "Other", label: "Other" },
+      ],
+    },
+  };
+
+  const {
+    filteredData: filterFilteredData,
+    filters,
+    updateFilter,
+    clearFilter,
+    clearAllFilters,
+    hasActiveFilters,
+  } = useFilter(
+    searchQuery ? searchFilteredData : filteredPatients || [],
+    patientFilterConfig
+  );
+
+  const { sortedData, sortField, sortOrder, handleSort } = useSort(
+    filterFilteredData,
     "name",
-    "email",
-    "contact",
-    "gender",
-    "address",
-  ]);
+    "asc"
+  );
 
   const detailsModal = useModal();
+
+  const patientSortOptions = [
+    { value: "name-asc", label: "Name A-Z" },
+    { value: "name-desc", label: "Name Z-A" },
+    { value: "age-asc", label: "Age Low to High" },
+    { value: "age-desc", label: "Age High to Low" },
+  ];
+
+  const handleSortSelection = (value) => {
+    if (value === "") {
+      handleSort(""); // Clear sort
+      return;
+    }
+
+    const [field, order] = value.split("-");
+    handleSort(field, order); 
+  };
+
+  const getCurrentSortValue = () => {
+    if (!sortField) return "";
+    return `${sortField}-${sortOrder}`;
+  };
+
+  // Get display label for current sort
+  const getSortDisplayLabel = () => {
+    if (!sortField) return "";
+    const currentOption = patientSortOptions.find(
+      (opt) => opt.value === getCurrentSortValue()
+    );
+    return currentOption ? currentOption.label : "";
+  };
 
   const handleViewPatient = (patient) => {
     detailsModal.open(patient);
@@ -37,8 +101,7 @@ const PatientsList = () => {
     refetch();
   };
 
-  // Use filteredData from useSearch when searching, otherwise use filteredPatients from useApiData
-  const displayData = searchQuery ? filteredData : filteredPatients || [];
+  const displayData = sortedData;
 
   return (
     <>
@@ -51,14 +114,38 @@ const PatientsList = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {/* Search Bar */}
-          <div className="mb-3">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search patients by name, email, contact, address..."
-              className="max-w-md"
+          <div className="flex gap-4 mb-3">
+            <div className="flex-1">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search patients by name, email, contact, address..."
+                className="max-w-md"
+              />
+            </div>
+            <FilterDropdown
+              label="Gender"
+              options={patientFilterConfig.gender.options}
+              value={filters.gender}
+              onChange={(value) => updateFilter("gender", value)}
+              onClear={() => clearFilter("gender")}
+              className="w-32"
+            />
+            <FilterDropdown
+              label="Sort by"
+              options={patientSortOptions}
+              value={getCurrentSortValue()}
+              onChange={handleSortSelection}
+              onClear={() => handleSortSelection("")}
+              className="w-48"
             />
           </div>
+
+          <ActiveFilters
+            filters={filters}
+            filterConfig={patientFilterConfig}
+            onClearFilter={clearFilter}
+            onClearAll={clearAllFilters}
+          />
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
@@ -73,10 +160,10 @@ const PatientsList = () => {
               ) : (
                 <>
                   <p className="text-muted-foreground text-lg mb-2">
-                    No patients match your search
+                    No patients match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Try adjusting your search terms
+                    Try adjusting your search terms or filters
                   </p>
                 </>
               )}
@@ -87,6 +174,7 @@ const PatientsList = () => {
               <div className="mb-4 flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
                   Showing {displayData.length} of {patients.length} patients
+                  {sortField && ` • Sorted by ${getSortDisplayLabel()}`}
                 </p>
               </div>
 
