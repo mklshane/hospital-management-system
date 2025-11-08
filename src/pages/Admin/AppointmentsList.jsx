@@ -1,67 +1,118 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import AppointmentDetailsModal from "@/components/Admin/AppointmentDetailsModal";
 import AppointmentCard from "@/components/Admin/AppointmentCard";
 import SearchBar from "@/components/Common/SearchBar";
-import { api } from "@/lib/axiosHeader";
-import toast from "react-hot-toast";
+import FilterDropdown from "@/components/Common/FilterDropdown";
+import ActiveFilters from "@/components/Common/ActiveFilters";
+import { useApiData } from "@/hooks/useApiData";
+import { useSearch } from "@/hooks/useSearch";
+import { useFilter } from "@/hooks/useFilter";
+import { useSort } from "@/hooks/useSort";
+import { useModal } from "@/hooks/useModal";
 
 const AppointmentsList = () => {
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [appointments, setAppointments] = useState([]);
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const {
+    data: appointments,
+    filteredData: filteredAppointments,
+    loading,
+    refetch,
+  } = useApiData("/appointment", {
+    entityName: "appointments",
+    dataKey: "appointments",
+  });
 
-  // Fetch appointments on component mount
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
+  const {
+    searchQuery,
+    handleSearch,
+    filteredData: searchFilteredData,
+  } = useSearch(appointments, [
+    "doctor.name",
+    "patient.name",
+    "doctor.specialization",
+    "patient.email",
+    "patient.contact",
+    "status",
+    "appointment_time",
+  ]);
 
-  const fetchAppointments = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/appointment");
-      setAppointments(response.data.appointments);
-      setFilteredAppointments(response.data.appointments);
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-      toast.error("Failed to fetch appointments");
-    } finally {
-      setLoading(false);
-    }
+  // Filter config for appointments - only status with correct options
+  const appointmentFilterConfig = {
+    status: {
+      type: "select",
+      label: "Status",
+      options: [
+        { value: "Scheduled", label: "Scheduled" },
+        { value: "Completed", label: "Completed" },
+        { value: "Cancelled", label: "Cancelled" },
+        { value: "Pending", label: "Pending" },
+        { value: "Rejected", label: "Rejected" },
+      ],
+    },
   };
 
-  const handleSearch = (searchQuery) => {
-    if (!searchQuery.trim()) {
-      setFilteredAppointments(appointments);
+  const {
+    filteredData: filterFilteredData,
+    filters,
+    updateFilter,
+    clearFilter,
+    clearAllFilters,
+    hasActiveFilters,
+  } = useFilter(
+    searchQuery ? searchFilteredData : filteredAppointments || [],
+    appointmentFilterConfig
+  );
+
+  const { sortedData, sortField, sortOrder, handleSort } = useSort(
+    filterFilteredData,
+    "appointment_time",
+    "asc"
+  );
+
+  const detailsModal = useModal();
+
+  // Sort options - only date options
+  const appointmentSortOptions = [
+    { value: "appointment_time-asc", label: "Date: Oldest First" },
+    { value: "appointment_time-desc", label: "Date: Newest First" },
+  ];
+
+  // Handle sort selection
+  const handleSortSelection = (value) => {
+    if (value === "") {
+      handleSort(""); // Clear sort
       return;
     }
 
-    const query = searchQuery.toLowerCase().trim();
-    const filtered = appointments.filter(
-      (appointment) =>
-        appointment.doctor?.name?.toLowerCase().includes(query) ||
-        appointment.patient?.name?.toLowerCase().includes(query) ||
-        appointment.doctor?.specialization?.toLowerCase().includes(query) ||
-        appointment.patient?.email?.toLowerCase().includes(query) ||
-        appointment.patient?.contact?.includes(query) ||
-        appointment.status?.toLowerCase().includes(query) ||
-        appointment.appointment_time?.includes(query)
+    const [field, order] = value.split("-");
+    handleSort(field, order); // Set both field and order
+  };
+
+  // Get current sort value for dropdown
+  const getCurrentSortValue = () => {
+    if (!sortField) return "";
+    return `${sortField}-${sortOrder}`;
+  };
+
+  // Get display label for current sort
+  const getSortDisplayLabel = () => {
+    if (!sortField) return "";
+    const currentOption = appointmentSortOptions.find(
+      (opt) => opt.value === getCurrentSortValue()
     );
-    setFilteredAppointments(filtered);
+    return currentOption ? currentOption.label : "";
   };
 
   const handleViewAppointment = (appointment) => {
-    setSelectedAppointment(appointment);
-    setIsDetailsModalOpen(true);
+    detailsModal.open(appointment);
   };
 
   const handleModalClose = () => {
-    setIsDetailsModalOpen(false);
-    setSelectedAppointment(null);
-    fetchAppointments();
+    detailsModal.close();
+    refetch();
   };
+
+  const displayData = sortedData;
 
   return (
     <>
@@ -76,32 +127,56 @@ const AppointmentsList = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {/* Search Bar */}
-          <div className="mb-3">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search appointments by doctor, patient, specialization, status..."
-              className="max-w-xl"
+          <div className="flex gap-4 mb-3">
+            <div className="flex-1">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search appointments by doctor, patient, specialization, status..."
+                className="max-w-xl"
+              />
+            </div>
+            <FilterDropdown
+              label="Status"
+              options={appointmentFilterConfig.status.options}
+              value={filters.status}
+              onChange={(value) => updateFilter("status", value)}
+              onClear={() => clearFilter("status")}
+              className="w-40"
+            />
+            <FilterDropdown
+              label="Sort by"
+              options={appointmentSortOptions}
+              value={getCurrentSortValue()}
+              onChange={handleSortSelection}
+              onClear={() => handleSortSelection("")}
+              className="w-48"
             />
           </div>
+
+          <ActiveFilters
+            filters={filters}
+            filterConfig={appointmentFilterConfig}
+            onClearFilter={clearFilter}
+            onClearAll={clearAllFilters}
+          />
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue"></div>
             </div>
-          ) : filteredAppointments.length === 0 ? (
+          ) : displayData.length === 0 ? (
             <div className="text-center py-12">
-              {appointments.length === 0 ? (
+              {!appointments || appointments.length === 0 ? (
                 <p className="text-muted-foreground text-lg">
                   No appointments found
                 </p>
               ) : (
                 <>
                   <p className="text-muted-foreground text-lg mb-2">
-                    No appointments match your search
+                    No appointments match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Try adjusting your search terms
+                    Try adjusting your search terms or filters
                   </p>
                 </>
               )}
@@ -111,15 +186,16 @@ const AppointmentsList = () => {
               {/* Results Count */}
               <div className="mb-4 flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
-                  Showing {filteredAppointments.length} of {appointments.length}{" "}
+                  Showing {displayData.length} of {appointments.length}{" "}
                   appointments
+                  {sortField && ` • ${getSortDisplayLabel()}`}
                 </p>
               </div>
 
               {/* Appointments List - Fixed scrolling container */}
               <div className="h-[calc(100vh-215px)] overflow-y-auto">
                 <div className="space-y-3 pr-2 pb-6">
-                  {filteredAppointments.map((appointment) => (
+                  {displayData.map((appointment) => (
                     <AppointmentCard
                       key={appointment._id}
                       appointment={appointment}
@@ -135,9 +211,9 @@ const AppointmentsList = () => {
 
       {/* Details & Delete Modal */}
       <AppointmentDetailsModal
-        isOpen={isDetailsModalOpen}
+        isOpen={detailsModal.isOpen}
         onClose={handleModalClose}
-        appointment={selectedAppointment}
+        appointment={detailsModal.selectedItem}
         onDelete={handleModalClose}
       />
     </>

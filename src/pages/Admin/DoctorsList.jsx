@@ -1,124 +1,121 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ThemeToggle from "@/components/ThemeToggle";
 import CreateDoctorModal from "@/components/Admin/CreateDoctorModal";
 import DoctorDetailsModal from "@/components/Admin/DoctorDetailsModal";
 import DoctorCard from "@/components/Admin/DoctorCard";
 import SearchBar from "@/components/Common/SearchBar";
+import FilterDropdown from "@/components/Common/FilterDropdown";
+import ActiveFilters from "@/components/Common/ActiveFilters";
 import DeleteModal from "@/components/Common/DeleteModal";
-import { api } from "@/lib/axiosHeader";
-import toast from "react-hot-toast"; // Import toast
+import { useApiData } from "@/hooks/useApiData";
+import { useSearch } from "@/hooks/useSearch";
+import { useFilter } from "@/hooks/useFilter";
+import { useSort } from "@/hooks/useSort";
+import { useModal } from "@/hooks/useModal";
+import { useCrudOperations } from "@/hooks/useCrudOperations";
 
 const DoctorsList = () => {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [doctors, setDoctors] = useState([]);
-  const [filteredDoctors, setFilteredDoctors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [doctorToDelete, setDoctorToDelete] = useState(null);
-  const [modalMode, setModalMode] = useState("create");
+  const {
+    data: doctors,
+    filteredData: filteredDoctors,
+    loading,
+    refetch,
+  } = useApiData("/doctor", {
+    entityName: "doctors",
+    dataKey: "doctors",
+  });
 
-  // Fetch doctors on component mount
-  useEffect(() => {
-    fetchDoctors();
-  }, []);
+  const {
+    searchQuery,
+    handleSearch,
+    filteredData: searchFilteredData,
+  } = useSearch(doctors, [
+    "name",
+    "email",
+    "specialization",
+    "contact",
+    "gender",
+  ]);
 
-  const fetchDoctors = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("/doctor");
-      setDoctors(response.data.doctors);
-      setFilteredDoctors(response.data.doctors);
-    } catch (error) {
-      console.error("Error fetching doctors:", error);
-      toast.error("Failed to fetch doctors"); // Changed to toast
-    } finally {
-      setLoading(false);
-    }
+  // Filter config for doctors
+  const doctorFilterConfig = {
+    specialization: {
+      type: "select",
+      label: "Specialization",
+      options: [
+        { value: "Cardiology", label: "Cardiology" },
+        { value: "Dermatology", label: "Dermatology" },
+        { value: "Neurology", label: "Neurology" },
+        { value: "Pediatrics", label: "Pediatrics" },
+        { value: "Orthopedics", label: "Orthopedics" },
+        { value: "Gynecology", label: "Gynecology" },
+      ],
+    },
   };
 
-  const handleSearch = (searchQuery) => {
-    if (!searchQuery.trim()) {
-      setFilteredDoctors(doctors);
-      return;
-    }
+  const {
+    filteredData: filterFilteredData,
+    filters,
+    updateFilter,
+    clearFilter,
+    clearAllFilters,
+    hasActiveFilters,
+  } = useFilter(
+    searchQuery ? searchFilteredData : filteredDoctors || [],
+    doctorFilterConfig
+  );
 
-    const query = searchQuery.toLowerCase().trim();
-    const filtered = doctors.filter(
-      (doctor) =>
-        doctor.name?.toLowerCase().includes(query) ||
-        doctor.email?.toLowerCase().includes(query) ||
-        doctor.specialization?.toLowerCase().includes(query) ||
-        doctor.contact?.includes(query) ||
-        doctor.gender?.toLowerCase().includes(query)
-    );
-    setFilteredDoctors(filtered);
-  };
+  const { sortedData, sortField, sortOrder, handleSort } =
+    useSort(filterFilteredData);
+
+  const createModal = useModal();
+  const detailsModal = useModal();
+  const deleteModal = useModal();
+
+  const { deleteLoading, deleteItem } = useCrudOperations("doctor", refetch);
 
   const handleCreateDoctor = () => {
-    setSelectedDoctor(null);
-    setModalMode("create");
-    setIsCreateModalOpen(true);
+    createModal.open();
   };
 
   const handleViewDoctor = (doctor) => {
-    setSelectedDoctor(doctor);
-    setIsDetailsModalOpen(true);
-  };
-
-  const handleEditDoctor = (doctor) => {
-    setSelectedDoctor(doctor);
-    setModalMode("edit");
-    setIsCreateModalOpen(true);
+    detailsModal.open(doctor);
   };
 
   const handleDeleteDoctor = (doctor) => {
-    setDoctorToDelete(doctor);
-    setIsDeleteModalOpen(true);
+    deleteModal.open(doctor);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!doctorToDelete) return;
+    if (!deleteModal.selectedItem) return;
 
-    setDeleteLoading(true);
-    try {
-      await api.delete(`/doctor/${doctorToDelete._id}`);
-      toast.success("Doctor deleted successfully!"); // Changed to toast
-      setIsDeleteModalOpen(false);
-      setDoctorToDelete(null);
-      fetchDoctors();
-    } catch (error) {
-      console.error("Error deleting doctor:", error);
-      toast.error("Failed to delete doctor"); // Changed to toast
-    } finally {
-      setDeleteLoading(false);
+    const success = await deleteItem(deleteModal.selectedItem._id, "/doctor");
+    if (success) {
+      deleteModal.close();
     }
   };
 
   const handleModalClose = () => {
-    setIsCreateModalOpen(false);
-    setIsDetailsModalOpen(false);
-    setSelectedDoctor(null);
-    fetchDoctors();
+    createModal.close();
+    detailsModal.close();
+    refetch();
   };
 
   const handleDeleteModalClose = () => {
-    setIsDeleteModalOpen(false);
-    setDoctorToDelete(null);
+    deleteModal.close();
   };
+
+  const displayData = sortedData;
 
   return (
     <>
       <div className="min-h-screen bg-ui-surface flex flex-col">
-        {/* Header */}
         <header className="border-b border-ui-border px-6 pt-4 pb-1 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Doctors List</h1>
           <div className="flex items-center gap-4">
             <button
               onClick={handleCreateDoctor}
-              className="bg-blue hover:bg-blue/90 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2"
+              className="bg-blue hover:bg-blue/90 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2 mb-2"
             >
               <svg
                 className="w-4 h-4"
@@ -139,24 +136,39 @@ const DoctorsList = () => {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 p-6">
-          {/* Search Bar */}
-          <div className="mb-3">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search doctors by name, email, specialization, contact..."
-              className="max-w-lg"
+          <div className="flex gap-4 mb-3">
+            <div className="flex-1">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search doctors by name, email, specialization, contact..."
+                className="max-w-lg"
+              />
+            </div>
+            <FilterDropdown
+              label="Specialization"
+              options={doctorFilterConfig.specialization.options}
+              value={filters.specialization}
+              onChange={(value) => updateFilter("specialization", value)}
+              onClear={() => clearFilter("specialization")}
+              className="w-48"
             />
           </div>
+
+          <ActiveFilters
+            filters={filters}
+            filterConfig={doctorFilterConfig}
+            onClearFilter={clearFilter}
+            onClearAll={clearAllFilters}
+          />
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue"></div>
             </div>
-          ) : filteredDoctors.length === 0 ? (
+          ) : displayData.length === 0 ? (
             <div className="text-center py-12">
-              {doctors.length === 0 ? (
+              {!doctors || doctors.length === 0 ? (
                 <>
                   <p className="text-muted-foreground text-lg mb-4">
                     No doctors found
@@ -171,27 +183,29 @@ const DoctorsList = () => {
               ) : (
                 <>
                   <p className="text-muted-foreground text-lg mb-2">
-                    No doctors match your search
+                    No doctors match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Try adjusting your search terms
+                    Try adjusting your search terms or filters
                   </p>
                 </>
               )}
             </div>
           ) : (
             <>
-              {/* Results Count */}
               <div className="mb-2 flex justify-between items-center">
                 <p className="text-sm text-muted-foreground">
-                  Showing {filteredDoctors.length} of {doctors.length} doctors
+                  Showing {displayData.length} of {doctors.length} doctors
+                  {sortField &&
+                    ` • Sorted by ${sortField} ${
+                      sortOrder === "asc" ? "↑" : "↓"
+                    }`}
                 </p>
               </div>
 
-              {/* Doctors List - Single column layout like patients */}
               <div className="h-[calc(100vh-195px)] overflow-y-auto">
                 <div className="space-y-3 pr-2 pb-6">
-                  {filteredDoctors.map((doctor) => (
+                  {displayData.map((doctor) => (
                     <DoctorCard
                       key={doctor._id}
                       doctor={doctor}
@@ -205,34 +219,31 @@ const DoctorsList = () => {
         </main>
       </div>
 
-      {/* Create/Edit Modal */}
       <CreateDoctorModal
-        isOpen={isCreateModalOpen}
+        isOpen={createModal.isOpen}
         onClose={handleModalClose}
-        doctor={selectedDoctor}
-        mode={modalMode}
+        doctor={createModal.selectedItem}
+        mode={createModal.selectedItem ? "edit" : "create"}
       />
 
-      {/* Details Modal */}
       <DoctorDetailsModal
-        isOpen={isDetailsModalOpen}
+        isOpen={detailsModal.isOpen}
         onClose={handleModalClose}
-        doctor={selectedDoctor}
+        doctor={detailsModal.selectedItem}
         onDelete={handleDeleteDoctor}
       />
 
-      {/* Delete Confirmation Modal */}
       <DeleteModal
-        isOpen={isDeleteModalOpen}
+        isOpen={deleteModal.isOpen}
         onClose={handleDeleteModalClose}
         onConfirm={handleDeleteConfirm}
         title="Delete Doctor"
         description="Are you sure you want to delete this doctor? All associated data including appointments will be permanently removed. This action cannot be undone."
         confirmText="Delete Doctor"
         loading={deleteLoading}
-        itemName={`Dr. ${doctorToDelete?.name || ""}${
-          doctorToDelete?.specialization
-            ? ` (${doctorToDelete.specialization})`
+        itemName={`Dr. ${deleteModal.selectedItem?.name || ""}${
+          deleteModal.selectedItem?.specialization
+            ? ` (${deleteModal.selectedItem.specialization})`
             : ""
         }`}
       />
