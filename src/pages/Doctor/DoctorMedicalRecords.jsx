@@ -19,7 +19,7 @@ const DoctorMedicalRecords = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [patientRecords, setPatientRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [columnsRefreshing, setColumnsRefreshing] = useState(false); // ← NEW
+  const [columnsRefreshing, setColumnsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [selectedFilters, setSelectedFilters] = useState(["recent", "older"]);
@@ -160,7 +160,6 @@ const DoctorMedicalRecords = () => {
     return acc;
   }, {});
 
-  // Initial loading only
   if (loading && records.length === 0) {
     return (
       <p className="text-center py-4 text-foreground text-sm">
@@ -292,21 +291,56 @@ const DoctorMedicalRecords = () => {
             </button>
           </div>
 
-          {/* COLUMNS WITH SCROLL + REFRESH OVERLAY */}
+          {/* COLUMNS WITH DASHBOARD-STYLE SKELETON CARDS */}
           <div className="relative flex-1 min-h-0 overflow-hidden">
-            {/* Refresh Overlay */}
+            {/* SKELETON LOADING - DASHBOARD STYLE */}
             {columnsRefreshing && (
-              <div className="absolute inset-0 bg-ui-card/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 pointer-events-none rounded-xl">
-                <RefreshCw className="w-7 h-7 text-blue animate-spin mb-2" />
-                <p className="text-sm font-medium text-foreground">Refreshing records...</p>
+              <div className="h-full overflow-y-auto pr-1 scrollbar">
+                <div className="grid grid-cols-3 gap-3 pb-4">
+                  {selectedFilters.map((filterKey) => {
+                    const statusData = statusOptions.find((s) => s.key === filterKey);
+
+                    return (
+                      <div key={filterKey} className="min-h-0 flex flex-col">
+                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-card z-10 py-1">
+                          {statusData.label} ({Math.floor(Math.random() * 6) + 1})
+                          <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+                        </h2>
+
+                        <div className="space-y-2">
+                          {[...Array(Math.floor(Math.random() * 4) + 3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
+                                <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-ui-muted/60 rounded w-36 animate-pulse" />
+                                  <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse" />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-3 bg-ui-muted/50 rounded w-full animate-pulse" />
+                                <div className="h-3 bg-ui-muted/50 rounded w-32 animate-pulse" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
-            {/* Scrollable Grid */}
-            <div className="h-full overflow-y-auto pr-1 scrollbar">
-              <div className={`grid grid-cols-3 gap-3 pb-4 transition-opacity duration-300 ${
-                columnsRefreshing ? "opacity-30" : "opacity-100"
-              }`}>
+            {/* REAL CONTENT - SMOOTH FADE IN */}
+            <div
+              className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
+                columnsRefreshing ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <div className="grid grid-cols-3 gap-3 pb-4">
                 {selectedFilters.map((filterKey) => {
                   const statusData = statusOptions.find((s) => s.key === filterKey);
                   const list = filteredRecords[filterKey] || [];
@@ -314,7 +348,6 @@ const DoctorMedicalRecords = () => {
 
                   return (
                     <div key={filterKey} className="min-h-0 flex flex-col">
-                      {/* Sticky Header */}
                       <h2
                         onClick={() => toggleSort(filterKey)}
                         className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1"
@@ -329,7 +362,6 @@ const DoctorMedicalRecords = () => {
                         />
                       </h2>
 
-                      {/* Cards */}
                       <div className="space-y-2 flex-1">
                         {list.length === 0 ? (
                           <p className="text-xs text-muted-foreground text-center py-8">
@@ -354,7 +386,7 @@ const DoctorMedicalRecords = () => {
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS */}
+        {/* RIGHT SECTION - DETAILS (unchanged) */}
         <div className="col-span-3 bg-ui-card rounded-xl p-3 flex flex-col overflow-hidden shadow-xs">
           <h2 className="text-base font-bold font-montserrat text-foreground mb-4">
             Record Details
