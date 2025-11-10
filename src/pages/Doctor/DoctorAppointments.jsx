@@ -20,6 +20,7 @@ import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
 import CollapsibleSection from "../../components/Doctor/CollapsibleSection";
 import AppointmentHistorySection from "../../components/Doctor/AppointmentHistorySection";
 import MedicalRecordsSection from "../../components/Doctor/MedicalRecordsSection";
+import AppointmentActionModal from "../../components/Doctor/AppointmentActionModal";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorAppointments = () => {
@@ -43,7 +44,14 @@ const DoctorAppointments = () => {
     "scheduled",
     "completed",
   ]);
+  
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const [modal, setModal] = useState({
+    isOpen: false,
+    appointment: null,
+    action: null, 
+  });
 
   const statusOptions = [
     { key: "pending", label: "Pending", color: "yellow" },
@@ -547,7 +555,11 @@ const DoctorAppointments = () => {
                   <>
                     <button
                       onClick={() =>
-                        updateStatus(selectedAppointment._id, "Scheduled")
+                        setModal({
+                          isOpen: true,
+                          appointment: selectedAppointment,
+                          action: "accept",
+                        })
                       }
                       className="w-full bg-blue hover:bg-blue-light text-white py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs shadow hover:shadow-md"
                     >
@@ -556,7 +568,11 @@ const DoctorAppointments = () => {
                     </button>
                     <button
                       onClick={() =>
-                        updateStatus(selectedAppointment._id, "Rejected")
+                        setModal({
+                          isOpen: true,
+                          appointment: selectedAppointment,
+                          action: "reject",
+                        })
                       }
                       className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
                     >
@@ -578,7 +594,11 @@ const DoctorAppointments = () => {
                     </button>
                     <button
                       onClick={() =>
-                        updateStatus(selectedAppointment._id, "Completed")
+                        setModal({
+                          isOpen: true,
+                          appointment: selectedAppointment,
+                          action: "complete",
+                        })
                       }
                       className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
                     >
@@ -588,14 +608,13 @@ const DoctorAppointments = () => {
                   </>
                 )}
 
-                {/* FINAL STATES */}
+                {/* Final states */}
                 {(selectedAppointment.status === "Completed" ||
                   selectedAppointment.status === "Rejected" ||
                   selectedAppointment.status === "Cancelled") && (
                   <div className="text-center py-2">
                     <p className="text-xs text-muted-foreground">
-                      This appointment is{" "}
-                      {selectedAppointment.status.toLowerCase()}.
+                      This appointment is {selectedAppointment.status.toLowerCase()}.
                     </p>
                   </div>
                 )}
@@ -617,6 +636,24 @@ const DoctorAppointments = () => {
             onRecordAdded={() => {
               fetchAppointments();
               setSelectedAppointment(null);
+            }}
+          />
+
+          {/* Appointment Action Modal */}
+          <AppointmentActionModal
+            isOpen={modal.isOpen}
+            onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+            appointment={modal.appointment}
+            actionType={modal.action}
+            loading={loading}
+            onConfirm={async () => {
+              if (!modal.appointment || !modal.action) return;
+              const statusMap = {
+                accept: "Scheduled",
+                reject: "Rejected",
+                complete: "Completed",
+              };
+              await updateStatus(modal.appointment._id, statusMap[modal.action]);
             }}
           />
         </div>
