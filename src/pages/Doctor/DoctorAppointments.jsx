@@ -27,11 +27,12 @@ const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [columnsRefreshing, setColumnsRefreshing] = useState(false); // ← NEW
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
   const [sortOrders, setSortOrders] = useState({
-    pending: "desc",
-    scheduled: "desc",
+    pending: "asc",
+    scheduled: "asc",
     completed: "desc",
     cancelled: "desc",
     rejected: "desc",
@@ -47,7 +48,7 @@ const DoctorAppointments = () => {
   
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-    const [modal, setModal] = useState({
+  const [modal, setModal] = useState({
     isOpen: false,
     appointment: null,
     action: null, 
@@ -77,6 +78,7 @@ const DoctorAppointments = () => {
 
   const fetchAppointments = async () => {
     try {
+      setColumnsRefreshing(true); // ← Trigger overlay
       setLoading(true);
       const res = await api.get("/appointment");
       setAppointments(res.data.appointments || []);
@@ -84,6 +86,7 @@ const DoctorAppointments = () => {
       console.error("Error fetching appointments:", err);
     } finally {
       setLoading(false);
+      setTimeout(() => setColumnsRefreshing(false), 300); // ← Smooth fade out
     }
   };
 
@@ -91,10 +94,12 @@ const DoctorAppointments = () => {
     fetchAppointments();
   }, []);
 
+  // ... [sortByDate, toggleSort, filteredAppointments, formatDate, updateStatus stay exactly the same] ...
+
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
       const parseAppointmentTime = (appt) => {
-        const dateObj = new Date(appt.appointment_date); // Already a Date
+        const dateObj = new Date(appt.appointment_date);
         if (isNaN(dateObj.getTime())) return 0;
 
         const timeStr = appt.appointment_time?.trim();
@@ -112,13 +117,11 @@ const DoctorAppointments = () => {
           if (period === 'PM' && hours !== 12) hours += 12;
           if (period === 'AM' && hours === 12) hours = 0;
         } else {
-          // 24-hour format: "09:00" or "14:30"
           const [h, m = '0'] = timeStr.split(':').map(Number);
           hours = h;
           minutes = m;
         }
 
-        // Set time on the date object
         dateObj.setHours(hours, minutes, 0, 0);
         return dateObj.getTime();
       };
@@ -126,7 +129,6 @@ const DoctorAppointments = () => {
       const timeA = parseAppointmentTime(a);
       const timeB = parseAppointmentTime(b);
 
-      // Safety fallback
       if (timeA === 0 && timeB === 0) return 0;
       if (timeA === 0) return 1;
       if (timeB === 0) return -1;
@@ -201,12 +203,14 @@ const DoctorAppointments = () => {
     }
   };
 
-  if (loading)
+  // Initial full-screen loading (only on first mount)
+  if (loading && appointments.length === 0) {
     return (
       <p className="text-center py-4 text-foreground text-sm">
         Loading appointments...
       </p>
     );
+  }
 
   return (
     <div className="h-screen flex flex-col ">
@@ -351,54 +355,77 @@ const DoctorAppointments = () => {
             </button>
           </div>
 
-          {/* Dynamic Columns */}
-          <div className="grid grid-cols-3 gap-3 flex-1 overflow-y-auto pr-1">
-            {selectedFilters.map((filterKey) => {
-              const statusData = statusOptions.find((s) => s.key === filterKey);
-              const list = filteredAppointments[filterKey] || [];
-              const currentOrder = sortOrders[filterKey] || "desc";
+          {/* COLUMNS AREA WITH PROPER SCROLL + LOADING OVERLAY */}
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+            {/* Loading Overlay - Covers only the columns */}
+            {columnsRefreshing && (
+              <div className="absolute inset-0 bg-ui-card/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 pointer-events-none rounded-xl">
+                <RefreshCw className="w-7 h-7 text-blue animate-spin mb-2" />
+                <p className="text-sm font-medium text-foreground">Refreshing columns...</p>
+              </div>
+            )}
 
-              return (
-                <div key={filterKey} className="min-h-0">
-                  <h2
-                    onClick={() => toggleSort(filterKey)}
-                    className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none"
-                  >
-                    {statusData.label} ({list.length})
-                    <ArrowUpDown
-                      className={`w-3 h-3 transition-all ${
-                        currentOrder === "asc"
-                          ? "rotate-180 text-blue"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  </h2>
-                  <div className="space-y-2">
-                    {list.map((appt) => (
-                      <AppointmentCard
-                        key={appt._id}
-                        appt={appt}
-                        onClick={setSelectedAppointment}
-                        formatDate={formatDate}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+            {/* Scrollable Grid Container */}
+            <div className="h-full overflow-y-auto pr-1 scrollbar">
+              <div className={`grid grid-cols-3 gap-3 pb-4 transition-opacity duration-300 ${
+                columnsRefreshing ? "opacity-30" : "opacity-100"
+              }`}>
+                {selectedFilters.map((filterKey) => {
+                  const statusData = statusOptions.find((s) => s.key === filterKey);
+                  const list = filteredAppointments[filterKey] || [];
+                  const currentOrder = sortOrders[filterKey] || "desc";
+
+                  return (
+                    <div key={filterKey} className="min-h-0 flex flex-col">
+                      {/* Column Header */}
+                      <h2
+                        onClick={() => toggleSort(filterKey)}
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1"
+                      >
+                        {statusData.label} ({list.length})
+                        <ArrowUpDown
+                          className={`w-3 h-3 transition-all ${
+                            currentOrder === "asc"
+                              ? "rotate-180 text-blue"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </h2>
+
+                      {/* Scrollable Cards */}
+                      <div className="space-y-2 flex-1">
+                        {list.length === 0 ? (
+                          <p className="text-xs text-muted-foreground text-center py-8">
+                            No {statusData.label.toLowerCase()} appointments
+                          </p>
+                        ) : (
+                          list.map((appt) => (
+                            <AppointmentCard
+                              key={appt._id}
+                              appt={appt}
+                              onClick={setSelectedAppointment}
+                              formatDate={formatDate}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS */}
+        {/* RIGHT SECTION - DETAILS (unchanged) */}
         <div className="col-span-3 bg-ui-card rounded-xl p-3 flex flex-col overflow-hidden shadow-xs">
-          {/* Fixed Header */}
+          {/* ... everything from header to modals stays exactly the same ... */}
           <header className="flex items-center justify-between mb-3 pb-2 border-b border-ui-border">
             <h2 className="text-base font-bold font-montserrat text-foreground">
               Appointment Details
             </h2>
           </header>
 
-          {/* Scrollable Content */}
           <div className="scrollbar flex-1 min-h-0 overflow-y-auto pr-2 space-y-3 pb-16">
             {!selectedAppointment ? (
               <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-8">
@@ -496,7 +523,6 @@ const DoctorAppointments = () => {
                   </div>
                 </section>
 
-                {/* COLLAPSIBLE SECTIONS */}
                 <CollapsibleSection title="Patient Details" defaultOpen={false}>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {selectedAppointment.patient?.age && (
@@ -568,11 +594,9 @@ const DoctorAppointments = () => {
             )}
           </div>
 
-          {/* STICKY ACTION BAR */}
           {selectedAppointment && (
             <div className="sticky bottom-0 -mx-3 mt-3 bg-gradient-to-t from-ui-card via-ui-card to-transparent pt-3">
               <div className="px-3 pb-3 space-y-2">
-                {/* PENDING */}
                 {selectedAppointment.status === "Pending" && (
                   <>
                     <button
@@ -604,7 +628,6 @@ const DoctorAppointments = () => {
                   </>
                 )}
 
-                {/* SCHEDULED */}
                 {selectedAppointment.status === "Scheduled" && (
                   <>
                     <button
@@ -630,7 +653,6 @@ const DoctorAppointments = () => {
                   </>
                 )}
 
-                {/* Final states */}
                 {(selectedAppointment.status === "Completed" ||
                   selectedAppointment.status === "Rejected" ||
                   selectedAppointment.status === "Cancelled") && (
@@ -644,7 +666,6 @@ const DoctorAppointments = () => {
             </div>
           )}
 
-          {/* Medical Record Modal */}
           <MedicalRecordModal
             isOpen={isRecordModalOpen}
             onClose={() => setIsRecordModalOpen(false)}
@@ -661,7 +682,6 @@ const DoctorAppointments = () => {
             }}
           />
 
-          {/* Appointment Action Modal */}
           <AppointmentActionModal
             isOpen={modal.isOpen}
             onClose={() => setModal({ isOpen: false, appointment: null, action: null })}

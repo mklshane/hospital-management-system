@@ -19,6 +19,7 @@ const DoctorMedicalRecords = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [patientRecords, setPatientRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [columnsRefreshing, setColumnsRefreshing] = useState(false); // ← NEW
   const [searchTerm, setSearchTerm] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [selectedFilters, setSelectedFilters] = useState(["recent", "older"]);
@@ -37,6 +38,7 @@ const DoctorMedicalRecords = () => {
 
   const fetchRecords = async () => {
     try {
+      setColumnsRefreshing(true);
       setLoading(true);
       const res = await api.get("/record");
 
@@ -63,6 +65,7 @@ const DoctorMedicalRecords = () => {
       alert("Failed to load records. Check console.");
     } finally {
       setLoading(false);
+      setTimeout(() => setColumnsRefreshing(false), 300);
     }
   };
 
@@ -157,12 +160,14 @@ const DoctorMedicalRecords = () => {
     return acc;
   }, {});
 
-  if (loading)
+  // Initial loading only
+  if (loading && records.length === 0) {
     return (
       <p className="text-center py-4 text-foreground text-sm">
         Loading medical records...
       </p>
     );
+  }
 
   return (
     <div className="h-screen flex flex-col">
@@ -287,41 +292,65 @@ const DoctorMedicalRecords = () => {
             </button>
           </div>
 
-          {/* Columns */}
-          <div className="grid grid-cols-3 gap-3 flex-1 overflow-y-auto pr-1">
-            {selectedFilters.map((filterKey) => {
-              const statusData = statusOptions.find((s) => s.key === filterKey);
-              const list = filteredRecords[filterKey] || [];
-              const currentOrder = sortOrders[filterKey] || "desc";
+          {/* COLUMNS WITH SCROLL + REFRESH OVERLAY */}
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+            {/* Refresh Overlay */}
+            {columnsRefreshing && (
+              <div className="absolute inset-0 bg-ui-card/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 pointer-events-none rounded-xl">
+                <RefreshCw className="w-7 h-7 text-blue animate-spin mb-2" />
+                <p className="text-sm font-medium text-foreground">Refreshing records...</p>
+              </div>
+            )}
 
-              return (
-                <div key={filterKey} className="min-h-0">
-                  <h2
-                    onClick={() => toggleSort(filterKey)}
-                    className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none"
-                  >
-                    {statusData.label} ({list.length})
-                    <ArrowUpDown
-                      className={`w-3 h-3 transition-all ${
-                        currentOrder === "asc"
-                          ? "rotate-180 text-blue"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  </h2>
-                  <div className="space-y-2">
-                    {list.map((record) => (
-                      <MedicalRecordCard
-                        key={record._id}
-                        record={record}
-                        onClick={setSelectedRecord}
-                        formatDate={formatDate}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+            {/* Scrollable Grid */}
+            <div className="h-full overflow-y-auto pr-1 scrollbar">
+              <div className={`grid grid-cols-3 gap-3 pb-4 transition-opacity duration-300 ${
+                columnsRefreshing ? "opacity-30" : "opacity-100"
+              }`}>
+                {selectedFilters.map((filterKey) => {
+                  const statusData = statusOptions.find((s) => s.key === filterKey);
+                  const list = filteredRecords[filterKey] || [];
+                  const currentOrder = sortOrders[filterKey] || "desc";
+
+                  return (
+                    <div key={filterKey} className="min-h-0 flex flex-col">
+                      {/* Sticky Header */}
+                      <h2
+                        onClick={() => toggleSort(filterKey)}
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1"
+                      >
+                        {statusData.label} ({list.length})
+                        <ArrowUpDown
+                          className={`w-3 h-3 transition-all ${
+                            currentOrder === "asc"
+                              ? "rotate-180 text-blue"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </h2>
+
+                      {/* Cards */}
+                      <div className="space-y-2 flex-1">
+                        {list.length === 0 ? (
+                          <p className="text-xs text-muted-foreground text-center py-8">
+                            No {statusData.label.toLowerCase()} records
+                          </p>
+                        ) : (
+                          list.map((record) => (
+                            <MedicalRecordCard
+                              key={record._id}
+                              record={record}
+                              onClick={setSelectedRecord}
+                              formatDate={formatDate}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
