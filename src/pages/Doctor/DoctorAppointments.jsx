@@ -449,6 +449,7 @@ const DoctorAppointments = () => {
                               appt={appt}
                               onClick={setSelectedAppointment}
                               formatDate={formatDate}
+                              isSelected={selectedAppointment?._id === appt._id}
                             />
                           ))
                         )}
