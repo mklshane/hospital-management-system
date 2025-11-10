@@ -11,6 +11,7 @@ const MedicalRecordModal = ({
   appointment,
   onRecordAdded,
   onRecordUpdated,
+  onRecordDeleted,
   existingRecord,
 }) => {
   const isEdit = !!existingRecord;
@@ -295,14 +296,61 @@ const MedicalRecordModal = ({
 
                 {/* Action Buttons */}
                 <div className="flex justify-end gap-3">
-                  <button
-                    onClick={onClose}
-                    className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    {isEdit && existingRecord?.appointment?.status === "Completed" ? "Close" : "Cancel"}
-                  </button>
+                  {/* LEFT: Cancel + Delete (only when editing & not completed) */}
+                  {isEdit && existingRecord?.appointment?.status !== "Completed" && (
+                    <>
+                      <button
+                        onClick={onClose}
+                        className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
 
-                  {/* Hide Save/Update button when COMPLETED */}
+                      {/* DELETE BUTTON */}
+                      <button
+                        onClick={() => {
+                          toast(
+                            (t) => (
+                              <div className="flex flex-col gap-3">
+                                <p className="text-sm">Are you sure you want to delete this record?</p>
+                                <div className="flex gap-2 justify-end">
+                                  <button
+                                    onClick={() => toast.dismiss(t.id)}
+                                    className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                  >
+                                    No, keep it
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      toast.dismiss(t.id);
+                                      try {
+                                        await api.delete(`/record/${existingRecord._id}`);
+                                        toast.success("Record deleted successfully");
+                                        onRecordDeleted?.(existingRecord._id); // new callback
+                                        onClose();
+                                      } catch (err) {
+                                        toast.error("Failed to delete record");
+                                      }
+                                    }}
+                                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                                  >
+                                    Yes, delete
+                                  </button>
+                                </div>
+                              </div>
+                            ),
+                            { duration: 10000 }
+                          );
+                        }}
+                        className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Record
+                      </button>
+                    </>
+                  )}
+
+                  {/* RIGHT: Update/Save button */}
                   {!(isEdit && existingRecord?.appointment?.status === "Completed") && (
                     <button
                       onClick={handleSave}
@@ -314,6 +362,16 @@ const MedicalRecordModal = ({
                         : isEdit
                         ? "Update Record"
                         : "Save Record"}
+                    </button>
+                  )}
+
+                  {/* Only "Close" when viewing completed */}
+                  {isEdit && existingRecord?.appointment?.status === "Completed" && (
+                    <button
+                      onClick={onClose}
+                      className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Close
                     </button>
                   )}
                 </div>

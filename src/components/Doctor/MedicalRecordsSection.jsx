@@ -3,7 +3,6 @@ import CollapsibleSection from "./CollapsibleSection";
 import { api } from "../../lib/axiosHeader";
 import { format } from "date-fns";
 import MedicalRecordModal from "./MedicalRecordModal";
-import { Edit3 } from "lucide-react";
 
 const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) => {
   const [records, setRecords] = useState([]);
@@ -71,6 +70,10 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
       prev.map((r) => (r._id === updatedRecord._id ? updatedRecord : r))
     );
     closeModal();
+  };
+
+  const handleRecordDeleted = (deletedId) => {
+    setRecords((prev) => prev.filter((r) => r._id !== deletedId));
   };
 
   const title = patientName ? `Medical Records` : "Medical Records History";
@@ -147,7 +150,6 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
                       className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-xs hover:underline"
                       title="Edit record"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
                       Edit
                     </button>
                   )}
@@ -173,6 +175,7 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
         }}
         existingRecord={editingRecord}
         onRecordUpdated={handleRecordUpdated}
+        onRecordDeleted={handleRecordDeleted}
         onRecordAdded={() => {
         }}
       />
