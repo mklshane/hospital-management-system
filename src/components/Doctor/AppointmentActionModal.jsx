@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom"; 
 import { CheckCircle, XCircle, CheckCircle2, X } from "lucide-react";
 
 const AppointmentActionModal = ({
@@ -7,7 +8,7 @@ const AppointmentActionModal = ({
   appointment,
   onConfirm,
   loading = false,
-  actionType, // "accept" | "reject" | "complete"
+  actionType,
 }) => {
   if (!isOpen || !appointment) return null;
 
@@ -42,12 +43,12 @@ const AppointmentActionModal = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-ui-card rounded-xl shadow-xl max-w-sm w-full p-6 relative">
+  const modalContent = (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+      <div className="bg-ui-card rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-in fade-in zoom-in duration-200">
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition"
           disabled={loading}
         >
           <X className="w-4 h-4" />
@@ -76,7 +77,7 @@ const AppointmentActionModal = ({
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className={`w-full py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all ${cfg.buttonClass} disabled:opacity-70`}
+            className={`w-full py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all ${cfg.buttonClass} disabled:opacity-70 shadow hover:shadow-md`}
           >
             {loading ? "Processing..." : cfg.buttonText}
           </button>
@@ -92,6 +93,8 @@ const AppointmentActionModal = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default AppointmentActionModal;
