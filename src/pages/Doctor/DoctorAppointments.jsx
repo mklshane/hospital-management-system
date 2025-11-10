@@ -47,6 +47,7 @@ const DoctorAppointments = () => {
   ]);
   
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [modal, setModal] = useState({
     isOpen: false,
@@ -78,7 +79,7 @@ const DoctorAppointments = () => {
 
   const fetchAppointments = async () => {
     try {
-      setColumnsRefreshing(true); // ← Trigger overlay
+      setColumnsRefreshing(true);
       setLoading(true);
       const res = await api.get("/appointment");
       setAppointments(res.data.appointments || []);
@@ -86,15 +87,14 @@ const DoctorAppointments = () => {
       console.error("Error fetching appointments:", err);
     } finally {
       setLoading(false);
-      setTimeout(() => setColumnsRefreshing(false), 300); // ← Smooth fade out
+      setTimeout(() => setColumnsRefreshing(false), 300); 
+      setRefreshTrigger((prev) => prev + 1);
     }
   };
 
   useEffect(() => {
     fetchAppointments();
   }, []);
-
-  // ... [sortByDate, toggleSort, filteredAppointments, formatDate, updateStatus stay exactly the same] ...
 
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
@@ -197,6 +197,7 @@ const DoctorAppointments = () => {
       );
       if (selectedAppointment?._id === id)
         setSelectedAppointment((prev) => ({ ...prev, status }));
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       console.error("Error updating status:", err);
       alert(err.response?.data?.message || "Failed to update status");
@@ -627,6 +628,7 @@ const DoctorAppointments = () => {
                   key={selectedAppointment?.patient?._id}
                   patientId={selectedAppointment.patient?._id}
                   patientName={selectedAppointment.patient?.name}
+                  refreshTrigger={refreshTrigger}
                 />
 
                 <MedicalRecordsSection
@@ -722,6 +724,7 @@ const DoctorAppointments = () => {
             onRecordAdded={() => {
               fetchAppointments();
               setSelectedAppointment(null);
+              setRefreshTrigger((prev) => prev + 1);
             }}
           />
 

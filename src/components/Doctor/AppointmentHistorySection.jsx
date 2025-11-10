@@ -4,65 +4,75 @@ import CollapsibleSection from "./CollapsibleSection";
 import { api } from "../../lib/axiosHeader";
 import { format } from "date-fns";
 
-const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" }) => {
+const AppointmentHistorySection = ({
+  patientId: propPatientId,
+  patientName = "",
+  refreshTrigger = 0,
+  currentAppointmentId = null, 
+}) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ---- patient id handling -------------------------------------------------
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const patientId = propPatientId;
 
-    // Remove fallback
-    const patientId = propPatientId;
-
-    // Add safety check
-    if (!patientId) {
+  // Early return if no patient selected
+  if (!patientId) {
     return (
-        <CollapsibleSection title={title} badge="0" badgeColor="bg-blue-700" defaultOpen={false}>
-        <p className="pt-3 text-sm text-muted-foreground">
-            Select a patient to view history.
+      <CollapsibleSection
+        title="Appointment History"
+        badge="0"
+        badgeColor="bg-blue-700"
+        defaultOpen={false}
+      >
+        <p className="pt-3 text-sm text-muted-foreground text-center">
+          Select a patient to view history.
         </p>
-        </CollapsibleSection>
+      </CollapsibleSection>
     );
-    }
+  }
 
-  // ---- fetch appointments --------------------------------------------------
-    useEffect(() => {
-    setAppointments([]);
-    // No need to check !patientId here — already returned above
+  // Fetch past appointments using dedicated route
+  useEffect(() => {
+    if (!patientId) return;
 
     const fetchAppointments = async () => {
-        try {
+      try {
         setLoading(true);
+        setAppointments([]); // Clear previous
+
         console.log("Fetching history for patient:", patientId);
 
-        const res = await api.get(`/appointment?patient=${patientId}`);
+        // Use dedicated patient history endpoint
+        const res = await api.get(`/appointment/patient/${patientId}`);
 
-        const list = (res.data?.appointments || [])
-            .filter((a) => {
-            const apptDateTime = new Date(`${a.appointment_date}T${a.appointment_time}`);
-            const isPast = apptDateTime < new Date();
-            return ["Completed", "Cancelled"].includes(a.status) || (a.status === "Scheduled" && isPast);
-            })
-            .sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
+        let list = res.data?.appointments || [];
+
+        // Exclude current appointment if provided
+        if (currentAppointmentId) {
+          list = list.filter((appt) => appt._id !== currentAppointmentId);
+        }
+
+        // Sort by date descending
+        list.sort((a, b) => new Date(b.appointment_date) - new Date(a.appointment_date));
 
         setAppointments(list);
-        } catch (err) {
+      } catch (err) {
         console.error("Failed to fetch appointment history:", err.response?.data || err);
         setAppointments([]);
-        } finally {
+      } finally {
         setLoading(false);
-        }
+      }
     };
 
     fetchAppointments();
-    }, [patientId]); // Re-fetch when patient changes
-  
-    // ---- titles --------------------------------------------------------------
-  const title = patientName ? `Appointment History` : "Appointment History";
+  }, [patientId, refreshTrigger, currentAppointmentId]); // Re-fetch on trigger or ID change
 
-  // ---- render helpers -------------------------------------------------------
+  const title = patientName
+    ? `Appointment History`
+    : "Appointment History";
+
   const renderEmpty = () => (
-    <p className="text-center text-sm text-muted-foreground py-2">
+    <p className="text-center text-sm text-muted-foreground py-4">
       No past appointments recorded.
     </p>
   );
@@ -70,43 +80,61 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
   const renderCard = (appt) => {
     const date = format(new Date(appt.appointment_date), "dd MMM yyyy");
     const time = appt.appointment_time || "—";
-    const doctor = appt.doctor?.name || "—";
+    const doctor = appt.doctor?.name || "Unknown Doctor";
+    const status = appt.status;
 
     return (
       <div
         key={appt._id}
-        className="flex flex-col py-2 px-4 bg-ui-muted rounded-lg hover:bg-ui-muted/50 transition"
+        className="flex flex-col py-3 px-4 bg-ui-muted/50 rounded-lg hover:bg-ui-muted/80 transition-all border border-ui-border/30"
       >
-        <p className="font-medium text-foreground">Dr. {doctor}</p>
+        <div className="flex justify-between items-start">
+          <p className="font-semibold text-foreground">Dr. {doctor}</p>
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+              status === "Completed"
+                ? "bg-green-100 text-green-800"
+                : status === "Cancelled"
+                ? "bg-red-100 text-red-800"
+                : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {status}
+          </span>
+        </div>
 
         <p className="text-xs text-muted-foreground mt-1">
           {date} • {time}
         </p>
 
         {appt.notes ? (
-          <p className="text-xs text-muted-foreground mt-2">
-            <span className="font-medium">Notes:</span> {appt.notes}
+          <p className="text-xs text-muted-foreground mt-2 italic">
+            "{appt.notes}"
           </p>
         ) : null}
       </div>
     );
   };
 
-  // ---- final render ---------------------------------------------------------
-  if (!patientId) {
-    return (
-      <CollapsibleSection title={title} badge="0" badgeColor="bg-blue-700" defaultOpen={false}>
-        <p className="p-3 text-sm text-muted-foreground">
-          Please log in to view appointment history.
-        </p>
-      </CollapsibleSection>
-    );
-  }
-
+  // Loading state
   if (loading) {
     return (
-      <CollapsibleSection title={title} badge="..." badgeColor="bg-blue-700" defaultOpen={false}>
-        <p className="p-3 text-sm text-muted-foreground">Loading appointments...</p>
+      <CollapsibleSection
+        title={title}
+        badge="..."
+        badgeColor="bg-blue-700"
+        defaultOpen={false}
+      >
+        <div className="p-4">
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-20 bg-ui-muted/40 rounded-lg animate-pulse border border-ui-border/20"
+              />
+            ))}
+          </div>
+        </div>
       </CollapsibleSection>
     );
   }
@@ -118,7 +146,7 @@ const AppointmentHistorySection = ({ patientId: propPatientId, patientName = "" 
       badgeColor="bg-blue-700"
       defaultOpen={false}
     >
-      <div className="space-y-3 p-2">
+      <div className="space-y-3 p-2 pb-4">
         {appointments.length === 0 ? renderEmpty() : appointments.map(renderCard)}
       </div>
     </CollapsibleSection>
