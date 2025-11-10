@@ -14,22 +14,19 @@ const AppointmentActionModal = ({
 
   const config = {
     accept: {
-      title: "Accept Appointment",
-      message: "Are you sure you want to accept this appointment?",
+      title: "Do you want to accept this appointment?",
       buttonText: "Accept Appointment",
       buttonClass: "bg-blue hover:bg-blue-light text-white",
       icon: <CheckCircle className="w-4 h-4" />,
     },
     reject: {
-      title: "Reject Appointment",
-      message: "Are you sure you want to reject this appointment?",
+      title: "Do you want to reject this appointment?",
       buttonText: "Reject Appointment",
       buttonClass: "border border-red-300 text-red-600 hover:bg-red-50",
       icon: <XCircle className="w-4 h-4" />,
     },
     complete: {
-      title: "Mark as Completed",
-      message: "Confirm that this appointment has been completed.",
+      title: "Do you want to mark this appointment as completed?",
       buttonText: "Mark as Completed",
       buttonClass: "bg-green-600 hover:bg-green-700 text-white",
       icon: <CheckCircle2 className="w-4 h-4" />,
@@ -44,7 +41,7 @@ const AppointmentActionModal = ({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
       <div className="bg-ui-card rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-in fade-in zoom-in duration-200">
         <button
           onClick={onClose}
@@ -61,12 +58,17 @@ const AppointmentActionModal = ({
           <h3 className="text-lg font-bold text-foreground font-montserrat">
             {cfg.title}
           </h3>
-          <p className="text-xs text-muted-foreground mt-2">
-            {appointment.patient?.name}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {appointment.appointment_date} • {appointment.appointment_time}
-          </p>
+          <div className="text-xs text-muted-foreground mt-2 space-y-1">
+            <p>{appointment.patient?.name}</p>
+            <p>
+              {new Date(appointment.appointment_date).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}{" "}
+              • {appointment.appointment_time}
+            </p>
+          </div>
         </div>
 
         <p className="text-sm text-center text-foreground mb-6">
