@@ -93,33 +93,53 @@ const DoctorAppointments = () => {
 
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
-      const dateA = new Date(
-        `${a.appointment_date} ${a.appointment_time}`
-      ).getTime();
-      const dateB = new Date(
-        `${b.appointment_date} ${b.appointment_time}`
-      ).getTime();
-      return order === "desc" ? dateB - dateA : dateA - dateB;
+      const parseAppointmentTime = (appt) => {
+        const dateObj = new Date(appt.appointment_date); // Already a Date
+        if (isNaN(dateObj.getTime())) return 0;
+
+        const timeStr = appt.appointment_time?.trim();
+        if (!timeStr) return dateObj.getTime();
+
+        let hours, minutes;
+        const upperTime = timeStr.toUpperCase();
+
+        if (upperTime.includes('AM') || upperTime.includes('PM')) {
+          const [time, period] = upperTime.split(' ');
+          const [h, m = '0'] = time.split(':').map(Number);
+          hours = h;
+          minutes = m;
+
+          if (period === 'PM' && hours !== 12) hours += 12;
+          if (period === 'AM' && hours === 12) hours = 0;
+        } else {
+          // 24-hour format: "09:00" or "14:30"
+          const [h, m = '0'] = timeStr.split(':').map(Number);
+          hours = h;
+          minutes = m;
+        }
+
+        // Set time on the date object
+        dateObj.setHours(hours, minutes, 0, 0);
+        return dateObj.getTime();
+      };
+
+      const timeA = parseAppointmentTime(a);
+      const timeB = parseAppointmentTime(b);
+
+      // Safety fallback
+      if (timeA === 0 && timeB === 0) return 0;
+      if (timeA === 0) return 1;
+      if (timeB === 0) return -1;
+
+      return order === "desc" ? timeB - timeA : timeA - timeB;
     });
   };
 
   const toggleSort = (column) => {
-    setSortOrders((prev) => {
-      const newOrder = prev[column] === "desc" ? "asc" : "desc";
-      const updated = { ...prev, [column]: newOrder };
-
-      setAppointments((prevAppointments) => {
-        const sorted = [...prevAppointments].sort((a, b) => {
-          const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
-          const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
-          if (newOrder === "asc") return dateA - dateB;
-          return dateB - dateA;
-        });
-        return sorted;
-      });
-
-      return updated;
-    });
+    setSortOrders(prev => ({
+      ...prev,
+      [column]: prev[column] === "desc" ? "asc" : "desc"
+    }));
   };
 
   const filteredAppointments = useMemo(() => {
@@ -158,12 +178,14 @@ const DoctorAppointments = () => {
     return result;
   }, [appointments, searchTerm, selectedFilters, sortOrders]);
 
-  const formatDate = (dateStr) =>
-    new Date(dateStr).toLocaleDateString("en-US", {
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
+  };
 
   const updateStatus = async (id, status) => {
     try {
