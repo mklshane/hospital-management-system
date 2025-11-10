@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { api } from "../../lib/axiosHeader";
 import { useNavigate } from "react-router-dom";
 import { Edit3, Save, X, Calendar, Mail, Phone, User, Stethoscope } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
@@ -103,15 +104,20 @@ const DoctorProfile = () => {
             <h1 className="text-2xl font-bold text-foreground font-montserrat">My Profile</h1>
             <p className="text-sm text-muted-foreground font-figtree">Manage your professional information</p>
           </div>
-          {!editing && (
-            <button
-              onClick={() => setEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue hover:bg-blue-700 text-white rounded-lg text-sm font-figtree transition-colors"
-            >
-              <Edit3 className="w-4 h-4" />
-              Edit Profile
-            </button>
-          )}
+
+          {/* Right side: ThemeToggle + Edit button */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            {!editing && (
+              <button
+                onClick={() => setEditing(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue hover:bg-blue-700 text-white rounded-lg text-sm font-figtree transition-colors"
+              >
+                <Edit3 className="w-4 h-4" />
+                Edit Profile
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Main Card - Takes remaining height */}
@@ -219,15 +225,7 @@ const DoctorProfile = () => {
                 <p className="text-xs text-muted-foreground mt-1">e.g., Mon 9-12, Thu 2-5</p>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-ui-border">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-figtree transition-colors disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
+              <div className="flex justify-end items-center gap-3 pt-4 border-t border-ui-border">
                 <button
                   type="button"
                   onClick={() => {
@@ -238,6 +236,14 @@ const DoctorProfile = () => {
                 >
                   <X className="w-4 h-4" />
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-blue hover:bg-blue-700 text-white rounded-lg text-sm font-figtree transition-colors disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {saving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>

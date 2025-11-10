@@ -361,7 +361,7 @@ const DoctorAppointments = () => {
             {columnsRefreshing && (
               <div className="absolute inset-0 bg-ui-card/90 backdrop-blur-sm flex flex-col items-center justify-center z-20 pointer-events-none rounded-xl">
                 <RefreshCw className="w-7 h-7 text-blue animate-spin mb-2" />
-                <p className="text-sm font-medium text-foreground">Refreshing columns...</p>
+                <p className="text-sm font-medium text-foreground">Refreshing records...</p>
               </div>
             )}
 
