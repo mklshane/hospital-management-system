@@ -26,6 +26,23 @@ const DoctorDashboard = () => {
   const [stats, setStats] = useState(null);
   const [doctorLoading, setDoctorLoading] = useState(true);
 
+  const getLocalToday = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateString = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // API: Fetch doctor profile and stats
   const fetchDoctorProfile = async () => {
     try {
@@ -41,13 +58,12 @@ const DoctorDashboard = () => {
 
       const apptRes = await api.get("/appointment");
       const allAppts = apptRes.data.appointments || [];
+      
+      const today = getLocalToday();
 
-      const today = new Date().toISOString().split("T")[0];
-
-      const todayAppts = allAppts.filter((a) => a.appointment_date === today);
-      const scheduled = todayAppts.filter(
-        (a) => a.status === "Scheduled"
-      ).length;
+      const todayAppts = allAppts.filter((a) => formatDateString(a.appointment_date) === today);
+      const scheduled = todayAppts.filter((a) => a.status === "Scheduled").length;
+      
       const pendingAll = allAppts.filter((a) => a.status === "Pending").length;
       const completedAll = allAppts.filter(
         (a) => a.status === "Completed"
@@ -78,12 +94,12 @@ const DoctorDashboard = () => {
     try {
       setLoading(true);
       const res = await api.get("/appointment");
-      const today = new Date().toISOString().split("T")[0];
+      const today = getLocalToday();
 
       const todayScheduled = (res.data.appointments || [])
-        .filter(
-          (appt) =>
-            appt.status === "Scheduled" && appt.appointment_date === today
+        .filter((appt) => 
+          appt.status === "Scheduled" && 
+          formatDateString(appt.appointment_date) === today
         )
         .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
 

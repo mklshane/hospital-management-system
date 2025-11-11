@@ -93,8 +93,10 @@ const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
           actionType={modal.action}
           loading={loading}
           onConfirm={async () => {
-            const status = modal.action === "accept" ? "Scheduled" : "Rejected";
-            await onApproveOrReject(request._id, status); // your handler
+            const handler = modal.action === "accept" ? onApprove : onReject;
+            if (handler) {
+              await handler(request._id);
+            }
           }}
         />
       </div>
