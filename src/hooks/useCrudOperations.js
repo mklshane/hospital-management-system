@@ -16,14 +16,13 @@ export const useCrudOperations = (entityName, refetch) => {
     } catch (error) {
       console.error(`Error creating ${entityName}:`, error);
 
-      // Extract meaningful error message
       const errorMessage =
         error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
         `Failed to create ${entityName}`;
 
-      toast.error(errorMessage); // Now shows exact reason!
+      toast.error(errorMessage);
       return false;
     } finally {
       setLoading(false);
