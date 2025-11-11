@@ -27,7 +27,7 @@ const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [columnsRefreshing, setColumnsRefreshing] = useState(false); // ← NEW
+  const [columnsRefreshing, setColumnsRefreshing] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
   const [sortOrders, setSortOrders] = useState({
@@ -204,7 +204,7 @@ const DoctorAppointments = () => {
     }
   };
 
-  // Initial full-screen loading (only on first mount)
+  // Initial full-screen loading
   if (loading && appointments.length === 0) {
     return (
       <p className="text-center py-4 text-foreground text-sm">
@@ -214,10 +214,14 @@ const DoctorAppointments = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col ">
+    <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 mb-8 gap-3 overflow-hidden min-h-0">
-        {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-xl p-4 flex flex-col overflow-hidden shadow-xs">
+        {/* LEFT SECTION - APPOINTMENTS (Expands when no selection) */}
+        <div
+          className={`scrollbar rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs transition-all duration-300 ${
+            selectedAppointment ? "col-span-9" : "col-span-12"
+          }`}
+        >
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -356,9 +360,9 @@ const DoctorAppointments = () => {
             </button>
           </div>
 
-          {/* COLUMNS AREA WITH DASHBOARD-STYLE SKELETON CARDS */}
+          {/* COLUMNS AREA WITH SKELETON */}
           <div className="relative flex-1 min-h-0 overflow-hidden">
-            {/* SKELETON LOADING - DASHBOARD STYLE */}
+            {/* SKELETON LOADING */}
             {columnsRefreshing && (
               <div className="h-full overflow-y-auto pr-1 scrollbar">
                 <div className="grid grid-cols-3 gap-3 pb-4">
@@ -367,13 +371,11 @@ const DoctorAppointments = () => {
 
                     return (
                       <div key={filterKey} className="min-h-0 flex flex-col">
-                        {/* Sticky Header */}
                         <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-card z-10 py-1">
                           {statusData.label} ({Math.floor(Math.random() * 5) + 1})
                           <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
                         </h2>
 
-                        {/* 3-5 Skeleton Cards per Column */}
                         <div className="space-y-2">
                           {[...Array(Math.floor(Math.random() * 3) + 3)].map((_, i) => (
                             <div
@@ -407,7 +409,7 @@ const DoctorAppointments = () => {
               </div>
             )}
 
-            {/* REAL CONTENT - FADES IN SMOOTHLY */}
+            {/* REAL CONTENT */}
             <div
               className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
                 columnsRefreshing ? "opacity-0" : "opacity-100"
@@ -421,10 +423,9 @@ const DoctorAppointments = () => {
 
                   return (
                     <div key={filterKey} className="min-h-0 flex flex-col">
-                      {/* Sticky Header */}
                       <h2
                         onClick={() => toggleSort(filterKey)}
-                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1"
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
                       >
                         {statusData.label} ({list.length})
                         <ArrowUpDown
@@ -436,7 +437,6 @@ const DoctorAppointments = () => {
                         />
                       </h2>
 
-                      {/* Real Cards */}
                       <div className="space-y-2 flex-1">
                         {list.length === 0 ? (
                           <p className="text-xs text-muted-foreground text-center py-8">
@@ -462,120 +462,119 @@ const DoctorAppointments = () => {
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS (unchanged) */}
-        <div className="col-span-3 bg-ui-card rounded-xl p-3 flex flex-col overflow-hidden shadow-xs">
-          {/* ... everything from header to modals stays exactly the same ... */}
-          <header className="flex items-center justify-between mb-3 pb-2 border-b border-ui-border">
-            <h2 className="text-base font-bold font-montserrat text-foreground">
-              Appointment Details
-            </h2>
-          </header>
-
-          <div className="scrollbar flex-1 min-h-0 overflow-y-auto pr-2 space-y-3 pb-16">
-            {!selectedAppointment ? (
-              <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-8">
-                <div className="p-2 bg-ui-muted/50 rounded-full mb-2">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <p className="text-xs">
-                  Select an appointment to view details.
-                </p>
+        {/* RIGHT SECTION - DETAILS */}
+        <div
+          className={`bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs transition-all duration-300 ease-in-out ${
+            selectedAppointment
+              ? "col-span-3 opacity-100"
+              : "col-span-0 opacity-0 w-0 p-0 overflow-hidden"
+          }`}
+          style={{
+            minWidth: selectedAppointment ? "340px" : "0",
+            maxWidth: selectedAppointment ? "380px" : "0",
+          }}
+        >
+          {selectedAppointment && (
+            <>
+              {/* Sticky Header */}
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5 flex items-center justify-between">
+                <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
+                  Appointment Details
+                </h2>
+                <button
+                  onClick={() => setSelectedAppointment(null)}
+                  className="p-1 rounded-full hover:bg-ui-muted/50 transition text-muted-foreground hover:text-foreground"
+                  aria-label="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
-            ) : (
-              <>
-                {/* SCHEDULE SECTION */}
-                <section className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue flex items-center justify-center text-sm font-bold text-white">
-                      {selectedAppointment.patient?.name
-                        ?.split(" ")
-                        .map((n) => n[0].toUpperCase())
-                        .join("")
-                        .slice(0, 2)}
+
+              {/* Scrollable Content - FIXED: No cut-off */}
+              <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
+                {/* Patient Header */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    {selectedAppointment.patient?.name
+                      ?.split(" ")
+                      .map((n) => n[0].toUpperCase())
+                      .join("")
+                      .slice(0, 2)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-foreground truncate text-sm">
+                      {selectedAppointment.patient?.name}
+                    </h3>
+                    <div
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-0.5 ${
+                        selectedAppointment.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : selectedAppointment.status === "Scheduled"
+                          ? "bg-blue-100 text-blue-800"
+                          : selectedAppointment.status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : selectedAppointment.status === "Cancelled"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-purple-100 text-purple-800"
+                      }`}
+                    >
+                      <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
+                      {selectedAppointment.status}
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">
-                        {selectedAppointment.patient?.name}
-                      </h3>
-                      <div
-                        className={`w-20 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 ${
-                          selectedAppointment.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : selectedAppointment.status === "Scheduled"
-                            ? "bg-blue-100 text-blue-800"
-                            : selectedAppointment.status === "Completed"
-                            ? "bg-green-100 text-green-800"
-                            : selectedAppointment.status === "Cancelled"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-purple-100 text-purple-800"
-                        }`}
-                      >
-                        <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
-                        {selectedAppointment.status}
+                  </div>
+                </div>
+
+                {/* Date, Time, Notes Card */}
+                <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
+                        <p className="font-bold text-foreground text-sm">
+                          {formatDate(selectedAppointment.appointment_date)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Time</p>
+                        <p className="font-bold text-foreground text-sm">
+                          {selectedAppointment.appointment_time}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-ui-muted/50 rounded-lg p-2 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3 h-3 text-blue" />
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Date
-                          </p>
-                          <p className="text-sm font-bold text-foreground">
-                            {formatDate(selectedAppointment.appointment_date)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3 text-indigo-500" />
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Time
-                          </p>
-                          <p className="text-sm font-bold text-foreground">
-                            {selectedAppointment.appointment_time}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-1">
-                      <p className="text-[10px] tracking-wider text-muted-foreground mb-1">
-                        Patient Notes
-                      </p>
-                      <p className="text-xs text-foreground leading-relaxed">
-                        {selectedAppointment.notes || (
-                          <span className="italic text-muted-foreground">
-                            No notes provided.
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
-                      <span>
-                        ID: #{selectedAppointment._id.slice(-6).toUpperCase()}
-                      </span>
-                      <span>
-                        {new Date(
-                          selectedAppointment.createdAt
-                        ).toLocaleDateString()}
-                      </span>
-                    </div>
+                  <div>
+                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">Patient Notes</p>
+                    <p className="text-xs text-foreground leading-relaxed">
+                      {selectedAppointment.notes || (
+                        <span className="italic text-muted-foreground">No notes provided.</span>
+                      )}
+                    </p>
                   </div>
-                </section>
 
+                  <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-2 border-t border-ui-border/50">
+                    <span>ID: #{selectedAppointment._id.slice(-6).toUpperCase()}</span>
+                    <span>
+                      {new Date(selectedAppointment.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Collapsible Sections */}
                 <CollapsibleSection title="Patient Details" defaultOpen={false}>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="grid grid-cols-2 gap-3 text-xs px-3">
                     {selectedAppointment.patient?.age && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <span className="text-[10px] font-medium text-muted-foreground">
-                            Age
-                          </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+                          Age
                         </div>
                         <span className="font-medium text-foreground">
                           {selectedAppointment.patient.age} yrs
@@ -583,13 +582,9 @@ const DoctorAppointments = () => {
                       </div>
                     )}
                     {selectedAppointment.patient?.gender && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <span className="text-[10px] font-medium text-muted-foreground">
-                            {selectedAppointment.patient.gender === "male"
-                              ? "M"
-                              : "F"}
-                          </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+                          {selectedAppointment.patient.gender === "male" ? "M" : "F"}
                         </div>
                         <span className="font-medium text-foreground capitalize">
                           {selectedAppointment.patient.gender}
@@ -597,26 +592,26 @@ const DoctorAppointments = () => {
                       </div>
                     )}
                     {selectedAppointment.patient?.contact && (
-                      <div className="flex items-center gap-1 col-span-2">
+                      <div className="flex items-center gap-2 col-span-2">
                         <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
                           <Phone className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <a
                           href={`tel:${selectedAppointment.patient.contact}`}
-                          className="font-medium text-foreground hover:text-blue transition text-xs"
+                          className="font-medium text-foreground hover:text-blue transition text-xs truncate"
                         >
                           {selectedAppointment.patient.contact}
                         </a>
                       </div>
                     )}
                     {selectedAppointment.patient?.email && (
-                      <div className="flex items-center gap-1 col-span-2">
+                      <div className="flex items-center gap-2 col-span-2">
                         <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
                           <Mail className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <a
                           href={`mailto:${selectedAppointment.patient.email}`}
-                          className="font-medium text-foreground hover:text-blue transition truncate text-xs"
+                          className="font-medium text-foreground hover:text-blue transition text-xs truncate"
                         >
                           {selectedAppointment.patient.email}
                         </a>
@@ -636,13 +631,10 @@ const DoctorAppointments = () => {
                   patientId={selectedAppointment.patient?._id}
                   patientName={selectedAppointment.patient?.name}
                 />
-              </>
-            )}
-          </div>
+              </div>
 
-          {selectedAppointment && (
-            <div className="sticky bottom-0 -mx-3 mt-3 bg-gradient-to-t from-ui-card via-ui-card to-transparent pt-3">
-              <div className="px-3 pb-3 space-y-2">
+              {/* Fixed Action Buttons - FULLY VISIBLE */}
+              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2 space-y-2 border-t border-ui-border">
                 {selectedAppointment.status === "Pending" && (
                   <>
                     <button
@@ -653,9 +645,9 @@ const DoctorAppointments = () => {
                           action: "accept",
                         })
                       }
-                      className="w-full bg-blue hover:bg-blue-light text-white py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs shadow hover:shadow-md"
+                      className="w-full bg-blue hover:bg-blue-light text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
                     >
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="w-4 h-4" />
                       Accept Appointment
                     </button>
                     <button
@@ -666,9 +658,9 @@ const DoctorAppointments = () => {
                           action: "reject",
                         })
                       }
-                      className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
+                      className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
-                      <XCircle className="w-3 h-3" />
+                      <XCircle className="w-4 h-4" />
                       Reject Appointment
                     </button>
                   </>
@@ -678,9 +670,9 @@ const DoctorAppointments = () => {
                   <>
                     <button
                       onClick={() => setIsRecordModalOpen(true)}
-                      className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs shadow hover:shadow-md"
+                      className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
                     >
-                      <FileText className="w-3 h-3" />
+                      <FileText className="w-4 h-4" />
                       Add Medical Record
                     </button>
                     <button
@@ -691,9 +683,9 @@ const DoctorAppointments = () => {
                           action: "complete",
                         })
                       }
-                      className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
+                      className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="w-4 h-4" />
                       Mark as Completed
                     </button>
                   </>
@@ -709,44 +701,45 @@ const DoctorAppointments = () => {
                   </div>
                 )}
               </div>
-            </div>
+            </>
           )}
-
-          <MedicalRecordModal
-            isOpen={isRecordModalOpen}
-            onClose={() => setIsRecordModalOpen(false)}
-            appointment={{
-              _id: selectedAppointment?._id,
-              patientName: selectedAppointment?.patient?.name,
-              date: formatDate(selectedAppointment?.appointment_date),
-              time: selectedAppointment?.appointment_time,
-              notes: selectedAppointment?.notes,
-            }}
-            onRecordAdded={() => {
-              fetchAppointments();
-              setSelectedAppointment(null);
-              setRefreshTrigger((prev) => prev + 1);
-            }}
-          />
-
-          <AppointmentActionModal
-            isOpen={modal.isOpen}
-            onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
-            appointment={modal.appointment}
-            actionType={modal.action}
-            loading={loading}
-            onConfirm={async () => {
-              if (!modal.appointment || !modal.action) return;
-              const statusMap = {
-                accept: "Scheduled",
-                reject: "Rejected",
-                complete: "Completed",
-              };
-              await updateStatus(modal.appointment._id, statusMap[modal.action]);
-            }}
-          />
         </div>
       </div>
+
+      {/* MODALS */}
+      <MedicalRecordModal
+        isOpen={isRecordModalOpen}
+        onClose={() => setIsRecordModalOpen(false)}
+        appointment={{
+          _id: selectedAppointment?._id,
+          patientName: selectedAppointment?.patient?.name,
+          date: formatDate(selectedAppointment?.appointment_date),
+          time: selectedAppointment?.appointment_time,
+          notes: selectedAppointment?.notes,
+        }}
+        onRecordAdded={() => {
+          fetchAppointments();
+          setSelectedAppointment(null);
+          setRefreshTrigger((prev) => prev + 1);
+        }}
+      />
+
+      <AppointmentActionModal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+        appointment={modal.appointment}
+        actionType={modal.action}
+        loading={loading}
+        onConfirm={async () => {
+          if (!modal.appointment || !modal.action) return;
+          const statusMap = {
+            accept: "Scheduled",
+            reject: "Rejected",
+            complete: "Completed",
+          };
+          await updateStatus(modal.appointment._id, statusMap[modal.action]);
+        }}
+      />
     </div>
   );
 };

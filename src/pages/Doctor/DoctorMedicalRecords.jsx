@@ -172,7 +172,7 @@ const DoctorMedicalRecords = () => {
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 gap-3 mb-8 overflow-hidden min-h-0">
         {/* LEFT SECTION */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-xl p-4 flex flex-col overflow-hidden shadow-xs">
+        <div className="scrollbar col-span-9 rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs">
           {/* Alert */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -302,7 +302,7 @@ const DoctorMedicalRecords = () => {
 
                     return (
                       <div key={filterKey} className="min-h-0 flex flex-col">
-                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-card z-10 py-1">
+                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
                           {statusData.label} ({Math.floor(Math.random() * 6) + 1})
                           <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
                         </h2>
@@ -350,7 +350,7 @@ const DoctorMedicalRecords = () => {
                     <div key={filterKey} className="min-h-0 flex flex-col">
                       <h2
                         onClick={() => toggleSort(filterKey)}
-                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1"
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
                       >
                         {statusData.label} ({list.length})
                         <ArrowUpDown
