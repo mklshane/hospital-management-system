@@ -189,7 +189,7 @@ export const MobileSidebar = ({ className, children, ...props }) => {
               )}
             >
               {/* User Info Section in Mobile Sidebar */}
-              <div className="flex items-center gap-3 border-b border-neutral-200 dark:border-neutral-800">
+              <div className="flex items-center gap-3 border-b pb-3 border-neutral-200 dark:border-neutral-800">
                 <div
                   className={cn(
                     "h-10 w-10 rounded-full flex items-center justify-center font-medium",
