@@ -28,7 +28,7 @@ const DoctorCard = ({ doctor, onClick }) => {
                 Dr. {doctor.name}
               </h3>
               {doctor.specialization && (
-                <span className="text-xs text-blue bg-blue/10 px-2 py-1 rounded-full">
+                <span className="text-xs text-blue bg-blue-100 dark:bg-blue-200/80 px-2 py-1 rounded-full">
                   {doctor.specialization}
                 </span>
               )}

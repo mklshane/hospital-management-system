@@ -1,25 +1,31 @@
 import React from "react";
 import { Clock, Trash2 } from "lucide-react";
 
-// Generate time slots with start and end times (8:00 AM - 8:00 PM)
+// Generate time slots: 8:00 AM – 8:00 PM, 30-min intervals
 const generateTimeSlots = () => {
   const slots = [];
   for (let hour = 8; hour <= 20; hour++) {
     for (let minute of ["00", "30"]) {
-      if (hour === 20 && minute === "30") break; 
+      if (hour === 20 && minute === "30") break;
 
-      const startHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-      const endHour = minute === "30" ? hour : hour;
+      const startHour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      const endHour24 = minute === "30" ? hour : hour + 1;
       const endMinute = minute === "00" ? "30" : "00";
-      const displayEndHour =
-        endHour > 12 ? endHour - 12 : endHour === 0 ? 12 : endHour;
+      const endHour12 =
+        endHour24 > 12 ? endHour24 - 12 : endHour24 === 0 ? 12 : endHour24;
 
-      const period = hour < 12 ? "AM" : "PM";
-      const endPeriod = endHour < 12 ? "AM" : "PM";
+      const startPeriod = hour < 12 ? "AM" : "PM";
+      const endPeriod = endHour24 < 12 ? "AM" : "PM";
 
       const slot = {
-        value: `${startHour}:${minute} ${period}`,
-        display: `${startHour}:${minute} ${period} - ${displayEndHour}:${endMinute} ${endPeriod}`,
+        value: `${startHour12}:${minute} ${startPeriod}`,
+        display: `${String(startHour12).padStart(
+          2,
+          " "
+        )}:${minute} ${startPeriod} – ${String(endHour12).padStart(
+          2,
+          " "
+        )}:${endMinute} ${endPeriod}`,
         startTime: `${hour.toString().padStart(2, "0")}:${minute}`,
       };
       slots.push(slot);
@@ -39,48 +45,39 @@ const TimeSlotSelector = ({
     if (disabled) return;
 
     const isSelected = selectedSlots.includes(slot.value);
-    let newSlots;
+    const newSlots = isSelected
+      ? selectedSlots.filter((s) => s !== slot.value)
+      : [...selectedSlots, slot.value];
 
-    if (isSelected) {
-      newSlots = selectedSlots.filter((s) => s !== slot.value);
-    } else {
-      newSlots = [...selectedSlots, slot.value];
-    }
-
-    // Sort slots chronologically
+    // Sort chronologically
     newSlots.sort((a, b) => {
       const getMinutes = (timeStr) => {
         const [time, period] = timeStr.split(" ");
-        const [hourStr, minuteStr] = time.split(":");
-        let hour = parseInt(hourStr);
-        const minute = parseInt(minuteStr);
-
-        if (period === "PM" && hour !== 12) hour += 12;
-        if (period === "AM" && hour === 12) hour = 0;
-
-        return hour * 60 + minute;
+        const [h, m] = time.split(":").map(Number);
+        let hour = h;
+        if (period === "PM" && h !== 12) hour += 12;
+        if (period === "AM" && h === 12) hour = 0;
+        return hour * 60 + m;
       };
-
       return getMinutes(a) - getMinutes(b);
     });
 
     onSlotsChange(newSlots);
   };
 
-  const removeTimeSlot = (slotToRemove) => {
+  const removeTimeSlot = (slotValue) => {
     if (disabled) return;
-    const newSlots = selectedSlots.filter((slot) => slot !== slotToRemove);
-    onSlotsChange(newSlots);
+    onSlotsChange(selectedSlots.filter((s) => s !== slotValue));
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Available Time Slots Grid */}
       <div>
         <label className="block text-sm font-medium text-foreground mb-3">
           Available Time Slots
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-60 overflow-y-auto p-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-1">
           {TIME_SLOTS.map((slot) => {
             const isSelected = selectedSlots.includes(slot.value);
             return (
@@ -90,16 +87,17 @@ const TimeSlotSelector = ({
                 onClick={() => toggleTimeSlot(slot)}
                 disabled={disabled}
                 className={`
-                  p-2 text-xs border rounded-lg transition-all duration-200 text-center
+                  w-full px-3 py-2.5 text-xs rounded-lg border
+                  text-center whitespace-nowrap transition-all duration-200
                   ${
                     isSelected
-                      ? "bg-blue-500 text-white border-blue-500 shadow-sm"
-                      : "bg-ui-muted text-foreground border-ui-border hover:bg-ui-hover hover:border-blue-300"
+                      ? "bg-blue-500 text-white border-blue-600 shadow-sm"
+                      : "bg-ui-muted text-foreground border-ui-border hover:bg-ui-hover hover:border-blue-400"
                   }
                   ${
                     disabled
                       ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer"
+                      : "cursor-pointer hover:shadow-sm"
                   }
                 `}
               >
@@ -109,15 +107,15 @@ const TimeSlotSelector = ({
           })}
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Click on time slots to select/deselect them
+          Click to select/deselect time slots
         </p>
       </div>
 
-      {/* Selected Time Slots */}
+      {/* Selected Time Slots – Fixed Alignment */}
       {selectedSlots.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-foreground">
+            <label className="text-sm font-medium text-foreground">
               Selected Time Slots ({selectedSlots.length})
             </label>
             {!disabled && (
@@ -126,9 +124,12 @@ const TimeSlotSelector = ({
               </span>
             )}
           </div>
+
           <div className="flex flex-wrap gap-2 p-3 bg-ui-muted rounded-lg border border-ui-border min-h-12">
             {selectedSlots.map((slotValue) => {
               const slot = TIME_SLOTS.find((s) => s.value === slotValue);
+              const display = slot?.display || slotValue;
+
               return (
                 <button
                   key={slotValue}
@@ -136,17 +137,19 @@ const TimeSlotSelector = ({
                   onClick={() => removeTimeSlot(slotValue)}
                   disabled={disabled}
                   className={`
-                    flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-all duration-200 group
+                    group flex  items-center justify-center gap-1.5
+                    w-38 px-1 py-1.5 rounded-full text-xs font-mono tracking-tighter
+                    transition-all duration-200 tabular-nums 
                     ${
                       disabled
-                        ? "bg-blue/20 text-blue cursor-default"
-                        : "bg-blue/10 text-blue hover:bg-red-500/20 hover:text-red-500 cursor-pointer"
+                        ? "bg-blue-100 text-blue-700 cursor-default"
+                        : "bg-blue-100 text-blue-700 hover:bg-red-100 hover:text-red-700 cursor-pointer"
                     }
                   `}
                 >
-                  <span>{slot?.display || slotValue}</span>
+                  <span>{display}</span>
                   {!disabled && (
-                    <Trash2 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <Trash2 className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   )}
                 </button>
               );
@@ -155,12 +158,15 @@ const TimeSlotSelector = ({
         </div>
       )}
 
+      {/* Empty State */}
       {selectedSlots.length === 0 && (
-        <div className="p-4 text-center border border-dashed border-ui-border rounded-lg">
-          <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+        <div className="p-6 text-center border-2 border-dashed border-ui-border rounded-xl bg-ui-muted/50">
+          <Clock className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">
-            No time slots selected. Click on the available slots above to add
-            them to the schedule.
+            No time slots selected yet.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Click on the slots above to add them to your schedule.
           </p>
         </div>
       )}
