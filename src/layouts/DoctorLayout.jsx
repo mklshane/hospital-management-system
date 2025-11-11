@@ -88,7 +88,7 @@ export default function DoctorLayout({ children }) {
         <SidebarBody className="justify-between gap-10 bg-blue-50 dark:bg-neutral-950 border-r-2 border-neutral-200 dark:border-neutral-800 transition-all duration-300">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {/* Logo Section */}
-            <div className="mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
+            <div className="hidden md:block mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
               {open ? <Logo /> : <LogoIcon />}
             </div>
 
@@ -135,7 +135,7 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content */}
-      <main className="flex-1 p-4 overflow-hidden">
+      <main className="flex-1 p-4 overflow-hidden md:mt-0 mt-16">
         {children}
         <LogoutConfirmModal
           isOpen={showLogoutModal}
