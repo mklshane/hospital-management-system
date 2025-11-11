@@ -15,7 +15,7 @@ const Navbar = () => {
   return (
     <div className="w-full md:w-[90%] px-4 md:px py-3 flex justify-between items-center z-50 rounded-2xl ">
       <div
-        className="flex gap-2 items-center transition-all duration-300 hover:scale-10 cursor-pointer"
+        className="flex gap-2 items-center transition-all duration-300 hover:scale-105 cursor-pointer"
         onClick={() => {
           navigate("/");
         }}
