@@ -87,7 +87,7 @@ const TimeSlotSelector = ({
                 onClick={() => toggleTimeSlot(slot)}
                 disabled={disabled}
                 className={`
-                  w-full px-3 py-2.5 text-xs rounded-lg border tracking-tight
+                  w-full px-3 py-2.5 text-xs rounded-lg border
                   text-center whitespace-nowrap transition-all duration-200
                   ${
                     isSelected
@@ -138,7 +138,7 @@ const TimeSlotSelector = ({
                   disabled={disabled}
                   className={`
                     group flex  items-center justify-center gap-1.5
-                    w-38 px-2 py-1.5 rounded-full text-xs font-mono tracking-tighter
+                    w-38 px-1 py-1.5 rounded-full text-xs font-mono tracking-tighter
                     transition-all duration-200 tabular-nums 
                     ${
                       disabled
