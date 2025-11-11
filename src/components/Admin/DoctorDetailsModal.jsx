@@ -149,7 +149,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
               >
                 <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-ui-card p-6 text-left align-middle shadow-2xl transition-all border border-gray-200 dark:border-gray-700">
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center justify-between mb-4 pb-4 border-b-2">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                         <Stethoscope className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -194,35 +194,45 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    {/* === Personal Info === */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="py-2 px-6 space-y-8">
+                    {/* Personal Information */}
+                    <section>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <User className="w-5 h-5 text-blue-600" />
+                        Personal Information
+                      </h3>
+
                       {isEditing ? (
-                        <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           <Input
                             label="Full Name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
                             required
+                            className="text-base"
                           />
                           <Input
-                            label="Email"
+                            label="Email Address"
                             name="email"
                             type="email"
                             value={formData.email}
                             onChange={handleChange}
                             disabled
+                            className="text-base"
                           />
                           <Input
-                            label="Contact"
+                            label="Contact Number"
                             name="contact"
+                            required
                             value={formData.contact}
                             onChange={handleChange}
+                            className="text-base"
                           />
                           <Select
                             label="Gender"
                             name="gender"
+                            required
                             value={formData.gender}
                             onChange={handleChange}
                             options={genders}
@@ -232,9 +242,11 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                             label="Age"
                             name="age"
                             type="number"
+                            required
                             value={formData.age}
                             onChange={handleChange}
                             placeholder="e.g. 45"
+                            className="text-base"
                           />
                           <Select
                             label="Specialization"
@@ -244,92 +256,106 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                             options={SPECIALIZATIONS}
                             required
                           />
-                        </>
+                        </div>
                       ) : (
-                        <>
-                          <InfoCard
-                            icon={User}
-                            label="Full Name"
-                            value={`Dr. ${doctor.name}`}
-                          />
-                          <InfoCard
-                            icon={Mail}
-                            label="Email"
-                            value={doctor.email}
-                          />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                          <div className="space-y-1 bg-primary-foreground">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              Full Name
+                            </p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              Dr. {doctor.name}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              Email
+                            </p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {doctor.email}
+                            </p>
+                          </div>
                           {doctor.contact && (
-                            <InfoCard
-                              icon={Phone}
-                              label="Contact"
-                              value={doctor.contact}
-                            />
+                            <div className="space-y-1">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Contact
+                              </p>
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {doctor.contact}
+                              </p>
+                            </div>
                           )}
                           {(doctor.age || doctor.gender) && (
-                            <InfoCard
-                              icon={User}
-                              label="Age & Gender"
-                              value={
-                                <>
-                                  {doctor.age && <span>Age: {doctor.age}</span>}
-                                  {doctor.age && doctor.gender && (
-                                    <span className="mx-1">•</span>
-                                  )}
-                                  {doctor.gender}
-                                </>
-                              }
-                            />
+                            <div className="space-y-1">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Age & Gender
+                              </p>
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {doctor.age && `${doctor.age} years old`}
+                                {doctor.age && doctor.gender && " • "}
+                                {doctor.gender}
+                              </p>
+                            </div>
                           )}
                           {doctor.specialization && (
-                            <InfoCard
-                              icon={Stethoscope}
-                              label="Specialization"
-                              value={doctor.specialization}
-                            />
+                            <div className="space-y-1 md:col-span-2">
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Specialization
+                              </p>
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {doctor.specialization}
+                              </p>
+                            </div>
                           )}
-                        </>
+                        </div>
                       )}
-                    </div>
+                    </section>
 
                     {/* === Schedule === */}
                     <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-                        <Calendar className="w-5 h-5 text-blue-600" />
-                        Available Schedule
-                        {scheduleTime.length > 0 && (
-                          <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                            ({scheduleTime.length} slots)
-                          </span>
-                        )}
-                      </div>
-
-                      {isEditing ? (
-                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                          <TimeSlotSelector
-                            selectedSlots={scheduleTime}
-                            onSlotsChange={setScheduleTime}
-                          />
-                        </div>
-                      ) : (
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                          {scheduleTime.length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
-                              {scheduleTime.map((slot, i) => (
-                                <span
-                                  key={i}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-full"
-                                >
-                                  <Clock className="w-3 h-3" />
-                                  {slot}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-center text-gray-500 dark:text-gray-400 py-3">
-                              No schedule configured
-                            </p>
+                      {/* Schedule Section */}
+                      <section>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-blue-600" />
+                          Available Schedule
+                          {scheduleTime.length > 0 && (
+                            <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                              ({scheduleTime.length} time slots)
+                            </span>
                           )}
-                        </div>
-                      )}
+                        </h3>
+
+                        {isEditing ? (
+                          <div className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-xl border border-gray-200 dark:border-gray-700">
+                            <TimeSlotSelector
+                              selectedSlots={scheduleTime}
+                              onSlotsChange={setScheduleTime}
+                            />
+                          </div>
+                        ) : (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-200 dark:border-blue-800">
+                            {scheduleTime.length > 0 ? (
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {scheduleTime.map((slot, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
+                                  >
+                                    <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                      {slot}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-center text-gray-500 dark:text-gray-400 py-4">
+                                No schedule configured for this doctor.
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </section>
                     </div>
                   </div>
 

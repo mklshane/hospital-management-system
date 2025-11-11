@@ -162,6 +162,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                       <Input
                         label="Contact"
                         name="contact"
+                        required
                         placeholder="0912345678"
                         value={formData.contact}
                         onChange={handleChange}
@@ -169,6 +170,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                       <Select
                         label="Gender"
                         name="gender"
+                        required
                         value={formData.gender}
                         onChange={handleChange}
                         options={["Male", "Female", "Other"]}
@@ -179,6 +181,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                         name="age"
                         type="number"
                         value={formData.age}
+                        required
                         onChange={handleChange}
                         placeholder="e.g. 35"
                       />
@@ -223,6 +226,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                         </label>
                         <input
                           type="password"
+                          placeholder="*******"
                           className="w-full px-4 py-3 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue focus:ring-offset-2 focus:ring-offset-ui-card focus:border-transparent"
                           onChange={(e) => {
                             if (e.target.value !== formData.password) {
