@@ -80,7 +80,7 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
 
   if (!patientId) {
     return (
-      <CollapsibleSection title={title} badge="0" badgeColor="bg-cyan-400" defaultOpen={false}>
+      <CollapsibleSection title={title} badge="0" badgeColor="bg-blue" defaultOpen={false}>
         <p className="p-3 text-sm text-muted-foreground">Please log in to view records.</p>
       </CollapsibleSection>
     );
@@ -88,7 +88,7 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
 
   if (loading) {
     return (
-      <CollapsibleSection title={title} badge="..." badgeColor="bg-cyan-400" defaultOpen={false}>
+      <CollapsibleSection title={title} badge="..." badgeColor="bg-blue" defaultOpen={false}>
         <p className="text-sm text-muted-foreground">Loading records...</p>
       </CollapsibleSection>
     );
@@ -96,7 +96,7 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
 
   return (
     <>
-      <CollapsibleSection title={title} badge={records.length.toString()} badgeColor="bg-cyan-400" defaultOpen={false}>
+      <CollapsibleSection title={title} badge={records.length.toString()} badgeColor="bg-blue" defaultOpen={false}>
         <div className="space-y-1 p-2">
           {records.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-2">

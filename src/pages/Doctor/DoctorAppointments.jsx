@@ -371,7 +371,7 @@ const DoctorAppointments = () => {
 
                     return (
                       <div key={filterKey} className="min-h-0 flex flex-col">
-                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-card z-10 py-1">
+                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
                           {statusData.label} ({Math.floor(Math.random() * 5) + 1})
                           <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
                         </h2>
@@ -469,10 +469,6 @@ const DoctorAppointments = () => {
               ? "col-span-3 opacity-100"
               : "col-span-0 opacity-0 w-0 p-0 overflow-hidden"
           }`}
-          style={{
-            minWidth: selectedAppointment ? "340px" : "0",
-            maxWidth: selectedAppointment ? "380px" : "0",
-          }}
         >
           {selectedAppointment && (
             <>
@@ -536,8 +532,8 @@ const DoctorAppointments = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <div className="flex items-center gap-2 pr-1">
+                      <Clock className="w-4 h-4 text-blue shrink-0" />
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Time</p>
                         <p className="font-bold text-foreground text-sm">
@@ -556,7 +552,7 @@ const DoctorAppointments = () => {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-2 border-t border-ui-border/50">
+                  {/* <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-2 border-t border-ui-border/50">
                     <span>ID: #{selectedAppointment._id.slice(-6).toUpperCase()}</span>
                     <span>
                       {new Date(selectedAppointment.createdAt).toLocaleDateString("en-US", {
@@ -565,7 +561,7 @@ const DoctorAppointments = () => {
                         year: "numeric",
                       })}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Collapsible Sections */}
@@ -634,7 +630,7 @@ const DoctorAppointments = () => {
               </div>
 
               {/* Fixed Action Buttons - FULLY VISIBLE */}
-              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2 space-y-2 border-t border-ui-border">
+              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2 space-y-2">
                 {selectedAppointment.status === "Pending" && (
                   <>
                     <button

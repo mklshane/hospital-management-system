@@ -21,7 +21,7 @@ const AppointmentHistorySection = ({
       <CollapsibleSection
         title="Appointment History"
         badge="0"
-        badgeColor="bg-blue-700"
+        badgeColor="bg-blue"
         defaultOpen={false}
       >
         <p className="pt-3 text-sm text-muted-foreground text-center">
@@ -122,7 +122,7 @@ const AppointmentHistorySection = ({
       <CollapsibleSection
         title={title}
         badge="..."
-        badgeColor="bg-blue-700"
+        badgeColor="bg-blue"
         defaultOpen={false}
       >
         <div className="p-4">
@@ -143,7 +143,7 @@ const AppointmentHistorySection = ({
     <CollapsibleSection
       title={title}
       badge={appointments.length.toString()}
-      badgeColor="bg-blue-700"
+      badgeColor="bg-blue"
       defaultOpen={false}
     >
       <div className="space-y-3 p-2 pb-4">

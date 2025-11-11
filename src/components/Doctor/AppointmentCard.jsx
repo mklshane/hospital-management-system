@@ -22,7 +22,7 @@ const AppointmentCard = ({ appt, onClick, formatDate, isSelected }) => {
     >
       {/* Top: Avatar + Name + Status */}
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-blue flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
           {patientInitial}
         </div>
         <div className="flex-1 min-w-0">
