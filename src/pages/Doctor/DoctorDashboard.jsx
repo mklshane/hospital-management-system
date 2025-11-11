@@ -333,7 +333,7 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Appointment List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+        <div className="flex-1 overflow-y-auto p-4 min-h-0">
           {loading ? (
             <p className="text-center text-muted-foreground py-8 text-sm">
               Loading today's appointments...
@@ -343,19 +343,25 @@ const DoctorDashboard = () => {
               No scheduled appointments for today.
             </p>
           ) : (
-            filteredAppointments.map((appt) => (
-              <AppointmentCard
-                key={appt._id}
-                appt={appt}
-                formatDate={(dateStr) =>
-                  new Date(dateStr).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                }
-              />
-            ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {filteredAppointments.map((appt, index) => (
+                <div
+                  key={appt._id}
+                  className="h-full min-h-[130px]" // Ensures equal height
+                >
+                  <AppointmentCard
+                    appt={appt}
+                    formatDate={(dateStr) =>
+                      new Date(dateStr).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
