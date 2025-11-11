@@ -145,7 +145,7 @@ const DoctorsList = () => {
             <div className="flex-1">
               <SearchBar
                 onSearch={handleSearch}
-                placeholder="Search doctors..."
+                placeholder="Search doctors by name, email, specialization, contact..."
                 className="w-full"
               />
             </div>

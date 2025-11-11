@@ -32,7 +32,7 @@ const SearchBar = ({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent transition-all"
+          className="w-full pl-10 pr-10 py-2.5 bg-ui-card border border-ui-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue focus:border-transparent transition-all"
         />
         {showClearButton && query && (
           <button
