@@ -59,7 +59,7 @@ export default function BookAppointmentModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-primary-foreground rounded-2xl shadow-xl max-w-md w-full p-6">
+      <div className="bg-ui-card border-2 rounded-2xl shadow-xl max-w-md w-full p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-primary">
             Book New Appointment
@@ -81,7 +81,7 @@ export default function BookAppointmentModal({
               name="doctor_id"
               value={form.doctor_id}
               onChange={handleDoctorChange}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
               <option value="">-- Choose a doctor --</option>
@@ -103,7 +103,7 @@ export default function BookAppointmentModal({
               value={form.appointment_date}
               onChange={onChange}
               min={format(new Date(), "yyyy-MM-dd")}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -117,7 +117,7 @@ export default function BookAppointmentModal({
                 name="appointment_time"
                 value={form.appointment_time}
                 onChange={handleTimeChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
                 <option value="">-- Select a time slot --</option>
@@ -128,7 +128,7 @@ export default function BookAppointmentModal({
                 ))}
               </select>
             ) : (
-              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50">
+              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 {form.doctor_id
                   ? "No available time slots for this doctor"
                   : "Please select a doctor first"}
@@ -151,7 +151,7 @@ export default function BookAppointmentModal({
               value={form.notes}
               onChange={onChange}
               rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., Persistent cough, mild fever"
             />
           </div>
