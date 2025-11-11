@@ -10,9 +10,9 @@ export default function AppointmentHistory({
   onAppointmentClick,
 }) {
   return (
-    <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 h-full flex flex-col">
+    <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col h-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white">
           Appointment History
         </h3>
@@ -42,8 +42,8 @@ export default function AppointmentHistory({
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Scrollable Cards Container - Fixed Behavior */}
+      <div className="flex-1 min-h-0 overflow-y-auto -mx-6 -mb-6 px-6 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {loading ? (
             [...Array(8)].map((_, i) => (
@@ -53,7 +53,7 @@ export default function AppointmentHistory({
               />
             ))
           ) : appointments.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-gray-500">
+            <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-300">
               No appointments found
             </div>
           ) : (

@@ -114,10 +114,11 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div className="min-h-90 bg-primary-foreground rounded-2xl p-4 md:p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Sidebar: Profile + Calendar (50/50 split) */}
+    <div className="min-h-[95vh] bg-primary-foreground rounded-2xl p-4 md:p-2">
+      <div className="max-w-7xl mx-auto h-full">
+        {/* Add h-full here */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+          {/* Sidebar: Profile + Calendar */}
           <aside className="lg:col-span-3 flex flex-col gap-4 h-full">
             <div className="h-[38%] min-h-0">
               <PatientProfile user={user} />
@@ -127,16 +128,17 @@ export default function PatientDashboard() {
             </div>
           </aside>
 
-          {/* Main: Appointment History */}
-          <main className="lg:col-span-9">
-            <AppointmentHistory
-              appointments={filteredAppointments}
-              loading={appointmentsLoading}
-              searchTerm={searchQuery}
-              setSearchTerm={handleSearch}
-              onNewAppointment={handleOpenBookModal}
-              onAppointmentClick={handleAppointmentClick}
-            />
+          <main className="lg:col-span-9 h-151 overflow-y-auto">
+            <div className="h-full flex flex-col">
+              <AppointmentHistory
+                appointments={filteredAppointments}
+                loading={appointmentsLoading}
+                searchTerm={searchQuery}
+                setSearchTerm={handleSearch}
+                onNewAppointment={handleOpenBookModal}
+                onAppointmentClick={handleAppointmentClick}
+              />
+            </div>
           </main>
         </div>
       </div>
