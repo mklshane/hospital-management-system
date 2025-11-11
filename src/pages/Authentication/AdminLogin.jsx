@@ -53,8 +53,8 @@ const AdminLogin = () => {
                 space
               </h1>
             </div>
-            <div className="absolute left-12 bottom-0">
-              <img src="/admin.png" alt="" className="w-auto h-72" />
+            <div className="absolute left-18 bottom-0">
+              <img src="/admin.png" alt="" className="w-auto h-78" />
             </div>
           </div>
 

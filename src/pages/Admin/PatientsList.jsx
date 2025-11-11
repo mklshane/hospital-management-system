@@ -75,7 +75,7 @@ const PatientsList = () => {
     }
 
     const [field, order] = value.split("-");
-    handleSort(field, order); 
+    handleSort(field, order);
   };
 
   const getCurrentSortValue = () => {
@@ -107,37 +107,46 @@ const PatientsList = () => {
     <>
       <div className="min-h-screen bg-ui-surface flex flex-col">
         {/* Header */}
-        <header className="border-b border-ui-border px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">Patients List</h1>
+        <header className="border-b border-ui-border px-4 md:px-6 py-4 flex justify-between items-center">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
+            Patients List
+          </h1>
           <ThemeToggle />
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
-          <div className="flex gap-4 mb-3">
+        <main className="flex-1 p-4 md:p-6">
+          {/* Search and Filters Section */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-3">
             <div className="flex-1">
               <SearchBar
                 onSearch={handleSearch}
                 placeholder="Search patients by name, email, contact, address..."
-                className="max-w-md"
+                className="w-full"
               />
             </div>
-            <FilterDropdown
-              label="Gender"
-              options={patientFilterConfig.gender.options}
-              value={filters.gender}
-              onChange={(value) => updateFilter("gender", value)}
-              onClear={() => clearFilter("gender")}
-              className="w-32"
-            />
-            <FilterDropdown
-              label="Sort by"
-              options={patientSortOptions}
-              value={getCurrentSortValue()}
-              onChange={handleSortSelection}
-              onClear={() => handleSortSelection("")}
-              className="w-48"
-            />
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <div className="w-full sm:w-32">
+                <FilterDropdown
+                  label="Gender"
+                  options={patientFilterConfig.gender.options}
+                  value={filters.gender}
+                  onChange={(value) => updateFilter("gender", value)}
+                  onClear={() => clearFilter("gender")}
+                  className="w-full"
+                />
+              </div>
+              <div className="w-full sm:w-40 md:w-48">
+                <FilterDropdown
+                  label="Sort by"
+                  options={patientSortOptions}
+                  value={getCurrentSortValue()}
+                  onChange={handleSortSelection}
+                  onClear={() => handleSortSelection("")}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
 
           <ActiveFilters
@@ -152,14 +161,14 @@ const PatientsList = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue"></div>
             </div>
           ) : displayData.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 px-4">
               {!patients || patients.length === 0 ? (
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-base md:text-lg">
                   No patients found
                 </p>
               ) : (
                 <>
-                  <p className="text-muted-foreground text-lg mb-2">
+                  <p className="text-muted-foreground text-base md:text-lg mb-2">
                     No patients match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -172,15 +181,15 @@ const PatientsList = () => {
             <>
               {/* Results Count */}
               <div className="mb-4 flex justify-between items-center">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Showing {displayData.length} of {patients.length} patients
                   {sortField && ` • Sorted by ${getSortDisplayLabel()}`}
                 </p>
               </div>
 
               {/* Patients List - Fixed scrolling container */}
-              <div className="h-[calc(100vh-215px)] overflow-y-auto">
-                <div className="space-y-3 pr-2 pb-6">
+              <div className="h-[calc(100vh-220px)] md:h-[calc(100vh-215px)] overflow-y-auto">
+                <div className="space-y-3 pr-1 md:pr-2 pb-6">
                   {displayData.map((patient) => (
                     <PatientCard
                       key={patient._id}

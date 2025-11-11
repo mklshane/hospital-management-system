@@ -65,8 +65,8 @@ const DoctorLogin = () => {
                 secure space
               </h1>
             </div>
-            <div className="absolute left-22 bottom-0">
-              <img src="/doctor1.png" alt="" className="w-auto h-80" />
+            <div className="absolute left-28 bottom-0">
+              <img src="/doctor1.png" alt="" className="w-auto h-87" />
             </div>
           </div>
 

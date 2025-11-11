@@ -97,7 +97,7 @@ export default function AdminLayout() {
         <SidebarBody className="justify-between gap-10 bg-blue-50 dark:bg-neutral-950 shadow-sm border-r border-neutral-200 dark:border-neutral-800 transition-all duration-300">
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {/* Logo */}
-            <div className="mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
+            <div className="hidden md:block mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
               {open ? <Logo /> : <LogoIcon />}
             </div>
 
@@ -147,14 +147,14 @@ export default function AdminLayout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <main className="flex-1 overflow-hidden px-4 sm:px-3 md:px-4 pt-5 md:pt-2 pb-4 md:py-3">
+        <main className="flex-1 overflow-hidden px-4 sm:px-3 md:px-4 pt-5 md:pt-2 pb-4 md:py-3 md:mt-0 mt-16">
           <Outlet />
-           <LogoutConfirmModal
-                    isOpen={showLogoutModal}
-                    onClose={() => setShowLogoutModal(false)}
-                    onConfirm={handleLogout}
-                    loading={loggingOut}
-                  />
+          <LogoutConfirmModal
+            isOpen={showLogoutModal}
+            onClose={() => setShowLogoutModal(false)}
+            onConfirm={handleLogout}
+            loading={loggingOut}
+          />
         </main>
       </div>
     </div>
