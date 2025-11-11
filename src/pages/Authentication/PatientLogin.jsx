@@ -59,20 +59,20 @@ const PatientLogin = () => {
       <div className="flex flex-1 items-center justify-center py-8 px-4 mt-5">
         <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 bg-gray-50 gap-4">
           {/* Left Section */}
-          <div className="hidden lg:flex items-start justify-center p-10 relative rounded-2xl bg-gradient-to-br from-blue-800 via-blue-600 to-blue-400">
+          <div className="hidden lg:flex items-start justify-center p-10 relative rounded-2xl bg-linear-to-br from-blue-800 via-blue-600 to-blue-400">
             <div className="text-white max-w-sm z-10 mt-8">
               <h2 className="text-lg">Streamline Your Healthcare</h2>
               <h1 className="text-2xl font-semibold mt-2">
                 Book appointments, view records, and manage your care securely
               </h1>
             </div>
-            <div className="absolute left-8 bottom-0">
-              <img src="/patient.png" alt="" className="w-auto h-70" />
+            <div className="absolute left-13 bottom-0">
+              <img src="/patient.png" alt="" className="w-auto h-78" />
             </div>
           </div>
 
           {/* Right Section */}
-          <div className="p-10 w-full mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
+          <div className="px-10 py-7 w-full mx-auto border-2 border-[#e7e7e7f0] rounded-2xl">
             <h2 className="text-2xl font-semibold mb-1 text-black">
               Patient Login
             </h2>
@@ -145,9 +145,9 @@ const PatientLogin = () => {
 
             {/* Divider */}
             <div className="flex items-center my-6">
-              <div className="flex-grow border-t border-[#cecececa]"></div>
+              <div className="grow border-t border-[#cecececa]"></div>
               <span className="px-4 text-sm text-gray-500">or login as</span>
-              <div className="flex-grow border-t border-[#cecececa]"></div>
+              <div className="grow border-t border-[#cecececa]"></div>
             </div>
 
             {/* Doctor Button */}
