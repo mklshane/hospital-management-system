@@ -110,12 +110,14 @@ const DoctorsList = () => {
   return (
     <>
       <div className="min-h-screen bg-ui-surface flex flex-col">
-        <header className="border-b border-ui-border px-6 pt-4 pb-1 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">Doctors List</h1>
-          <div className="flex items-center gap-4">
+        <header className="border-b border-ui-border px-4 md:px-6 pt-4 pb-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
+            Doctors List
+          </h1>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={handleCreateDoctor}
-              className="bg-blue hover:bg-blue/90 text-white px-4 py-2 rounded-lg shadow transition flex items-center gap-2 mb-2"
+              className="bg-blue hover:bg-blue/90 text-white px-3 md:px-4 py-2 rounded-lg shadow transition flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
             >
               <svg
                 className="w-4 h-4"
@@ -130,29 +132,33 @@ const DoctorsList = () => {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Create Doctor Account
+              <span className="hidden sm:inline">Create Doctor</span>
+              <span className="sm:hidden">Add Doctor</span>
             </button>
             <ThemeToggle />
           </div>
         </header>
 
-        <main className="flex-1 p-6">
-          <div className="flex gap-4 mb-3">
+        <main className="flex-1 p-4 md:p-6">
+          {/* Search and Filter Section */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-3">
             <div className="flex-1">
               <SearchBar
                 onSearch={handleSearch}
-                placeholder="Search doctors by name, email, specialization, contact..."
-                className="max-w-lg"
+                placeholder="Search doctors..."
+                className="w-full"
               />
             </div>
-            <FilterDropdown
-              label="Specialization"
-              options={doctorFilterConfig.specialization.options}
-              value={filters.specialization}
-              onChange={(value) => updateFilter("specialization", value)}
-              onClear={() => clearFilter("specialization")}
-              className="w-48"
-            />
+            <div className="w-full sm:w-48">
+              <FilterDropdown
+                label="Specialization"
+                options={doctorFilterConfig.specialization.options}
+                value={filters.specialization}
+                onChange={(value) => updateFilter("specialization", value)}
+                onClear={() => clearFilter("specialization")}
+                className="w-full"
+              />
+            </div>
           </div>
 
           <ActiveFilters
@@ -167,7 +173,7 @@ const DoctorsList = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue"></div>
             </div>
           ) : displayData.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 px-4">
               {!doctors || doctors.length === 0 ? (
                 <>
                   <p className="text-muted-foreground text-lg mb-4">
@@ -175,14 +181,14 @@ const DoctorsList = () => {
                   </p>
                   <button
                     onClick={handleCreateDoctor}
-                    className="bg-blue hover:bg-blue/90 text-white px-6 py-2 rounded-lg transition"
+                    className="bg-blue hover:bg-blue/90 text-white px-6 py-2 rounded-lg transition text-sm md:text-base"
                   >
                     Create Your First Doctor
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-muted-foreground text-lg mb-2">
+                  <p className="text-muted-foreground text-base md:text-lg mb-2">
                     No doctors match your search and filters
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -194,7 +200,7 @@ const DoctorsList = () => {
           ) : (
             <>
               <div className="mb-2 flex justify-between items-center">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs md:text-sm text-muted-foreground">
                   Showing {displayData.length} of {doctors.length} doctors
                   {sortField &&
                     ` • Sorted by ${sortField} ${
@@ -203,8 +209,8 @@ const DoctorsList = () => {
                 </p>
               </div>
 
-              <div className="h-[calc(100vh-195px)] overflow-y-auto">
-                <div className="space-y-3 pr-2 pb-6">
+              <div className="h-[calc(100vh-220px)] md:h-[calc(100vh-195px)] overflow-y-auto">
+                <div className="space-y-3 pr-1 md:pr-2 pb-6">
                   {displayData.map((doctor) => (
                     <DoctorCard
                       key={doctor._id}
