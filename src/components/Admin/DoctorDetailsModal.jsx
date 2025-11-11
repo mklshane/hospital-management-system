@@ -133,7 +133,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-blue-900/10 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -259,7 +259,7 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                          <div className="space-y-1 bg-primary-foreground">
+                          <div className="space-y-1">
                             <p className="text-sm text-gray-500 dark:text-gray-400">
                               Full Name
                             </p>
@@ -333,13 +333,13 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                             />
                           </div>
                         ) : (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-200 dark:border-blue-800">
+                          <div className="bg-blue-100 dark:bg-blue-900/20 p-5 rounded-xl border border-blue-400 dark:border-blue-800">
                             {scheduleTime.length > 0 ? (
                               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                 {scheduleTime.map((slot, i) => (
                                   <div
                                     key={i}
-                                    className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
+                                    className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700"
                                   >
                                     <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                     <span className="text-sm font-medium text-gray-900 dark:text-white">

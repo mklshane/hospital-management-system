@@ -28,8 +28,8 @@ const PatientCard = ({ patient, onClick }) => {
                 {patient.name}
               </h3>
               {patient.age && (
-                <span className="text-xs text-muted-foreground bg-ui-muted px-2 py-1 rounded-full">
-                  {patient.age} years
+                <span className="text-xs text-blue-600 bg-blue-50 dark:bg-blue-100/25 dark:text-gray-300 px-2 py-1 rounded-full">
+                  {patient.age} years old
                 </span>
               )}
             </div>
