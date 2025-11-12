@@ -147,7 +147,7 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
                   {canEdit && (
                     <button
                       onClick={() => openEditModal(record)}
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-xs hover:underline"
+                      className="flex items-center gap-1 text-blue hover:text-blue-700 font-medium text-xs hover:underline"
                       title="Edit record"
                     >
                       Edit

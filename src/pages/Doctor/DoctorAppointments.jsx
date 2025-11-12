@@ -473,7 +473,7 @@ const DoctorAppointments = () => {
           {selectedAppointment && (
             <>
               {/* Sticky Header */}
-              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5 flex items-center justify-between pl-3">
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5 flex items-center justify-between pl-3 pr-2">
                 <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
                   Appointment Details
                 </h2>
@@ -666,7 +666,7 @@ const DoctorAppointments = () => {
                   <>
                     <button
                       onClick={() => setIsRecordModalOpen(true)}
-                      className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
+                      className="w-full bg-blue hover:bg-navy text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
                     >
                       <FileText className="w-4 h-4" />
                       Add Medical Record

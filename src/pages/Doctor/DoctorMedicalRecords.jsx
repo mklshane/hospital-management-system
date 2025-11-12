@@ -437,7 +437,7 @@ const DoctorMedicalRecords = () => {
                 </div>
 
                 {/* Date, Time Card */}
-                <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
+                {/* <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-blue shrink-0" />
@@ -458,7 +458,7 @@ const DoctorMedicalRecords = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Diagnosis */}
                 <div className="space-y-1">

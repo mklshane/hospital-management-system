@@ -86,19 +86,16 @@ const MedicalRecordModal = ({
     try {
       let res;
       if (isEdit && existingRecord?._id) {
-        console.log("Updating record ID:", existingRecord._id);
         res = await api.put(`/record/${existingRecord._id}`, payload);
         toast.success("Record updated successfully!");
         onRecordUpdated?.(res.data.record);
       } else {
-        console.log("Creating new record for appointment:", appointment._id);
         res = await api.post(`/record/${appointment._id}`, payload);
         toast.success("Medical record saved successfully!");
         onRecordAdded?.(res.data.record);
       }
       onClose();
     } catch (error) {
-      console.error("Save error:", error);
       const message =
         error.response?.data?.message ||
         error.message ||
@@ -135,10 +132,13 @@ const MedicalRecordModal = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl max-h-[90vh] transform overflow-hidden rounded-xl bg-white p-4 sm:p-6 shadow-xl transition-all flex flex-col">
+              {/* Main Panel */}
+              <Dialog.Panel
+                className="w-full max-w-4xl max-h-[90vh] transform overflow-hidden rounded-xl bg-ui-card p-4 sm:p-6 shadow-xl transition-all flex flex-col"
+              >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
-                  <Dialog.Title className="text-lg sm:text-xl font-semibold text-gray-900">
+                  <Dialog.Title className="text-lg sm:text-xl font-semibold text-foreground">
                     {isEdit
                       ? existingRecord?.appointment?.status === "Completed"
                         ? "View Medical Record"
@@ -147,22 +147,25 @@ const MedicalRecordModal = ({
                   </Dialog.Title>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 {/* Patient Info */}
+                {/* DEBUG: Missing notes when editing record */}
                 {appointment && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-sm text-muted-foreground bg-ui-muted p-3 rounded-lg">
                     <div>
                       <span className="font-medium">Patient Name</span>
                       <p className="truncate">{appointment.patientName}</p>
                     </div>
                     <div>
                       <span className="font-medium">Appointment</span>
-                      <p className="truncate">{appointment.date} | {appointment.time}</p>
+                      <p className="truncate">
+                        {appointment.date} | {appointment.time}
+                      </p>
                     </div>
                     <div>
                       <span className="font-medium">Notes</span>
@@ -171,46 +174,46 @@ const MedicalRecordModal = ({
                   </div>
                 )}
 
-                {/* Content Area - Scrollable */}
-                <div className="flex-1 overflow-y-auto pr-2 -mr-2">
-                  {/* === READ-ONLY MODE (COMPLETED) === */}
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto pr-2 -mr-2 scrollbar">
+                  {/* READ-ONLY (Completed) */}
                   {isEdit && existingRecord?.appointment?.status === "Completed" ? (
                     <div className="space-y-4">
-                      {/* Symptoms - Read Only */}
+                      {/* Symptoms */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Symptoms
                         </label>
-                        <p className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 text-sm min-h-[60px]">
+                        <p className="w-full px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground text-sm min-h-[60px]">
                           {symptoms || "-"}
                         </p>
                       </div>
 
-                      {/* Diagnosis - Read Only */}
+                      {/* Diagnosis */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Diagnosis <span className="text-red-500">*</span>
                         </label>
-                        <p className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 text-sm min-h-[60px]">
+                        <p className="w-full px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground text-sm min-h-[60px]">
                           {diagnosis}
                         </p>
                       </div>
 
-                      {/* Prescriptions - Read Only */}
+                      {/* Prescriptions */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Prescription <span className="text-red-500">*</span>
                         </label>
                         <div className="space-y-2">
                           {prescriptions.map((p, i) => (
                             <div key={i} className="flex gap-2 text-sm">
-                              <div className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
+                              <div className="flex-1 px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground">
                                 {p.medicine}
                               </div>
-                              <div className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
+                              <div className="flex-1 px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground">
                                 {p.dosage}
                               </div>
-                              <div className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-800">
+                              <div className="flex-1 px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground">
                                 {p.duration}
                               </div>
                             </div>
@@ -219,39 +222,39 @@ const MedicalRecordModal = ({
                       </div>
                     </div>
                   ) : (
+                    /* EDITABLE MODE */
                     <div className="space-y-4">
-                      {/* === EDITABLE MODE (SCHEDULED or ADD) === */}
                       {/* Symptoms */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Symptoms
                         </label>
                         <textarea
                           value={symptoms}
                           onChange={(e) => setSymptoms(e.target.value)}
                           placeholder="Enter symptoms..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                          className="w-full px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue focus:border-transparent resize-none text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
                           rows={2}
                         />
                       </div>
 
                       {/* Diagnosis */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Diagnosis <span className="text-red-500">*</span>
                         </label>
                         <textarea
                           value={diagnosis}
                           onChange={(e) => setDiagnosis(e.target.value)}
                           placeholder="Enter diagnosis..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                          className="w-full px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue focus:border-transparent resize-none text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
                           rows={2}
                         />
                       </div>
 
                       {/* Prescriptions */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-foreground mb-2">
                           Prescription <span className="text-red-500">*</span>
                         </label>
                         <div className="space-y-2">
@@ -261,26 +264,32 @@ const MedicalRecordModal = ({
                                 type="text"
                                 placeholder="Medicine"
                                 value={p.medicine}
-                                onChange={(e) => updatePrescription(i, "medicine", e.target.value)}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                                onChange={(e) =>
+                                  updatePrescription(i, "medicine", e.target.value)
+                                }
+                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
                               />
                               <input
                                 type="text"
                                 placeholder="Dosage"
                                 value={p.dosage}
-                                onChange={(e) => updatePrescription(i, "dosage", e.target.value)}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                                onChange={(e) =>
+                                  updatePrescription(i, "dosage", e.target.value)
+                                }
+                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
                               />
                               <input
                                 type="text"
                                 placeholder="Duration"
                                 value={p.duration}
-                                onChange={(e) => updatePrescription(i, "duration", e.target.value)}
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                                onChange={(e) =>
+                                  updatePrescription(i, "duration", e.target.value)
+                                }
+                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
                               />
                               <button
                                 onClick={() => removePrescription(i)}
-                                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors mt-0.5"
+                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors mt-0.5"
                                 disabled={prescriptions.length === 1}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -290,7 +299,7 @@ const MedicalRecordModal = ({
                         </div>
                         <button
                           onClick={addPrescription}
-                          className="mt-2 flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                          className="mt-2 flex items-center gap-1 text-blue hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm"
                         >
                           <Plus className="w-4 h-4" />
                           Add Prescription
@@ -301,14 +310,14 @@ const MedicalRecordModal = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 mt-4 border-t border-gray-200">
-                  {/* Left side - Cancel + Delete */}
+                <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 mt-4 border-t border-ui-border">
+                  {/* Left: Cancel + Delete */}
                   <div className="flex gap-2">
                     {isEdit && existingRecord?.appointment?.status !== "Completed" && (
                       <>
                         <button
                           onClick={onClose}
-                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm flex-1 sm:flex-none"
+                          className="px-4 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors text-sm flex-1 sm:flex-none"
                         >
                           Cancel
                         </button>
@@ -323,7 +332,7 @@ const MedicalRecordModal = ({
                                   <div className="flex gap-2 justify-end">
                                     <button
                                       onClick={() => toast.dismiss(t.id)}
-                                      className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                      className="px-3 py-1 text-sm text-muted-foreground hover:bg-ui-muted rounded"
                                     >
                                       No, keep it
                                     </button>
@@ -358,13 +367,13 @@ const MedicalRecordModal = ({
                     )}
                   </div>
 
-                  {/* Right side - Update/Save/Close */}
+                  {/* Right: Save / Close */}
                   <div className="flex gap-2">
                     {!(isEdit && existingRecord?.appointment?.status === "Completed") ? (
                       <button
                         onClick={handleSave}
                         disabled={isSubmitting}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm flex-1"
+                        className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm flex-1"
                       >
                         {isSubmitting
                           ? "Saving..."
@@ -375,7 +384,7 @@ const MedicalRecordModal = ({
                     ) : (
                       <button
                         onClick={onClose}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm flex-1"
+                        className="px-4 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors text-sm flex-1"
                       >
                         Close
                       </button>
