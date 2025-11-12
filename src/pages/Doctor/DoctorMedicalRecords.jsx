@@ -172,7 +172,11 @@ const DoctorMedicalRecords = () => {
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 gap-3 mb-8 overflow-hidden min-h-0">
         {/* LEFT SECTION */}
-        <div className="scrollbar col-span-9 rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs">
+        <div
+          className={`scrollbar rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs transition-all duration-300 ${
+            selectedRecord ? "col-span-9" : "col-span-12"
+          }`}
+        >
           {/* Alert */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -386,136 +390,150 @@ const DoctorMedicalRecords = () => {
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS (unchanged) */}
-        <div className="col-span-3 bg-ui-card rounded-xl p-3 flex flex-col overflow-hidden shadow-xs">
-          <h2 className="text-base font-bold font-montserrat text-foreground mb-4">
-            Record Details
-          </h2>
-
-          {!selectedRecord ? (
-            <p className="text-muted-foreground text-sm">
-              Select a record to view details.
-            </p>
-          ) : (
+        {/* RIGHT SECTION - DETAILS (mirrors Appointments behavior) */}
+        <div
+          className={`bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs transition-all duration-300 ease-in-out ${
+            selectedRecord
+              ? "col-span-3 opacity-100"
+              : "col-span-0 opacity-0 w-0 p-0 overflow-hidden"
+          }`}
+        >
+          {selectedRecord && (
             <>
-              {/* Patient Info */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-semibold text-white">
+              {/* Sticky Header with Close Button */}
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5 flex items-center justify-between">
+                <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
+                  Record Details
+                </h2>
+                <button
+                  onClick={() => setSelectedRecord(null)}
+                  className="p-1 rounded-full hover:bg-ui-muted/50 transition text-muted-foreground hover:text-foreground"
+                  aria-label="Close details"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
+                {/* Patient Header */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
                     {selectedRecord.patient?.name
                       ?.split(" ")
-                      .map((n) => n[0])
-                      .join("") || "P"}
+                      .map((n) => n[0].toUpperCase())
+                      .join("")
+                      .slice(0, 2) || "P"}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-foreground text-sm">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-foreground truncate text-sm">
                       {selectedRecord.patient?.name}
                     </h3>
-                    <div className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      <span className="w-1 h-1 rounded-full bg-blue-500 mr-1" />
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 mt-0.5">
+                      <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
                       {formatDate(selectedRecord.appointment?.appointment_date)}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-muted-foreground" />
-                    <span>
-                      {formatDate(selectedRecord.appointment?.appointment_date)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-muted-foreground" />
-                    <span>{selectedRecord.appointment?.appointment_time}</span>
+                {/* Date, Time Card */}
+                <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
+                        <p className="font-bold text-foreground text-sm">
+                          {formatDate(selectedRecord.appointment?.appointment_date)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pr-1">
+                      <Clock className="w-4 h-4 text-blue shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Time</p>
+                        <p className="font-bold text-foreground text-sm">
+                          {selectedRecord.appointment?.appointment_time}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Diagnosis */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-foreground text-sm mb-1">
-                  Diagnosis
-                </h4>
-                <div className="bg-ui-muted rounded-lg p-2">
-                  <p className="text-xs text-foreground">
+                {/* Diagnosis */}
+                <div className="space-y-1">
+                  <p className="text-[10px] tracking-wider text-muted-foreground">Diagnosis</p>
+                  <p className="text-xs text-foreground leading-relaxed">
                     {selectedRecord.diagnosis}
                   </p>
                 </div>
-              </div>
 
-              {/* Symptoms */}
-              {selectedRecord.symptoms && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-1">
-                    Symptoms
-                  </h4>
-                  <div className="bg-ui-muted rounded-lg p-2">
-                    <p className="text-xs text-foreground">
+                {/* Symptoms */}
+                {selectedRecord.symptoms && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] tracking-wider text-muted-foreground">Symptoms</p>
+                    <p className="text-xs text-foreground leading-relaxed">
                       {selectedRecord.symptoms}
                     </p>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Prescriptions */}
-              {selectedRecord.prescriptions?.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-1">
-                    Prescriptions ({selectedRecord.prescriptions.length})
-                  </h4>
+                {/* Prescriptions */}
+                {selectedRecord.prescriptions?.length > 0 && (
                   <div className="space-y-1">
-                    {selectedRecord.prescriptions.map((p, i) => (
-                      <div
-                        key={i}
-                        className="bg-ui-muted p-2 rounded-lg text-xs"
-                      >
-                        <div className="font-medium">{p.medicine}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {p.dosage} • {p.duration}
+                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">
+                      Prescriptions ({selectedRecord.prescriptions.length})
+                    </p>
+                    <div className="space-y-2">
+                      {selectedRecord.prescriptions.map((p, i) => (
+                        <div
+                          key={i}
+                          className="bg-ui-muted/50 p-2 rounded-lg text-xs"
+                        >
+                          <div className="font-medium text-foreground">{p.medicine}</div>
+                          <div className="text-xs text-muted-foreground">
+                             {p.dosage} • {p.duration}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Previous Records Dropdown */}
-              {patientRecords.length > 1 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-1">
-                    Previous Records
-                  </h4>
-                  <div className="relative">
-                    <select
-                      className="w-full p-2 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground appearance-none pr-8"
-                      onChange={(e) => {
-                        const rec = patientRecords.find(
-                          (r) => r._id === e.target.value
-                        );
-                        if (rec) setSelectedRecord(rec);
-                      }}
-                      value={selectedRecord._id}
-                    >
-                      {patientRecords.map((r) => (
-                        <option key={r._id} value={r._id}>
-                          {formatDate(r.appointment.appointment_date)} -{" "}
-                          {r.diagnosis}
-                        </option>
                       ))}
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Action */}
-              <button
-                onClick={() => window.print()}
-                className="mt-auto w-full bg-blue hover:bg-blue-dark text-white py-2 rounded-lg font-semibold text-sm transition-colors"
-              >
-                Print Record
-              </button>
+                {/* Previous Records Dropdown */}
+                {patientRecords.length > 1 && (
+                  <div className="space-y-1">
+                    <p className="text-[10px] tracking-wider text-muted-foreground">Previous Records</p>
+                    <div className="relative">
+                      <select
+                        className="w-full p-2 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground appearance-none pr-8"
+                        onChange={(e) => {
+                          const rec = patientRecords.find((r) => r._id === e.target.value);
+                          if (rec) setSelectedRecord(rec);
+                        }}
+                        value={selectedRecord._id}
+                      >
+                        {patientRecords.map((r) => (
+                          <option key={r._id} value={r._id}>
+                            {formatDate(r.appointment.appointment_date)} - {r.diagnosis}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Fixed Print Button */}
+              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2">
+                <button
+                  onClick={() => window.print()}
+                  className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  Print Record
+                </button>
+              </div>
             </>
           )}
         </div>

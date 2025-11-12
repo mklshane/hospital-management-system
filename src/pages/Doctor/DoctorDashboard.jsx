@@ -187,9 +187,9 @@ const DoctorDashboard = () => {
             ) : (
               <>
                 <h1 className="text-xl font-bold font-montserrat">
-                  {doctorInfo?.name ?? "Dr. Unknown"}
+                  Dr. {doctorInfo?.name ?? "Dr. Unknown"}
                 </h1>
-                <p className="text-blue-light font-figtree text-sm">
+                <p className="text-blue-200 font-figtree text-sm">
                   {doctorInfo?.specialization ?? "—"}
                 </p>
               </>
