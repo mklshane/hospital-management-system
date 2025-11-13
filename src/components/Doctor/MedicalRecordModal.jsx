@@ -41,7 +41,7 @@ const MedicalRecordModal = ({
       setDiagnosis("");
       setPrescriptions([{ medicine: "", dosage: "", duration: "" }]);
     }
-  }, [isEdit, existingRecord]);
+  }, [isEdit, existingRecord, isOpen]);
 
   const addPrescription = () => {
     setPrescriptions([...prescriptions, { medicine: "", dosage: "", duration: "" }]);
@@ -93,6 +93,9 @@ const MedicalRecordModal = ({
         res = await api.post(`/record/${appointment._id}`, payload);
         toast.success("Medical record saved successfully!");
         onRecordAdded?.(res.data.record);
+        setSymptoms("");
+        setDiagnosis("");
+        setPrescriptions([{ medicine: "", dosage: "", duration: "" }]);
       }
       onClose();
     } catch (error) {
