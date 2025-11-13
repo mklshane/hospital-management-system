@@ -9,6 +9,11 @@ import {
   X,
   Check,
   ChevronDown,
+  FileText,
+  Stethoscope,
+  Activity,
+  Pill,
+  Printer,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import MedicalRecordCard from "../../components/Doctor/MedicalRecordCard";
@@ -76,6 +81,8 @@ const DoctorMedicalRecords = () => {
   useEffect(() => {
     if (selectedRecord) {
       fetchPatientRecords(selectedRecord.patient._id);
+    } else {
+      setPatientRecords([]);
     }
   }, [selectedRecord]);
 
@@ -171,12 +178,8 @@ const DoctorMedicalRecords = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 gap-3 mb-8 overflow-hidden min-h-0">
-        {/* LEFT SECTION */}
-        <div
-          className={`scrollbar rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs transition-all duration-300 ${
-            selectedRecord ? "col-span-9" : "col-span-12"
-          }`}
-        >
+        {/* LEFT SECTION - ALWAYS 9 COLUMNS */}
+        <div className="scrollbar rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs col-span-9">
           {/* Alert */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -295,9 +298,9 @@ const DoctorMedicalRecords = () => {
             </button>
           </div>
 
-          {/* COLUMNS WITH DASHBOARD-STYLE SKELETON CARDS */}
+          {/* COLUMNS WITH SKELETON */}
           <div className="relative flex-1 min-h-0 overflow-hidden">
-            {/* SKELETON LOADING - DASHBOARD STYLE */}
+            {/* SKELETON */}
             {columnsRefreshing && (
               <div className="h-full overflow-y-auto pr-1 scrollbar">
                 <div className="grid grid-cols-3 gap-3 pb-4">
@@ -338,7 +341,7 @@ const DoctorMedicalRecords = () => {
               </div>
             )}
 
-            {/* REAL CONTENT - SMOOTH FADE IN */}
+            {/* REAL CONTENT */}
             <div
               className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
                 columnsRefreshing ? "opacity-0" : "opacity-100"
@@ -378,6 +381,7 @@ const DoctorMedicalRecords = () => {
                               record={record}
                               onClick={setSelectedRecord}
                               formatDate={formatDate}
+                              isSelected={selectedRecord?._id === record._id}
                             />
                           ))
                         )}
@@ -390,28 +394,15 @@ const DoctorMedicalRecords = () => {
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS (mirrors Appointments behavior) */}
-        <div
-          className={`bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs transition-all duration-300 ease-in-out ${
-            selectedRecord
-              ? "col-span-3 opacity-100"
-              : "col-span-0 opacity-0 w-0 p-0 overflow-hidden"
-          }`}
-        >
-          {selectedRecord && (
+        {/* RIGHT SECTION - ALWAYS VISIBLE, FIXED WIDTH */}
+        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+          {selectedRecord ? (
             <>
-              {/* Sticky Header with Close Button */}
-              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5 flex items-center justify-between">
+              {/* Sticky Header - No Close Button */}
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
                 <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
                   Record Details
                 </h2>
-                <button
-                  onClick={() => setSelectedRecord(null)}
-                  className="p-1 rounded-full hover:bg-ui-muted/50 transition text-muted-foreground hover:text-foreground"
-                  aria-label="Close details"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
               </div>
 
               {/* Scrollable Content */}
@@ -430,49 +421,33 @@ const DoctorMedicalRecords = () => {
                       {selectedRecord.patient?.name}
                     </h3>
                     <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 mt-0.5">
-                      <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                      <Calendar className="w-3 h-3" />
                       {formatDate(selectedRecord.appointment?.appointment_date)}
                     </div>
                   </div>
                 </div>
 
-                {/* Date, Time Card */}
-                {/* <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-blue shrink-0" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
-                        <p className="font-bold text-foreground text-sm">
-                          {formatDate(selectedRecord.appointment?.appointment_date)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 pr-1">
-                      <Clock className="w-4 h-4 text-blue shrink-0" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Time</p>
-                        <p className="font-bold text-foreground text-sm">
-                          {selectedRecord.appointment?.appointment_time}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div> */}
-
                 {/* Diagnosis */}
-                <div className="space-y-1">
-                  <p className="text-[10px] tracking-wider text-muted-foreground">Diagnosis</p>
-                  <p className="text-xs text-foreground leading-relaxed">
-                    {selectedRecord.diagnosis}
+                <div className="space-y-1 pl-1">
+                  <div className="flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4 text-blue" />
+                    <p className="text-[10px] tracking-wider text-muted-foreground">Diagnosis</p>
+                  </div>
+                  <p className="text-xs text-foreground leading-relaxed pl-6">
+                    {selectedRecord.diagnosis || (
+                      <span className="italic text-muted-foreground">No diagnosis recorded.</span>
+                    )}
                   </p>
                 </div>
 
                 {/* Symptoms */}
                 {selectedRecord.symptoms && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] tracking-wider text-muted-foreground">Symptoms</p>
-                    <p className="text-xs text-foreground leading-relaxed">
+                  <div className="space-y-1 pl-1">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-blue" />
+                      <p className="text-[10px] tracking-wider text-muted-foreground">Symptoms</p>
+                    </div>
+                    <p className="text-xs text-foreground leading-relaxed pl-6">
                       {selectedRecord.symptoms}
                     </p>
                   </div>
@@ -480,11 +455,14 @@ const DoctorMedicalRecords = () => {
 
                 {/* Prescriptions */}
                 {selectedRecord.prescriptions?.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">
-                      Prescriptions ({selectedRecord.prescriptions.length})
-                    </p>
-                    <div className="space-y-2">
+                  <div className="space-y-1 pl-1">
+                    <div className="flex items-center gap-2">
+                      <Pill className="w-4 h-4 text-blue" />
+                      <p className="text-[10px] tracking-wider text-muted-foreground">
+                        Prescriptions ({selectedRecord.prescriptions.length})
+                      </p>
+                    </div>
+                    <div className="space-y-2 pl-6">
                       {selectedRecord.prescriptions.map((p, i) => (
                         <div
                           key={i}
@@ -492,7 +470,7 @@ const DoctorMedicalRecords = () => {
                         >
                           <div className="font-medium text-foreground">{p.medicine}</div>
                           <div className="text-xs text-muted-foreground">
-                             {p.dosage} • {p.duration}
+                            {p.dosage} • {p.duration}
                           </div>
                         </div>
                       ))}
@@ -503,8 +481,11 @@ const DoctorMedicalRecords = () => {
                 {/* Previous Records Dropdown */}
                 {patientRecords.length > 1 && (
                   <div className="space-y-1">
-                    <p className="text-[10px] tracking-wider text-muted-foreground">Previous Records</p>
-                    <div className="relative">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-[10px] tracking-wider text-muted-foreground">Previous Records</p>
+                    </div>
+                    <div className="relative pl-6">
                       <select
                         className="w-full p-2 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground appearance-none pr-8"
                         onChange={(e) => {
@@ -513,11 +494,13 @@ const DoctorMedicalRecords = () => {
                         }}
                         value={selectedRecord._id}
                       >
-                        {patientRecords.map((r) => (
-                          <option key={r._id} value={r._id}>
-                            {formatDate(r.appointment.appointment_date)} - {r.diagnosis}
-                          </option>
-                        ))}
+                        {patientRecords
+                          .sort((a, b) => new Date(b.appointment.appointment_date) - new Date(a.appointment.appointment_date))
+                          .map((r) => (
+                            <option key={r._id} value={r._id}>
+                              {formatDate(r.appointment.appointment_date)} - {r.diagnosis}
+                            </option>
+                          ))}
                       </select>
                       <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
                     </div>
@@ -531,8 +514,26 @@ const DoctorMedicalRecords = () => {
                   onClick={() => window.print()}
                   className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"
                 >
+                  <Printer className="w-4 h-4" />
                   Print Record
                 </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Empty State */}
+              <div className="flex-1 flex items-center justify-center px-3">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    No record selected
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Click on any record card to view details.
+                  </p>
+                </div>
               </div>
             </>
           )}

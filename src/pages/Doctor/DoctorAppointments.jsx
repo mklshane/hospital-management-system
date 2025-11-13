@@ -13,6 +13,7 @@ import {
   FileText,
   Phone,
   Mail,
+  SquareUserRound,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/Doctor/AppointmentCard";
@@ -216,12 +217,8 @@ const DoctorAppointments = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 mb-8 gap-3 overflow-hidden min-h-0">
-        {/* LEFT SECTION - APPOINTMENTS (Expands when no selection) */}
-        <div
-          className={`scrollbar rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs transition-all duration-300 ${
-            selectedAppointment ? "col-span-9" : "col-span-12"
-          }`}
-        >
+         {/* LEFT SECTION - APPOINTMENTS */}
+        <div className="scrollbar rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -463,30 +460,17 @@ const DoctorAppointments = () => {
         </div>
 
         {/* RIGHT SECTION - DETAILS */}
-        <div
-          className={`bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs transition-all duration-300 ease-in-out ${
-            selectedAppointment
-              ? "col-span-3 opacity-100"
-              : "col-span-0 opacity-0 w-0 p-0 overflow-hidden"
-          }`}
-        >
-          {selectedAppointment && (
+        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+          {selectedAppointment ? (
             <>
               {/* Sticky Header */}
-              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5 flex items-center justify-between pl-3 pr-2">
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
                 <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
                   Appointment Details
                 </h2>
-                <button
-                  onClick={() => setSelectedAppointment(null)}
-                  className="p-1 rounded-full hover:bg-ui-muted/50 transition text-muted-foreground hover:text-foreground"
-                  aria-label="Close"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
               </div>
 
-              {/* Scrollable Content - FIXED: No cut-off */}
+              {/* Scrollable Content */}
               <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
                 {/* Patient Header */}
                 <div className="flex items-center gap-3">
@@ -551,39 +535,18 @@ const DoctorAppointments = () => {
                       )}
                     </p>
                   </div>
-
-                  {/* <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-2 border-t border-ui-border/50">
-                    <span>ID: #{selectedAppointment._id.slice(-6).toUpperCase()}</span>
-                    <span>
-                      {new Date(selectedAppointment.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div> */}
                 </div>
 
                 {/* Collapsible Sections */}
                 <CollapsibleSection title="Patient Details" defaultOpen={false}>
-                  <div className="grid grid-cols-2 gap-3 text-xs px-3">
+                  <div className="grid gap-3 text-xs px-3">
                     {selectedAppointment.patient?.age && (
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground">
-                          Age
+                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
+                          <SquareUserRound className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <span className="font-medium text-foreground">
-                          {selectedAppointment.patient.age} yrs
-                        </span>
-                      </div>
-                    )}
-                    {selectedAppointment.patient?.gender && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center text-[10px] font-medium text-muted-foreground">
-                          {selectedAppointment.patient.gender === "male" ? "M" : "F"}
-                        </div>
-                        <span className="font-medium text-foreground capitalize">
-                          {selectedAppointment.patient.gender}
+                          {selectedAppointment.patient.age} years old, {selectedAppointment.patient.gender}
                         </span>
                       </div>
                     )}
@@ -629,7 +592,7 @@ const DoctorAppointments = () => {
                 />
               </div>
 
-              {/* Fixed Action Buttons - FULLY VISIBLE */}
+              {/* Fixed Action Buttons */}
               <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2 space-y-2">
                 {selectedAppointment.status === "Pending" && (
                   <>
@@ -696,6 +659,23 @@ const DoctorAppointments = () => {
                     </p>
                   </div>
                 )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Empty State */}
+              <div className="flex-1 flex items-center justify-center px-3">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    No appointment selected
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Click on any appointment card to view details.
+                  </p>
+                </div>
               </div>
             </>
           )}
