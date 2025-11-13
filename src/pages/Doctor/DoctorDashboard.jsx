@@ -467,7 +467,7 @@ const DoctorDashboard = () => {
                           })
                         }
                         disabled={actionLoading[appt._id]}
-                        className="flex-1 border border-green-300 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                        className="flex-1 border border-green-200 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 disabled:opacity-50"
                       >
                         <CheckCircle className="w-3.5 h-3.5" />
                         Complete

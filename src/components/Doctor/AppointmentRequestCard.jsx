@@ -81,7 +81,7 @@ const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
         <button
           onClick={() => setModal({ isOpen: true, appointment: request, action: "reject" })}
           disabled={loading}
-          className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
+          className="w-full border border-red-200 text-red-600 hover:bg-red-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
         >
           <XCircle className="w-3 h-3" />
           Reject

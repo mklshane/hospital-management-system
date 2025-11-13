@@ -617,7 +617,7 @@ const DoctorAppointments = () => {
                           action: "reject",
                         })
                       }
-                      className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
+                      className="w-full text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
                       <XCircle className="w-4 h-4" />
                       Reject Appointment
@@ -642,7 +642,7 @@ const DoctorAppointments = () => {
                           action: "complete",
                         })
                       }
-                      className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
+                      className="w-full text-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Mark as Completed
