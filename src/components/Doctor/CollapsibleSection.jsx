@@ -26,7 +26,7 @@ const CollapsibleSection = ({
         className="w-full flex items-center justify-between pt-2 text-left hover:bg-ui-muted/30 transition-colors"
       >
         <div className="flex items-center gap-3 flex-1">
-          <h5 className="font-medium text-foreground text-sm">{title}</h5>
+          <h5 className="font-medium text-foreground text-xs">{title}</h5>
           {badge && (
             <span
               className={`flex items-center justify-center w-5 h-5 rounded-full text-xs text-white font-medium ${badgeColor}`}

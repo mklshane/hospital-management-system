@@ -1,9 +1,11 @@
-import React from "react";
-import { Check, X, User, Calendar, Clock } from "lucide-react";
+import React, { useState } from "react";
+import { CheckCircle, XCircle, User, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
+import AppointmentActionModal from "../Doctor/AppointmentActionModal.jsx";
 
 const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
   const { _id, patient, appointment_date, appointment_time, notes } = request;
+  const [modal, setModal] = useState({ isOpen: false, appointment: null, action: null });
 
   if (!patient) return null;
 
@@ -68,25 +70,35 @@ const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
       {/* Action Buttons - Smaller */}
       <div className="flex gap-1.5 pt-2 border-t border-ui-border">
         <button
-          onClick={() => onApprove(_id)}
+          onClick={() => setModal({ isOpen: true, appointment: request, action: "accept" })}
           disabled={loading}
-          className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-600/30 text-emerald-700 border border-emerald-500/30 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-blue hover:bg-blue-light text-white py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
         >
-          {loading ? (
-            <div className="w-3 h-3 border-2 border-emerald-400 border-t-emerald-700 rounded-full animate-spin"></div>
-          ) : (
-            <Check className="w-3 h-3" />
-          )}
+          <CheckCircle className="w-3 h-3" />
           Accept
         </button>
+
         <button
-          onClick={() => onReject(_id)}
+          onClick={() => setModal({ isOpen: true, appointment: request, action: "reject" })}
           disabled={loading}
-          className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-red-500/10 hover:bg-red-500/30 text-red-700 border border-red-500/30 text-xs font-medium rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full border border-red-200 text-red-600 hover:bg-red-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
         >
-          <X className="w-3 h-3" />
+          <XCircle className="w-3 h-3" />
           Reject
         </button>
+        <AppointmentActionModal
+          isOpen={modal.isOpen}
+          onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+          appointment={modal.appointment}
+          actionType={modal.action}
+          loading={loading}
+          onConfirm={async () => {
+            const handler = modal.action === "accept" ? onApprove : onReject;
+            if (handler) {
+              await handler(request._id);
+            }
+          }}
+        />
       </div>
     </div>
   );

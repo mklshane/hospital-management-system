@@ -9,6 +9,11 @@ import {
   X,
   Check,
   ChevronDown,
+  FileText,
+  Stethoscope,
+  Activity,
+  Pill,
+  Printer,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import MedicalRecordCard from "../../components/Doctor/MedicalRecordCard";
@@ -19,6 +24,7 @@ const DoctorMedicalRecords = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [patientRecords, setPatientRecords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [columnsRefreshing, setColumnsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [selectedFilters, setSelectedFilters] = useState(["recent", "older"]);
@@ -37,6 +43,7 @@ const DoctorMedicalRecords = () => {
 
   const fetchRecords = async () => {
     try {
+      setColumnsRefreshing(true);
       setLoading(true);
       const res = await api.get("/record");
 
@@ -63,6 +70,7 @@ const DoctorMedicalRecords = () => {
       alert("Failed to load records. Check console.");
     } finally {
       setLoading(false);
+      setTimeout(() => setColumnsRefreshing(false), 300);
     }
   };
 
@@ -73,6 +81,8 @@ const DoctorMedicalRecords = () => {
   useEffect(() => {
     if (selectedRecord) {
       fetchPatientRecords(selectedRecord.patient._id);
+    } else {
+      setPatientRecords([]);
     }
   }, [selectedRecord]);
 
@@ -157,18 +167,19 @@ const DoctorMedicalRecords = () => {
     return acc;
   }, {});
 
-  if (loading)
+  if (loading && records.length === 0) {
     return (
       <p className="text-center py-4 text-foreground text-sm">
         Loading medical records...
       </p>
     );
+  }
 
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 gap-3 mb-8 overflow-hidden min-h-0">
-        {/* LEFT SECTION */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-xl p-4 flex flex-col overflow-hidden shadow-xs">
+        {/* LEFT SECTION - ALWAYS 9 COLUMNS */}
+        <div className="scrollbar rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs col-span-9">
           {/* Alert */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -287,174 +298,243 @@ const DoctorMedicalRecords = () => {
             </button>
           </div>
 
-          {/* Columns */}
-          <div className="grid grid-cols-3 gap-3 flex-1 overflow-y-auto pr-1">
-            {selectedFilters.map((filterKey) => {
-              const statusData = statusOptions.find((s) => s.key === filterKey);
-              const list = filteredRecords[filterKey] || [];
-              const currentOrder = sortOrders[filterKey] || "desc";
+          {/* COLUMNS WITH SKELETON */}
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+            {/* SKELETON */}
+            {columnsRefreshing && (
+              <div className="h-full overflow-y-auto pr-1 scrollbar">
+                <div className="grid grid-cols-3 gap-3 pb-4">
+                  {selectedFilters.map((filterKey) => {
+                    const statusData = statusOptions.find((s) => s.key === filterKey);
 
-              return (
-                <div key={filterKey} className="min-h-0">
-                  <h2
-                    onClick={() => toggleSort(filterKey)}
-                    className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none"
-                  >
-                    {statusData.label} ({list.length})
-                    <ArrowUpDown
-                      className={`w-3 h-3 transition-all ${
-                        currentOrder === "asc"
-                          ? "rotate-180 text-blue"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  </h2>
-                  <div className="space-y-2">
-                    {list.map((record) => (
-                      <MedicalRecordCard
-                        key={record._id}
-                        record={record}
-                        onClick={setSelectedRecord}
-                        formatDate={formatDate}
-                      />
-                    ))}
-                  </div>
+                    return (
+                      <div key={filterKey} className="min-h-0 flex flex-col">
+                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
+                          {statusData.label} ({Math.floor(Math.random() * 6) + 1})
+                          <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+                        </h2>
+
+                        <div className="space-y-2">
+                          {[...Array(Math.floor(Math.random() * 4) + 3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
+                                <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-ui-muted/60 rounded w-36 animate-pulse" />
+                                  <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse" />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="h-3 bg-ui-muted/50 rounded w-full animate-pulse" />
+                                <div className="h-3 bg-ui-muted/50 rounded w-32 animate-pulse" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            {/* REAL CONTENT */}
+            <div
+              className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
+                columnsRefreshing ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <div className="grid grid-cols-3 gap-3 pb-4">
+                {selectedFilters.map((filterKey) => {
+                  const statusData = statusOptions.find((s) => s.key === filterKey);
+                  const list = filteredRecords[filterKey] || [];
+                  const currentOrder = sortOrders[filterKey] || "desc";
+
+                  return (
+                    <div key={filterKey} className="min-h-0 flex flex-col">
+                      <h2
+                        onClick={() => toggleSort(filterKey)}
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
+                      >
+                        {statusData.label} ({list.length})
+                        <ArrowUpDown
+                          className={`w-3 h-3 transition-all ${
+                            currentOrder === "asc"
+                              ? "rotate-180 text-blue"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </h2>
+
+                      <div className="space-y-2 flex-1">
+                        {list.length === 0 ? (
+                          <p className="text-xs text-muted-foreground text-center py-8">
+                            No {statusData.label.toLowerCase()} records
+                          </p>
+                        ) : (
+                          list.map((record) => (
+                            <MedicalRecordCard
+                              key={record._id}
+                              record={record}
+                              onClick={setSelectedRecord}
+                              formatDate={formatDate}
+                              isSelected={selectedRecord?._id === record._id}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT SECTION - DETAILS */}
-        <div className="col-span-3 bg-ui-card rounded-xl p-3 flex flex-col overflow-hidden shadow-xs">
-          <h2 className="text-base font-bold font-montserrat text-foreground mb-4">
-            Record Details
-          </h2>
-
-          {!selectedRecord ? (
-            <p className="text-muted-foreground text-sm">
-              Select a record to view details.
-            </p>
-          ) : (
+        {/* RIGHT SECTION - ALWAYS VISIBLE, FIXED WIDTH */}
+        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+          {selectedRecord ? (
             <>
-              {/* Patient Info */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-semibold text-white">
+              {/* Sticky Header - No Close Button */}
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
+                <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
+                  Record Details
+                </h2>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
+                {/* Patient Header */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
                     {selectedRecord.patient?.name
                       ?.split(" ")
-                      .map((n) => n[0])
-                      .join("") || "P"}
+                      .map((n) => n[0].toUpperCase())
+                      .join("")
+                      .slice(0, 2) || "P"}
                   </div>
-                  <div>
-                    <h3 className="font-bold text-foreground text-sm">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-foreground truncate text-sm">
                       {selectedRecord.patient?.name}
                     </h3>
-                    <div className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      <span className="w-1 h-1 rounded-full bg-blue-500 mr-1" />
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800 mt-0.5">
+                      <Calendar className="w-3 h-3" />
                       {formatDate(selectedRecord.appointment?.appointment_date)}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-muted-foreground" />
-                    <span>
-                      {formatDate(selectedRecord.appointment?.appointment_date)}
-                    </span>
+                {/* Diagnosis */}
+                <div className="space-y-1 pl-1">
+                  <div className="flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4 text-blue" />
+                    <p className="text-[10px] tracking-wider text-muted-foreground">Diagnosis</p>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-muted-foreground" />
-                    <span>{selectedRecord.appointment?.appointment_time}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Diagnosis */}
-              <div className="mb-4">
-                <h4 className="font-semibold text-foreground text-sm mb-1">
-                  Diagnosis
-                </h4>
-                <div className="bg-ui-muted rounded-lg p-2">
-                  <p className="text-xs text-foreground">
-                    {selectedRecord.diagnosis}
+                  <p className="text-xs text-foreground leading-relaxed pl-6">
+                    {selectedRecord.diagnosis || (
+                      <span className="italic text-muted-foreground">No diagnosis recorded.</span>
+                    )}
                   </p>
                 </div>
-              </div>
 
-              {/* Symptoms */}
-              {selectedRecord.symptoms && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-1">
-                    Symptoms
-                  </h4>
-                  <div className="bg-ui-muted rounded-lg p-2">
-                    <p className="text-xs text-foreground">
+                {/* Symptoms */}
+                {selectedRecord.symptoms && (
+                  <div className="space-y-1 pl-1">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-blue" />
+                      <p className="text-[10px] tracking-wider text-muted-foreground">Symptoms</p>
+                    </div>
+                    <p className="text-xs text-foreground leading-relaxed pl-6">
                       {selectedRecord.symptoms}
                     </p>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Prescriptions */}
-              {selectedRecord.prescriptions?.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-1">
-                    Prescriptions ({selectedRecord.prescriptions.length})
-                  </h4>
-                  <div className="space-y-1">
-                    {selectedRecord.prescriptions.map((p, i) => (
-                      <div
-                        key={i}
-                        className="bg-ui-muted p-2 rounded-lg text-xs"
-                      >
-                        <div className="font-medium">{p.medicine}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {p.dosage} • {p.duration}
+                {/* Prescriptions */}
+                {selectedRecord.prescriptions?.length > 0 && (
+                  <div className="space-y-1 pl-1">
+                    <div className="flex items-center gap-2">
+                      <Pill className="w-4 h-4 text-blue" />
+                      <p className="text-[10px] tracking-wider text-muted-foreground">
+                        Prescriptions ({selectedRecord.prescriptions.length})
+                      </p>
+                    </div>
+                    <div className="space-y-2 pl-6">
+                      {selectedRecord.prescriptions.map((p, i) => (
+                        <div
+                          key={i}
+                          className="bg-ui-muted/50 p-2 rounded-lg text-xs"
+                        >
+                          <div className="font-medium text-foreground">{p.medicine}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {p.dosage} • {p.duration}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Previous Records Dropdown */}
-              {patientRecords.length > 1 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold text-foreground text-sm mb-1">
-                    Previous Records
-                  </h4>
-                  <div className="relative">
-                    <select
-                      className="w-full p-2 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground appearance-none pr-8"
-                      onChange={(e) => {
-                        const rec = patientRecords.find(
-                          (r) => r._id === e.target.value
-                        );
-                        if (rec) setSelectedRecord(rec);
-                      }}
-                      value={selectedRecord._id}
-                    >
-                      {patientRecords.map((r) => (
-                        <option key={r._id} value={r._id}>
-                          {formatDate(r.appointment.appointment_date)} -{" "}
-                          {r.diagnosis}
-                        </option>
                       ))}
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Action */}
-              <button
-                onClick={() => window.print()}
-                className="mt-auto w-full bg-blue hover:bg-blue-dark text-white py-2 rounded-lg font-semibold text-sm transition-colors"
-              >
-                Print Record
-              </button>
+                {/* Previous Records Dropdown */}
+                {patientRecords.length > 1 && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-[10px] tracking-wider text-muted-foreground">Previous Records</p>
+                    </div>
+                    <div className="relative pl-6">
+                      <select
+                        className="w-full p-2 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground appearance-none pr-8"
+                        onChange={(e) => {
+                          const rec = patientRecords.find((r) => r._id === e.target.value);
+                          if (rec) setSelectedRecord(rec);
+                        }}
+                        value={selectedRecord._id}
+                      >
+                        {patientRecords
+                          .sort((a, b) => new Date(b.appointment.appointment_date) - new Date(a.appointment.appointment_date))
+                          .map((r) => (
+                            <option key={r._id} value={r._id}>
+                              {formatDate(r.appointment.appointment_date)} - {r.diagnosis}
+                            </option>
+                          ))}
+                      </select>
+                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Fixed Print Button */}
+              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2">
+                <button
+                  onClick={() => window.print()}
+                  className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium text-sm transition-all shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Record
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Empty State */}
+              <div className="flex-1 flex items-center justify-center px-3">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    No record selected
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Click on any record card to view details.
+                  </p>
+                </div>
+              </div>
             </>
           )}
         </div>

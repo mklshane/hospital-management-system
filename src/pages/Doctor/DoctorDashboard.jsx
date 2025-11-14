@@ -6,25 +6,60 @@ import {
   AlertCircle,
   CheckCircle2,
   Users,
+  FileText,
+  CheckCircle,
+  SquareUserRound,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/Doctor/AppointmentCard";
 import AppointmentRequestCard from "../../components/Doctor/AppointmentRequestCard";
+import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
+import AppointmentActionModal from "../../components/Doctor/AppointmentActionModal";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [scheduledAppointments, setScheduledAppointments] = useState([]);
   const [requests, setRequests] = useState([]);
-  const [allAppointments, setAllAppointments] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
-
   const [doctorInfo, setDoctorInfo] = useState(null);
   const [stats, setStats] = useState(null);
   const [doctorLoading, setDoctorLoading] = useState(true);
+
+  // Modals
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, appointment: null, action: null });
+
+  const getLocalToday = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateString = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   // API: Fetch doctor profile and stats
   const fetchDoctorProfile = async () => {
@@ -41,17 +76,14 @@ const DoctorDashboard = () => {
 
       const apptRes = await api.get("/appointment");
       const allAppts = apptRes.data.appointments || [];
+      
+      const today = getLocalToday();
 
-      const today = new Date().toISOString().split("T")[0];
-
-      const todayAppts = allAppts.filter((a) => a.appointment_date === today);
-      const scheduled = todayAppts.filter(
-        (a) => a.status === "Scheduled"
-      ).length;
+      const todayAppts = allAppts.filter((a) => formatDateString(a.appointment_date) === today);
+      const scheduled = todayAppts.filter((a) => a.status === "Scheduled").length;
+      
       const pendingAll = allAppts.filter((a) => a.status === "Pending").length;
-      const completedAll = allAppts.filter(
-        (a) => a.status === "Completed"
-      ).length;
+      const completedAll = allAppts.filter((a) => a.status === "Completed").length;
 
       const uniquePatients = new Set(allAppts.map((a) => a.patient?._id)).size;
 
@@ -63,10 +95,7 @@ const DoctorDashboard = () => {
       });
     } catch (err) {
       console.error("Error loading doctor profile / stats:", err);
-      setDoctorInfo({
-        name: "Dr. Juan De La Cruz",
-        specialization: "General Medicine",
-      });
+      setDoctorInfo({ name: "Dr. Juan De La Cruz", specialization: "General Medicine" });
       setStats({ today: 0, pending: 0, completed: 0, patients: 0 });
     } finally {
       setDoctorLoading(false);
@@ -78,12 +107,12 @@ const DoctorDashboard = () => {
     try {
       setLoading(true);
       const res = await api.get("/appointment");
-      const today = new Date().toISOString().split("T")[0];
+      const today = getLocalToday();
 
       const todayScheduled = (res.data.appointments || [])
-        .filter(
-          (appt) =>
-            appt.status === "Scheduled" && appt.appointment_date === today
+        .filter((appt) => 
+          appt.status === "Scheduled" && 
+          formatDateString(appt.appointment_date) === today
         )
         .sort((a, b) => a.appointment_time.localeCompare(b.appointment_time));
 
@@ -131,6 +160,7 @@ const DoctorDashboard = () => {
       await api.put(`/appointment/${id}`, { status: newStatus });
       await fetchPendingRequests();
       await fetchTodayAppointments();
+      await fetchDoctorProfile();
     } catch (err) {
       console.error(`Failed to ${newStatus} appointment:`, err);
       alert("Action failed. Please try again.");
@@ -155,7 +185,7 @@ const DoctorDashboard = () => {
   );
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-background">
+    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-surface">
       {/* Left Column - Stats (Top) and Today's Appointments (Bottom) */}
 
       {/* Stats Section - Top Left */}
@@ -171,9 +201,9 @@ const DoctorDashboard = () => {
             ) : (
               <>
                 <h1 className="text-xl font-bold font-montserrat">
-                  {doctorInfo?.name ?? "Dr. Unknown"}
+                  Dr. {doctorInfo?.name ?? "Dr. Unknown"}
                 </h1>
-                <p className="text-blue-light font-figtree text-sm">
+                <p className="text-blue-200 font-figtree text-sm">
                   {doctorInfo?.specialization ?? "—"}
                 </p>
               </>
@@ -188,8 +218,7 @@ const DoctorDashboard = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
           {doctorLoading || !stats
-            ? /* ----- SKELETON ----- */
-              [...Array(4)].map((_, i) => (
+            ? [...Array(4)].map((_, i) => (
                 <div
                   key={i}
                   className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20"
@@ -201,30 +230,29 @@ const DoctorDashboard = () => {
                   <div className="h-8 w-16 bg-white/20 rounded animate-pulse"></div>
                 </div>
               ))
-            : /* ----- REAL STATS – PROPERLY SIZED ----- */
-              [
+            : [
                 {
                   label: "Today's Appointments",
                   value: stats.today,
-                  icon: <Clock className="w-4 h-4" />,
+                  icon: <Clock className="w-5 h-5" />,
                   bg: "bg-blue-500",
                 },
                 {
                   label: "Pending Approvals",
                   value: stats.pending,
-                  icon: <AlertCircle className="w-4 h-4" />,
+                  icon: <AlertCircle className="w-5 h-5" />,
                   bg: "bg-amber-500",
                 },
                 {
                   label: "Completed Appointments",
                   value: stats.completed,
-                  icon: <CheckCircle2 className="w-4 h-4" />,
+                  icon: <CheckCircle2 className="w-5 h-5" />,
                   bg: "bg-emerald-500",
                 },
                 {
                   label: "Assigned Patients",
                   value: stats.patients,
-                  icon: <Users className="w-4 h-4" />,
+                  icon: <Users className="w-5 h-5" />,
                   bg: "bg-indigo-500",
                 },
               ].map((stat, i) => (
@@ -232,26 +260,25 @@ const DoctorDashboard = () => {
                   key={i}
                   className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20 transition-all duration-200 hover:bg-white/15"
                 >
-                  {/* Icon + Label */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`${stat.bg} text-white p-1.5 rounded-full`}>
+                  <div className="flex items-center gap-3 pt-1 pb-1">
+                    <div className={`${stat.bg} text-white p-2 rounded-full flex-shrink-0`}>
                       {stat.icon}
                     </div>
-                    <p className="text-xs font-figtree opacity-90 leading-tight">
-                      {stat.label}
-                    </p>
+                    <div className="flex-1">
+                      <p className="text-xs font-figtree opacity-90 leading-none">
+                        {stat.label}
+                      </p>
+                      <p className="text-2xl font-bold font-montserrat leading-none mt-1">
+                        {stat.value}
+                      </p>
+                    </div>
                   </div>
-
-                  {/* PROPERLY SIZED VALUE */}
-                  <p className="text-2xl font-bold font-montserrat leading-none">
-                    {stat.value}
-                  </p>
                 </div>
               ))}
         </div>
       </div>
 
-      {/* Right Column - Appointment Requests (Full Height) - NARROWER */}
+      {/* Right Column - Appointment Requests */}
       <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card rounded-xl min-h-0">
         <div className="p-3 border-b border-ui-border shrink-0">
           <h2 className="text-base font-semibold text-foreground font-montserrat">
@@ -283,13 +310,12 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Today's Appointments - Bottom Left */}
-      <div className="col-span-9 row-span-1 bg-ui-card rounded-xl overflow-hidden flex flex-col min-h-0">
+      <div className="col-span-9 row-span-1 rounded-xl overflow-hidden flex flex-col min-h-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-ui-border shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">
             Today's Appointments
           </h2>
 
-          {/* Search Bar */}
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <div className="relative flex-1 min-w-[200px]">
               <input
@@ -302,47 +328,191 @@ const DoctorDashboard = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground pointer-events-none" />
             </div>
 
-            {/* Refresh Button */}
             <button
               onClick={fetchTodayAppointments}
               disabled={loading}
-              className="p-2 h-9 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              className="p-2 h-9 bg-blue hover:bg-blue-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
               title="Refresh"
             >
-              <RefreshCw
-                className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
             </button>
           </div>
         </div>
 
-        {/* Appointment List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+        {/* Scrollable 2-Column Grid - Only 2 Cards Visible (1 per column) */}
+        <div className="flex-1 overflow-y-auto p-4 min-h-0">
           {loading ? (
-            <p className="text-center text-muted-foreground py-8 text-sm">
-              Loading today's appointments...
-            </p>
-          ) : scheduledAppointments.length === 0 ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="bg-ui-muted/50 rounded-xl p-4 animate-pulse space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-ui-muted/70 animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-ui-muted/60 rounded w-32 animate-pulse" />
+                      <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="h-3 bg-ui-muted/50 rounded animate-pulse" />
+                    <div className="h-3 bg-ui-muted/50 rounded animate-pulse" />
+                  </div>
+                  <div className="h-10 bg-ui-muted/50 rounded animate-pulse" />
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-8 bg-ui-muted/60 rounded-lg flex-1 animate-pulse" />
+                    <div className="h-8 bg-ui-muted/60 rounded-lg flex-1 animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredAppointments.length === 0 ? (
             <p className="text-center text-muted-foreground py-8 text-sm">
               No scheduled appointments for today.
             </p>
           ) : (
-            filteredAppointments.map((appt) => (
-              <AppointmentCard
-                key={appt._id}
-                appt={appt}
-                formatDate={(dateStr) =>
-                  new Date(dateStr).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })
-                }
-              />
-            ))
+            <div className="grid grid-cols-2 gap-4">
+              {filteredAppointments.map((appt) => {
+                const patient = appt.patient;
+                return (
+                  <div
+                    key={appt._id}
+                    className="bg-ui-card backdrop-blur-sm border border-ui-border/30 rounded-xl p-4 flex flex-col"
+                  >
+                    {/* Patient Header */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-full bg-blue flex items-center justify-center text-white font-bold text-sm">
+                        {patient?.name
+                          ?.split(" ")
+                          .map((n) => n[0].toUpperCase())
+                          .join("")
+                          .slice(0, 2)}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground text-sm truncate">
+                          {patient?.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {appt.appointment_time}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Patient Details */}
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs mb-4">
+                      {/* Left Column: All Patient Info */}
+                      <div className="space-y-2 pl-2">
+                        {patient?.age && (
+                          <div className="flex items-center gap-1.5">
+                            <SquareUserRound className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span>
+                              {patient.age}, {patient.gender}
+                            </span>
+                          </div>
+                        )}
+                        {patient?.contact && (
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-muted-foreground" />
+                            <a
+                              href={`tel:${patient.contact}`}
+                              className="text-foreground hover:text-blue truncate"
+                            >
+                              {patient.contact}
+                            </a>
+                          </div>
+                        )}
+                        {patient?.email && (
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                            <a
+                              href={`mailto:${patient.email}`}
+                              className="text-foreground hover:text-blue truncate text-xs"
+                            >
+                              {patient.email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Column: Only Notes */}
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">
+                          Notes
+                        </span>
+                        <p className="text-xs text-foreground line-clamp-2">
+                          {appt.notes || (
+                            <span className="italic text-muted-foreground">No notes.</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-auto">
+                      <button
+                        onClick={() => {
+                          setSelectedAppointment(appt);
+                          setIsRecordModalOpen(true);
+                        }}
+                        disabled={actionLoading[appt._id]}
+                        className="flex-1 bg-blue hover:bg-blue-700 text-white py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        Add Record
+                      </button>
+                      <button
+                        onClick={() =>
+                          setModal({
+                            isOpen: true,
+                            appointment: appt,
+                            action: "complete",
+                          })
+                        }
+                        disabled={actionLoading[appt._id]}
+                        className="flex-1 border border-green-200 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        Complete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <MedicalRecordModal
+        isOpen={isRecordModalOpen}
+        onClose={() => {
+          setIsRecordModalOpen(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={{
+          _id: selectedAppointment?._id,
+          patientName: selectedAppointment?.patient?.name,
+          date: formatDate(selectedAppointment?.appointment_date),
+          time: selectedAppointment?.appointment_time,
+          notes: selectedAppointment?.notes,
+        }}
+        onRecordAdded={() => {
+          fetchTodayAppointments();
+          fetchDoctorProfile();
+        }}
+      />
+
+      <AppointmentActionModal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+        appointment={modal.appointment}
+        actionType={modal.action}
+        loading={actionLoading[modal.appointment?._id]}
+        onConfirm={async () => {
+          if (!modal.appointment) return;
+          await handleStatusUpdate(modal.appointment._id, "Completed");
+          setModal({ isOpen: false, appointment: null, action: null });
+        }}
+      />
     </div>
   );
 };

@@ -13,6 +13,7 @@ import {
   FileText,
   Phone,
   Mail,
+  SquareUserRound,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
 import AppointmentCard from "../../components/Doctor/AppointmentCard";
@@ -20,17 +21,19 @@ import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
 import CollapsibleSection from "../../components/Doctor/CollapsibleSection";
 import AppointmentHistorySection from "../../components/Doctor/AppointmentHistorySection";
 import MedicalRecordsSection from "../../components/Doctor/MedicalRecordsSection";
+import AppointmentActionModal from "../../components/Doctor/AppointmentActionModal";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [columnsRefreshing, setColumnsRefreshing] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
 
   const [sortOrders, setSortOrders] = useState({
-    pending: "desc",
-    scheduled: "desc",
+    pending: "asc",
+    scheduled: "asc",
     completed: "desc",
     cancelled: "desc",
     rejected: "desc",
@@ -43,7 +46,15 @@ const DoctorAppointments = () => {
     "scheduled",
     "completed",
   ]);
+  
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const [modal, setModal] = useState({
+    isOpen: false,
+    appointment: null,
+    action: null, 
+  });
 
   const statusOptions = [
     { key: "pending", label: "Pending", color: "yellow" },
@@ -69,6 +80,7 @@ const DoctorAppointments = () => {
 
   const fetchAppointments = async () => {
     try {
+      setColumnsRefreshing(true);
       setLoading(true);
       const res = await api.get("/appointment");
       setAppointments(res.data.appointments || []);
@@ -76,6 +88,8 @@ const DoctorAppointments = () => {
       console.error("Error fetching appointments:", err);
     } finally {
       setLoading(false);
+      setTimeout(() => setColumnsRefreshing(false), 300); 
+      setRefreshTrigger((prev) => prev + 1);
     }
   };
 
@@ -85,33 +99,50 @@ const DoctorAppointments = () => {
 
   const sortByDate = (appointments, order) => {
     return [...appointments].sort((a, b) => {
-      const dateA = new Date(
-        `${a.appointment_date} ${a.appointment_time}`
-      ).getTime();
-      const dateB = new Date(
-        `${b.appointment_date} ${b.appointment_time}`
-      ).getTime();
-      return order === "desc" ? dateB - dateA : dateA - dateB;
+      const parseAppointmentTime = (appt) => {
+        const dateObj = new Date(appt.appointment_date);
+        if (isNaN(dateObj.getTime())) return 0;
+
+        const timeStr = appt.appointment_time?.trim();
+        if (!timeStr) return dateObj.getTime();
+
+        let hours, minutes;
+        const upperTime = timeStr.toUpperCase();
+
+        if (upperTime.includes('AM') || upperTime.includes('PM')) {
+          const [time, period] = upperTime.split(' ');
+          const [h, m = '0'] = time.split(':').map(Number);
+          hours = h;
+          minutes = m;
+
+          if (period === 'PM' && hours !== 12) hours += 12;
+          if (period === 'AM' && hours === 12) hours = 0;
+        } else {
+          const [h, m = '0'] = timeStr.split(':').map(Number);
+          hours = h;
+          minutes = m;
+        }
+
+        dateObj.setHours(hours, minutes, 0, 0);
+        return dateObj.getTime();
+      };
+
+      const timeA = parseAppointmentTime(a);
+      const timeB = parseAppointmentTime(b);
+
+      if (timeA === 0 && timeB === 0) return 0;
+      if (timeA === 0) return 1;
+      if (timeB === 0) return -1;
+
+      return order === "desc" ? timeB - timeA : timeA - timeB;
     });
   };
 
   const toggleSort = (column) => {
-    setSortOrders((prev) => {
-      const newOrder = prev[column] === "desc" ? "asc" : "desc";
-      const updated = { ...prev, [column]: newOrder };
-
-      setAppointments((prevAppointments) => {
-        const sorted = [...prevAppointments].sort((a, b) => {
-          const dateA = new Date(`${a.appointment_date} ${a.appointment_time}`);
-          const dateB = new Date(`${b.appointment_date} ${b.appointment_time}`);
-          if (newOrder === "asc") return dateA - dateB;
-          return dateB - dateA;
-        });
-        return sorted;
-      });
-
-      return updated;
-    });
+    setSortOrders(prev => ({
+      ...prev,
+      [column]: prev[column] === "desc" ? "asc" : "desc"
+    }));
   };
 
   const filteredAppointments = useMemo(() => {
@@ -150,12 +181,14 @@ const DoctorAppointments = () => {
     return result;
   }, [appointments, searchTerm, selectedFilters, sortOrders]);
 
-  const formatDate = (dateStr) =>
-    new Date(dateStr).toLocaleDateString("en-US", {
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
+  };
 
   const updateStatus = async (id, status) => {
     try {
@@ -165,24 +198,27 @@ const DoctorAppointments = () => {
       );
       if (selectedAppointment?._id === id)
         setSelectedAppointment((prev) => ({ ...prev, status }));
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       console.error("Error updating status:", err);
       alert(err.response?.data?.message || "Failed to update status");
     }
   };
 
-  if (loading)
+  // Initial full-screen loading
+  if (loading && appointments.length === 0) {
     return (
       <p className="text-center py-4 text-foreground text-sm">
         Loading appointments...
       </p>
     );
+  }
 
   return (
-    <div className="h-screen flex flex-col ">
+    <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 mb-8 gap-3 overflow-hidden min-h-0">
-        {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar col-span-9 bg-ui-card rounded-xl p-4 flex flex-col overflow-hidden shadow-xs">
+         {/* LEFT SECTION - APPOINTMENTS */}
+        <div className="scrollbar rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -312,7 +348,7 @@ const DoctorAppointments = () => {
             <button
               onClick={fetchAppointments}
               disabled={loading}
-              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-light text-white text-xs font-medium rounded-lg transition"
+              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-dark text-white text-xs font-medium rounded-lg transition"
             >
               <RefreshCw
                 className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
@@ -321,201 +357,220 @@ const DoctorAppointments = () => {
             </button>
           </div>
 
-          {/* Dynamic Columns */}
-          <div className="grid grid-cols-3 gap-3 flex-1 overflow-y-auto pr-1">
-            {selectedFilters.map((filterKey) => {
-              const statusData = statusOptions.find((s) => s.key === filterKey);
-              const list = filteredAppointments[filterKey] || [];
-              const currentOrder = sortOrders[filterKey] || "desc";
+          {/* COLUMNS AREA WITH SKELETON */}
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+            {/* SKELETON LOADING */}
+            {columnsRefreshing && (
+              <div className="h-full overflow-y-auto pr-1 scrollbar">
+                <div className="grid grid-cols-3 gap-3 pb-4">
+                  {selectedFilters.map((filterKey) => {
+                    const statusData = statusOptions.find((s) => s.key === filterKey);
 
-              return (
-                <div key={filterKey} className="min-h-0">
-                  <h2
-                    onClick={() => toggleSort(filterKey)}
-                    className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none"
-                  >
-                    {statusData.label} ({list.length})
-                    <ArrowUpDown
-                      className={`w-3 h-3 transition-all ${
-                        currentOrder === "asc"
-                          ? "rotate-180 text-blue"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  </h2>
-                  <div className="space-y-2">
-                    {list.map((appt) => (
-                      <AppointmentCard
-                        key={appt._id}
-                        appt={appt}
-                        onClick={setSelectedAppointment}
-                        formatDate={formatDate}
-                      />
-                    ))}
-                  </div>
+                    return (
+                      <div key={filterKey} className="min-h-0 flex flex-col">
+                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
+                          {statusData.label} ({Math.floor(Math.random() * 5) + 1})
+                          <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
+                        </h2>
+
+                        <div className="space-y-2">
+                          {[...Array(Math.floor(Math.random() * 3) + 3)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
+                            >
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
+                                <div className="flex-1 space-y-2">
+                                  <div className="h-4 bg-ui-muted/60 rounded w-32 animate-pulse" />
+                                  <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse" />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
+                                  <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse flex-1" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
+                                  <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse flex-1" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
+
+            {/* REAL CONTENT */}
+            <div
+              className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
+                columnsRefreshing ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <div className="grid grid-cols-3 gap-3 pb-4">
+                {selectedFilters.map((filterKey) => {
+                  const statusData = statusOptions.find((s) => s.key === filterKey);
+                  const list = filteredAppointments[filterKey] || [];
+                  const currentOrder = sortOrders[filterKey] || "desc";
+
+                  return (
+                    <div key={filterKey} className="min-h-0 flex flex-col">
+                      <h2
+                        onClick={() => toggleSort(filterKey)}
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
+                      >
+                        {statusData.label} ({list.length})
+                        <ArrowUpDown
+                          className={`w-3 h-3 transition-all ${
+                            currentOrder === "asc"
+                              ? "rotate-180 text-blue"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </h2>
+
+                      <div className="space-y-2 flex-1">
+                        {list.length === 0 ? (
+                          <p className="text-xs text-muted-foreground text-center py-8">
+                            No {statusData.label.toLowerCase()} appointments
+                          </p>
+                        ) : (
+                          list.map((appt) => (
+                            <AppointmentCard
+                              key={appt._id}
+                              appt={appt}
+                              onClick={setSelectedAppointment}
+                              formatDate={formatDate}
+                              isSelected={selectedAppointment?._id === appt._id}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
         {/* RIGHT SECTION - DETAILS */}
-        <div className="col-span-3 bg-ui-card rounded-xl p-3 flex flex-col overflow-hidden shadow-xs">
-          {/* Fixed Header */}
-          <header className="flex items-center justify-between mb-3 pb-2 border-b border-ui-border">
-            <h2 className="text-base font-bold font-montserrat text-foreground">
-              Appointment Details
-            </h2>
-          </header>
-
-          {/* Scrollable Content */}
-          <div className="scrollbar flex-1 min-h-0 overflow-y-auto pr-2 space-y-3 pb-16">
-            {!selectedAppointment ? (
-              <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground py-8">
-                <div className="p-2 bg-ui-muted/50 rounded-full mb-2">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <p className="text-xs">
-                  Select an appointment to view details.
-                </p>
+        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+          {selectedAppointment ? (
+            <>
+              {/* Sticky Header */}
+              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
+                <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
+                  Appointment Details
+                </h2>
               </div>
-            ) : (
-              <>
-                {/* SCHEDULE SECTION */}
-                <section className="space-y-2">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue flex items-center justify-center text-sm font-bold text-white">
-                      {selectedAppointment.patient?.name
-                        ?.split(" ")
-                        .map((n) => n[0].toUpperCase())
-                        .join("")
-                        .slice(0, 2)}
+
+              {/* Scrollable Content */}
+              <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
+                {/* Patient Header */}
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue flex items-center justify-center text-sm font-bold text-white shrink-0">
+                    {selectedAppointment.patient?.name
+                      ?.split(" ")
+                      .map((n) => n[0].toUpperCase())
+                      .join("")
+                      .slice(0, 2)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-foreground truncate text-sm">
+                      {selectedAppointment.patient?.name}
+                    </h3>
+                    <div
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-0.5 ${
+                        selectedAppointment.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : selectedAppointment.status === "Scheduled"
+                          ? "bg-blue-100 text-blue-800"
+                          : selectedAppointment.status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : selectedAppointment.status === "Cancelled"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-purple-100 text-purple-800"
+                      }`}
+                    >
+                      <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
+                      {selectedAppointment.status}
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">
-                        {selectedAppointment.patient?.name}
-                      </h3>
-                      <div
-                        className={`w-20 px-2 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-1 ${
-                          selectedAppointment.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : selectedAppointment.status === "Scheduled"
-                            ? "bg-blue-100 text-blue-800"
-                            : selectedAppointment.status === "Completed"
-                            ? "bg-green-100 text-green-800"
-                            : selectedAppointment.status === "Cancelled"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-purple-100 text-purple-800"
-                        }`}
-                      >
-                        <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
-                        {selectedAppointment.status}
+                  </div>
+                </div>
+
+                {/* Date, Time, Notes Card */}
+                <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-blue shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
+                        <p className="font-bold text-foreground text-sm">
+                          {formatDate(selectedAppointment.appointment_date)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pr-1">
+                      <Clock className="w-4 h-4 text-blue shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Time</p>
+                        <p className="font-bold text-foreground text-sm">
+                          {selectedAppointment.appointment_time}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-ui-muted/50 rounded-lg p-2 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3 h-3 text-blue" />
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Date
-                          </p>
-                          <p className="text-sm font-bold text-foreground">
-                            {formatDate(selectedAppointment.appointment_date)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3 text-indigo-500" />
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Time
-                          </p>
-                          <p className="text-sm font-bold text-foreground">
-                            {selectedAppointment.appointment_time}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-1">
-                      <p className="text-[10px] tracking-wider text-muted-foreground mb-1">
-                        Patient Notes
-                      </p>
-                      <p className="text-xs text-foreground leading-relaxed">
-                        {selectedAppointment.notes || (
-                          <span className="italic text-muted-foreground">
-                            No notes provided.
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
-                      <span>
-                        ID: #{selectedAppointment._id.slice(-6).toUpperCase()}
-                      </span>
-                      <span>
-                        {new Date(
-                          selectedAppointment.createdAt
-                        ).toLocaleDateString()}
-                      </span>
-                    </div>
+                  <div>
+                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">Patient Notes</p>
+                    <p className="text-xs text-foreground leading-relaxed">
+                      {selectedAppointment.notes || (
+                        <span className="italic text-muted-foreground">No notes provided.</span>
+                      )}
+                    </p>
                   </div>
-                </section>
+                </div>
 
-                {/* COLLAPSIBLE SECTIONS */}
+                {/* Collapsible Sections */}
                 <CollapsibleSection title="Patient Details" defaultOpen={false}>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="grid gap-3 text-xs px-3">
                     {selectedAppointment.patient?.age && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <span className="text-[10px] font-medium text-muted-foreground">
-                            Age
-                          </span>
+                          <SquareUserRound className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <span className="font-medium text-foreground">
-                          {selectedAppointment.patient.age} yrs
-                        </span>
-                      </div>
-                    )}
-                    {selectedAppointment.patient?.gender && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <span className="text-[10px] font-medium text-muted-foreground">
-                            {selectedAppointment.patient.gender === "male"
-                              ? "M"
-                              : "F"}
-                          </span>
-                        </div>
-                        <span className="font-medium text-foreground capitalize">
-                          {selectedAppointment.patient.gender}
+                          {selectedAppointment.patient.age} years old, {selectedAppointment.patient.gender}
                         </span>
                       </div>
                     )}
                     {selectedAppointment.patient?.contact && (
-                      <div className="flex items-center gap-1 col-span-2">
+                      <div className="flex items-center gap-2 col-span-2">
                         <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
                           <Phone className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <a
                           href={`tel:${selectedAppointment.patient.contact}`}
-                          className="font-medium text-foreground hover:text-blue transition text-xs"
+                          className="font-medium text-foreground hover:text-blue transition text-xs truncate"
                         >
                           {selectedAppointment.patient.contact}
                         </a>
                       </div>
                     )}
                     {selectedAppointment.patient?.email && (
-                      <div className="flex items-center gap-1 col-span-2">
+                      <div className="flex items-center gap-2 col-span-2">
                         <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
                           <Mail className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <a
                           href={`mailto:${selectedAppointment.patient.email}`}
-                          className="font-medium text-foreground hover:text-blue transition truncate text-xs"
+                          className="font-medium text-foreground hover:text-blue transition text-xs truncate"
                         >
                           {selectedAppointment.patient.email}
                         </a>
@@ -528,99 +583,139 @@ const DoctorAppointments = () => {
                   key={selectedAppointment?.patient?._id}
                   patientId={selectedAppointment.patient?._id}
                   patientName={selectedAppointment.patient?.name}
+                  refreshTrigger={refreshTrigger}
                 />
 
                 <MedicalRecordsSection
                   patientId={selectedAppointment.patient?._id}
                   patientName={selectedAppointment.patient?.name}
                 />
-              </>
-            )}
-          </div>
+              </div>
 
-          {/* STICKY ACTION BAR */}
-          {selectedAppointment && (
-            <div className="sticky bottom-0 -mx-3 mt-3 bg-gradient-to-t from-ui-card via-ui-card to-transparent pt-3">
-              <div className="px-3 pb-3 space-y-2">
-                {/* PENDING */}
+              {/* Fixed Action Buttons */}
+              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2 space-y-2">
                 {selectedAppointment.status === "Pending" && (
                   <>
                     <button
                       onClick={() =>
-                        updateStatus(selectedAppointment._id, "Scheduled")
+                        setModal({
+                          isOpen: true,
+                          appointment: selectedAppointment,
+                          action: "accept",
+                        })
                       }
-                      className="w-full bg-blue hover:bg-blue-light text-white py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs shadow hover:shadow-md"
+                      className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
                     >
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="w-4 h-4" />
                       Accept Appointment
                     </button>
                     <button
                       onClick={() =>
-                        updateStatus(selectedAppointment._id, "Rejected")
+                        setModal({
+                          isOpen: true,
+                          appointment: selectedAppointment,
+                          action: "reject",
+                        })
                       }
-                      className="w-full border border-red-300 text-red-600 hover:bg-red-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
+                      className="w-full text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
-                      <XCircle className="w-3 h-3" />
+                      <XCircle className="w-4 h-4" />
                       Reject Appointment
                     </button>
                   </>
                 )}
 
-                {/* SCHEDULED */}
                 {selectedAppointment.status === "Scheduled" && (
                   <>
                     <button
                       onClick={() => setIsRecordModalOpen(true)}
-                      className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs shadow hover:shadow-md"
+                      className="w-full bg-blue hover:bg-navy text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
                     >
-                      <FileText className="w-3 h-3" />
+                      <FileText className="w-4 h-4" />
                       Add Medical Record
                     </button>
                     <button
                       onClick={() =>
-                        updateStatus(selectedAppointment._id, "Completed")
+                        setModal({
+                          isOpen: true,
+                          appointment: selectedAppointment,
+                          action: "complete",
+                        })
                       }
-                      className="w-full border border-green-300 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1 text-xs"
+                      className="w-full text-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
-                      <CheckCircle className="w-3 h-3" />
+                      <CheckCircle className="w-4 h-4" />
                       Mark as Completed
                     </button>
                   </>
                 )}
 
-                {/* FINAL STATES */}
                 {(selectedAppointment.status === "Completed" ||
                   selectedAppointment.status === "Rejected" ||
                   selectedAppointment.status === "Cancelled") && (
                   <div className="text-center py-2">
                     <p className="text-xs text-muted-foreground">
-                      This appointment is{" "}
-                      {selectedAppointment.status.toLowerCase()}.
+                      This appointment is {selectedAppointment.status.toLowerCase()}.
                     </p>
                   </div>
                 )}
               </div>
-            </div>
+            </>
+          ) : (
+            <>
+              {/* Empty State */}
+              <div className="flex-1 flex items-center justify-center px-3">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    No appointment selected
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Click on any appointment card to view details.
+                  </p>
+                </div>
+              </div>
+            </>
           )}
-
-          {/* Medical Record Modal */}
-          <MedicalRecordModal
-            isOpen={isRecordModalOpen}
-            onClose={() => setIsRecordModalOpen(false)}
-            appointment={{
-              _id: selectedAppointment?._id,
-              patientName: selectedAppointment?.patient?.name,
-              date: formatDate(selectedAppointment?.appointment_date),
-              time: selectedAppointment?.appointment_time,
-              notes: selectedAppointment?.notes,
-            }}
-            onRecordAdded={() => {
-              fetchAppointments();
-              setSelectedAppointment(null);
-            }}
-          />
         </div>
       </div>
+
+      {/* MODALS */}
+      <MedicalRecordModal
+        isOpen={isRecordModalOpen}
+        onClose={() => setIsRecordModalOpen(false)}
+        appointment={{
+          _id: selectedAppointment?._id,
+          patientName: selectedAppointment?.patient?.name,
+          date: formatDate(selectedAppointment?.appointment_date),
+          time: selectedAppointment?.appointment_time,
+          notes: selectedAppointment?.notes,
+        }}
+        onRecordAdded={() => {
+          fetchAppointments();
+          setSelectedAppointment(null);
+          setRefreshTrigger((prev) => prev + 1);
+        }}
+      />
+
+      <AppointmentActionModal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+        appointment={modal.appointment}
+        actionType={modal.action}
+        loading={loading}
+        onConfirm={async () => {
+          if (!modal.appointment || !modal.action) return;
+          const statusMap = {
+            accept: "Scheduled",
+            reject: "Rejected",
+            complete: "Completed",
+          };
+          await updateStatus(modal.appointment._id, statusMap[modal.action]);
+        }}
+      />
     </div>
   );
 };

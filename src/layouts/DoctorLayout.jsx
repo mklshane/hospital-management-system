@@ -117,7 +117,7 @@ export default function DoctorLayout({ children }) {
             <SidebarLink
               link={{
                 label: user?.name || user?.username || "Doctor",
-                href: "/profile",
+                href: "/doctor/profile",
                 icon: (
                   <div
                     className={cn(

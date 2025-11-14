@@ -4,7 +4,7 @@ const MedicalRecordCard = ({ record, onClick, formatDate }) => {
   return (
     <div
       onClick={() => onClick(record)}
-      className="p-2 bg-ui-card rounded-lg border border-gray-200 dark:border-gray-700
+      className="px-4 py-3 bg-ui-card rounded-lg border border-gray-200 dark:border-gray-700
                  shadow-xs hover:shadow-sm cursor-pointer transition-all duration-150
                  hover:border-blue-300 dark:hover:border-blue-600
                  hover:bg-ui-muted dark:hover:bg-ui-surface-dark"
@@ -26,15 +26,15 @@ const MedicalRecordCard = ({ record, onClick, formatDate }) => {
       </div>
 
       {/* Diagnosis */}
-      <div className="text-xs text-gray-700 dark:text-gray-300 mb-1 line-clamp-2">
+      <div className="text-xs text-gray-700 dark:text-gray-300 mb-1 truncate">
         <strong>Diagnosis:</strong> {record.diagnosis}
       </div>
 
       {/* Symptoms & Prescriptions */}
       <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
         {record.symptoms && (
-          <p className="flex items-center gap-1 line-clamp-1">
-            <Stethoscope className="w-3 h-3" />
+          <p className="flex items-center gap-1 truncate">
+            <Stethoscope className="w-3 h-3 flex-shrink-0" />
             {record.symptoms}
           </p>
         )}

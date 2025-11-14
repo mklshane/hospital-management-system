@@ -18,6 +18,7 @@ import DoctorLayout from "./layouts/DoctorLayout";
 import DoctorDashboard from "./pages/Doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/Doctor/DoctorAppointments";
 import DoctorMedicalRecords from "./pages/Doctor/DoctorMedicalRecords";
+import DoctorProfile from "./pages/Doctor/DoctorProfile";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import DoctorsList from "./pages/Admin/DoctorsList";
@@ -86,7 +87,7 @@ function App() {
         <Route
           path="/profile"
           element={
-            <ProtectedRoute allowedUserTypes={["patient", "doctor", "admin"]}>
+            <ProtectedRoute allowedUserTypes={["patient", "admin"]}>
               <DashboardLayout>
                 <Profile />
               </DashboardLayout>
@@ -147,6 +148,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/doctor/profile"
+          element={
+            <ProtectedRoute allowedUserTypes={["doctor"]}>
+              <DoctorLayout>
+                <DoctorProfile />
+              </DoctorLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Admin Routes with Nested Layout */}
         <Route
@@ -164,16 +175,6 @@ function App() {
           <Route path="appointments" element={<AppointmentsList />} />
         </Route>
 
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute allowedUserTypes={["patient", "doctor", "admin"]}>
-              <DashboardLayout>
-                <Profile />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/settings"
           element={
