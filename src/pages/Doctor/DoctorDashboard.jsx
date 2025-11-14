@@ -185,7 +185,7 @@ const DoctorDashboard = () => {
   );
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-background">
+    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-surface">
       {/* Left Column - Stats (Top) and Today's Appointments (Bottom) */}
 
       {/* Stats Section - Top Left */}
@@ -331,7 +331,7 @@ const DoctorDashboard = () => {
             <button
               onClick={fetchTodayAppointments}
               disabled={loading}
-              className="p-2 h-9 bg-blue hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+              className="p-2 h-9 bg-blue hover:bg-blue-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
               title="Refresh"
             >
               <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />

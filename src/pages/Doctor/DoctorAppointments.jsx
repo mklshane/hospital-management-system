@@ -348,7 +348,7 @@ const DoctorAppointments = () => {
             <button
               onClick={fetchAppointments}
               disabled={loading}
-              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-light text-white text-xs font-medium rounded-lg transition"
+              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-dark text-white text-xs font-medium rounded-lg transition"
             >
               <RefreshCw
                 className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
@@ -604,7 +604,7 @@ const DoctorAppointments = () => {
                           action: "accept",
                         })
                       }
-                      className="w-full bg-blue hover:bg-blue-light text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
+                      className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Accept Appointment

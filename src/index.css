@@ -157,11 +157,14 @@
   body {
     @apply bg-background text-foreground font-figtree;
   }
+  .font-montserrat { font-family: var(--font-montserrat); }
+  .font-figtree { font-family: var(--font-figtree); }
 }
 
 /* Custom background colors */
 .bg-blue { background-color: var(--blue); }
 .bg-blue-light { background-color: var(--blue-light); }
+.bg-blue-dark { background-color: var(--blue-dark); }
 .bg-navy { background-color: var(--navy); }
 .bg-gray { background-color: var(--gray); }
 .bg-white { background-color: var(--white); }
