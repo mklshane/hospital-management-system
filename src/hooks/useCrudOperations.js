@@ -15,7 +15,14 @@ export const useCrudOperations = (entityName, refetch) => {
       return true;
     } catch (error) {
       console.error(`Error creating ${entityName}:`, error);
-      toast.error(`Failed to create ${entityName}`);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        `Failed to create ${entityName}`;
+
+      toast.error(errorMessage);
       return false;
     } finally {
       setLoading(false);
@@ -25,7 +32,6 @@ export const useCrudOperations = (entityName, refetch) => {
   const update = async (id, data, endpoint) => {
     setLoading(true);
     try {
-      // if endpoint already includes id, don't append it again
       const url = endpoint.includes(id) ? endpoint : `${endpoint}/${id}`;
       await api.put(url, data);
       toast.success(`${entityName} updated successfully!`);
@@ -33,13 +39,19 @@ export const useCrudOperations = (entityName, refetch) => {
       return true;
     } catch (error) {
       console.error(`Error updating ${entityName}:`, error);
-      toast.error(`Failed to update ${entityName}`);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        `Failed to update ${entityName}`;
+
+      toast.error(errorMessage);
       return false;
     } finally {
       setLoading(false);
     }
   };
-
 
   const deleteItem = async (id, endpoint) => {
     setDeleteLoading(true);
@@ -50,7 +62,14 @@ export const useCrudOperations = (entityName, refetch) => {
       return true;
     } catch (error) {
       console.error(`Error deleting ${entityName}:`, error);
-      toast.error(`Failed to delete ${entityName}`);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        `Failed to delete ${entityName}`;
+
+      toast.error(errorMessage);
       return false;
     } finally {
       setDeleteLoading(false);

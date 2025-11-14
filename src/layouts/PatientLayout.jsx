@@ -92,7 +92,7 @@ export default function DashboardLayout({ children }) {
         >
           <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
             {/* Logo Section */}
-            <div className="mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
+            <div className="hidden md:block mb-8 pb-6 border-b border-neutral-200 dark:border-neutral-700">
               {open ? <Logo /> : <LogoIcon />}
             </div>
 
@@ -138,7 +138,7 @@ export default function DashboardLayout({ children }) {
         </SidebarBody>
       </Sidebar>
 
-      <main className="flex-1 overflow-y-auto p-2 md:p-4">
+      <main className="flex-1 overflow-y-auto p-2 md:p-4 md:mt-0 mt-16">
         {/* <div className="flex h-full w-full flex-1 flex-col rounded-2xl border border-neutral-200 bg-white shadow-sm p-4 md:p-8 dark:border-neutral-800 dark:bg-neutral-900"> */}
         {children}
         <LogoutConfirmModal

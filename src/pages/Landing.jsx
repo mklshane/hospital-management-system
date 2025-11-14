@@ -186,7 +186,7 @@ const Landing = () => {
 
           {/* Right Content */}
           <motion.div
-            className="relative flex justify-center items-end h-full"
+            className="relative hidden md:flex justify-center items-end h-full"
             variants={doctorImageVariants}
           >
             <div className="absolute bottom-0 h-4/5 flex items-end">
