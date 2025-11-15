@@ -4,7 +4,7 @@ const MedicalRecordCard = ({ record, onClick, formatDate }) => {
   return (
     <div
       onClick={() => onClick(record)}
-      className="px-4 py-3 bg-ui-card rounded-lg border border-gray-200 dark:border-gray-700
+      className="px-4 py-3  bg-ui-surface rounded-lg border border-gray-200 dark:border-gray-700
                  shadow-xs hover:shadow-sm cursor-pointer transition-all duration-150
                  hover:border-blue-300 dark:hover:border-blue-600
                  hover:bg-ui-muted dark:hover:bg-ui-surface-dark"
