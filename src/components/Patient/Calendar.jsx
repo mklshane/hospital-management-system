@@ -40,6 +40,17 @@ const Calendar = ({ appointments = [] }) => {
     );
   };
 
+  // Define day headers with unique keys
+  const dayHeaders = [
+    { key: "sun", label: "S" },
+    { key: "mon", label: "M" },
+    { key: "tue", label: "T" },
+    { key: "wed", label: "W" },
+    { key: "thu", label: "T" },
+    { key: "fri", label: "F" },
+    { key: "sat", label: "S" }
+  ];
+
   return (
     <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
       <div className="flex items-center justify-between mb-3">
@@ -65,19 +76,19 @@ const Calendar = ({ appointments = [] }) => {
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+        {dayHeaders.map((day) => (
           <div
-            key={day}
+            key={day.key}
             className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-1"
           >
-            {day}
+            {day.label}
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-7 gap-1 flex-1 text-xs">
         {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-          <div key={`empty-start-${i}`} />
+          <div key={`empty-${year}-${currentDate.getMonth()}-${i}`} />
         ))}
 
         {Array.from({ length: daysInMonth }, (_, i) => {
@@ -87,7 +98,7 @@ const Calendar = ({ appointments = [] }) => {
 
           return (
             <div
-              key={day}
+              key={`day-${year}-${currentDate.getMonth()}-${day}`}
               className={`
                 flex items-center justify-center h-8 rounded-lg transition-colors
                 ${
