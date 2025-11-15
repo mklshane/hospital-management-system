@@ -166,7 +166,7 @@ const PatientProfile = () => {
           </div>
 
           {/* Profile Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="bg-[#ffff] dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
             {/* Card Header */}
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <div>
@@ -226,7 +226,7 @@ const PatientProfile = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -246,7 +246,7 @@ const PatientProfile = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                       placeholder="Enter your email address"
                     />
                   </div>
@@ -265,7 +265,7 @@ const PatientProfile = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
-                      className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      className="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                       placeholder="Leave blank to keep current password"
                     />
                     <button
@@ -296,7 +296,7 @@ const PatientProfile = () => {
                       value={formData.age}
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                       placeholder="Enter your age"
                     />
                   </div>
@@ -314,7 +314,7 @@ const PatientProfile = () => {
                       value={formData.gender}
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed appearance-none"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed appearance-none"
                     >
                       <option value="">Select gender</option>
                       <option value="Male">Male</option>
@@ -340,7 +340,7 @@ const PatientProfile = () => {
                       value={formData.contact}
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                       placeholder="Enter your contact number"
                     />
                   </div>
@@ -359,7 +359,7 @@ const PatientProfile = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing || isLoading}
                       rows={3}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-[#ffff] dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition disabled:bg-gray-50 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                       placeholder="Enter your address"
                     />
                   </div>
