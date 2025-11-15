@@ -114,10 +114,10 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div className="min-h-[95vh] bg-primary-foreground rounded-2xl p-4 md:p-2">
+    <div className="h-full rounded-2xl ">
       <div className="max-w-7xl mx-auto h-full">
         {/* Add h-full here */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
           {/* Sidebar: Profile + Calendar */}
           <aside className="lg:col-span-3 flex flex-col gap-4 h-full">
             <div className="h-[38%] min-h-0">
@@ -128,7 +128,7 @@ export default function PatientDashboard() {
             </div>
           </aside>
 
-          <main className="lg:col-span-9 h-151 overflow-y-auto">
+          <main className="lg:col-span-9 h-full overflow-y-auto">
             <div className="h-full flex flex-col">
               <AppointmentHistory
                 appointments={filteredAppointments}

@@ -188,8 +188,7 @@ const DoctorDashboard = () => {
     <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-surface">
       {/* Left Column - Stats (Top) and Today's Appointments (Bottom) */}
 
-      {/* Stats Section - Top Left */}
-      <div className="col-span-9 row-span-1 bg-blue rounded-xl p-4 text-white flex flex-col min-h-0">
+      <div className="col-span-9 row-span-1 bg-gradient-to-r from-blue-500 to-blue-600 shadow-md rounded-xl p-4 text-white flex flex-col min-h-0">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div className="space-y-1">
@@ -216,59 +215,56 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-3 flex-1 min-h-0">
+        <div className="grid grid-cols-4 gap-4 flex-1 min-h-0">
           {doctorLoading || !stats
             ? [...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20"
+                  className="bg-white/10 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-center border border-white/20 shadow"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-white/20 rounded-full animate-pulse"></div>
-                    <div className="h-3 w-20 bg-white/30 rounded animate-pulse"></div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 bg-white/20 rounded-full animate-pulse"></div>
+                    <div className="h-3 w-24 bg-white/20 rounded animate-pulse"></div>
                   </div>
-                  <div className="h-8 w-16 bg-white/20 rounded animate-pulse"></div>
+                  <div className="h-6 w-16 bg-white/20 rounded animate-pulse"></div>
                 </div>
               ))
             : [
                 {
                   label: "Today's Appointments",
                   value: stats.today,
-                  icon: <Clock className="w-5 h-5" />,
-                  bg: "bg-blue-500",
+                  icon: <Clock className="w-5 h-5 text-white" />,
                 },
                 {
                   label: "Pending Approvals",
                   value: stats.pending,
-                  icon: <AlertCircle className="w-5 h-5" />,
-                  bg: "bg-amber-500",
+                  icon: <AlertCircle className="w-5 h-5 text-white" />,
                 },
                 {
                   label: "Completed Appointments",
                   value: stats.completed,
-                  icon: <CheckCircle2 className="w-5 h-5" />,
-                  bg: "bg-emerald-500",
+                  icon: <CheckCircle2 className="w-5 h-5 text-white" />,
                 },
                 {
                   label: "Assigned Patients",
                   value: stats.patients,
-                  icon: <Users className="w-5 h-5" />,
-                  bg: "bg-indigo-500",
+                  icon: <Users className="w-5 h-5 text-white" />,
                 },
               ].map((stat, i) => (
                 <div
                   key={i}
-                  className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col justify-center border border-white/20 transition-all duration-200 hover:bg-white/15"
+                  className="bg-white/20 backdrop-blur-sm rounded-xl p-4 flex flex-col justify-center border border-white/20 shadow transition-all hover:bg-white/15 hover:border-white/30"
                 >
-                  <div className="flex items-center gap-3 pt-1 pb-1">
-                    <div className={`${stat.bg} text-white p-2 rounded-full flex-shrink-0`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center">
                       {stat.icon}
                     </div>
+
                     <div className="flex-1">
-                      <p className="text-xs font-figtree opacity-90 leading-none">
+                      <p className="text-xs text-blue-100 font-figtree leading-none">
                         {stat.label}
                       </p>
-                      <p className="text-2xl font-bold font-montserrat leading-none mt-1">
+                      <p className="text-2xl text-white font-bold font-montserrat leading-none mt-1">
                         {stat.value}
                       </p>
                     </div>
@@ -279,7 +275,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Right Column - Appointment Requests */}
-      <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card rounded-xl min-h-0">
+      <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card border-2 rounded-xl min-h-0">
         <div className="p-3 border-b border-ui-border shrink-0">
           <h2 className="text-base font-semibold text-foreground font-montserrat">
             Appointment Requests
@@ -310,7 +306,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Today's Appointments - Bottom Left */}
-      <div className="col-span-9 row-span-1 rounded-xl overflow-hidden flex flex-col min-h-0">
+      <div className="col-span-9 bg-ui-card border-2 row-span-1 rounded-xl overflow-hidden flex flex-col min-h-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-ui-border shrink-0">
           <h2 className="text-lg font-semibold text-foreground font-montserrat">
             Today's Appointments
@@ -334,7 +330,9 @@ const DoctorDashboard = () => {
               className="p-2 h-9 bg-blue hover:bg-blue-dark text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
               title="Refresh"
             >
-              <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
+              />
             </button>
           </div>
         </div>
@@ -344,7 +342,10 @@ const DoctorDashboard = () => {
           {loading ? (
             <div className="grid grid-cols-2 gap-4">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="bg-ui-muted/50 rounded-xl p-4 animate-pulse space-y-3">
+                <div
+                  key={i}
+                  className="bg-ui-muted/50 border-2 rounded-xl p-4 animate-pulse space-y-3"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-ui-muted/70 animate-pulse" />
                     <div className="flex-1 space-y-2">
@@ -439,7 +440,9 @@ const DoctorDashboard = () => {
                         </span>
                         <p className="text-xs text-foreground line-clamp-2">
                           {appt.notes || (
-                            <span className="italic text-muted-foreground">No notes.</span>
+                            <span className="italic text-muted-foreground">
+                              No notes.
+                            </span>
                           )}
                         </p>
                       </div>
@@ -503,7 +506,9 @@ const DoctorDashboard = () => {
 
       <AppointmentActionModal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+        onClose={() =>
+          setModal({ isOpen: false, appointment: null, action: null })
+        }
         appointment={modal.appointment}
         actionType={modal.action}
         loading={actionLoading[modal.appointment?._id]}

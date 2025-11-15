@@ -2,10 +2,39 @@ import { useState } from "react";
 import { api } from "@/lib/axiosHeader";
 import toast from "react-hot-toast";
 
+/**
+ * Enhanced CRUD hook with precise toast messages.
+ *
+ * @param {string} entityName
+ * @param {Function} refetch
+ */
 export const useCrudOperations = (entityName, refetch) => {
+  // global loading (create / generic update)
   const [loading, setLoading] = useState(false);
+  // delete loading (still per-item)
   const [deleteLoading, setDeleteLoading] = useState(false);
+  // per-action loading for updates (accept/reject/cancel)
+  const [actionLoading, setActionLoading] = useState({});
 
+  const getActionVerb = (data) => {
+    if (!data) return "updated";
+
+    // Appointment status changes
+    if (entityName === "Appointment" && data.status) {
+      const s = data.status.toLowerCase().trim();
+      if (["scheduled", "accepted"].includes(s)) return "accepted";
+      if (s === "rejected") return "declined";
+      if (s === "cancelled") return "cancelled";
+      if (s === "completed") return "marked as completed";
+    }
+
+    // Generic verbs
+    return "updated";
+  };
+
+  // --------------------------------------------------------------------- //
+  // CREATE
+  // --------------------------------------------------------------------- //
   const create = async (data, endpoint) => {
     setLoading(true);
     try {
@@ -14,15 +43,9 @@ export const useCrudOperations = (entityName, refetch) => {
       refetch?.();
       return true;
     } catch (error) {
-      console.error(`Error creating ${entityName}:`, error);
-
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        `Failed to create ${entityName}`;
-
-      toast.error(errorMessage);
+      const msg =
+        error.response?.data?.message || `Failed to create ${entityName}`;
+      toast.error(msg);
       return false;
     } finally {
       setLoading(false);
@@ -30,26 +53,23 @@ export const useCrudOperations = (entityName, refetch) => {
   };
 
   const update = async (id, data, endpoint) => {
-    setLoading(true);
+    setActionLoading((prev) => ({ ...prev, [id]: true }));
     try {
       const url = endpoint.includes(id) ? endpoint : `${endpoint}/${id}`;
       await api.put(url, data);
-      toast.success(`${entityName} updated successfully!`);
+
+      const verb = getActionVerb(data);
+      toast.success(`${entityName} ${verb} successfully!`);
       refetch?.();
       return true;
     } catch (error) {
-      console.error(`Error updating ${entityName}:`, error);
-
-      const errorMessage =
+      const msg =
         error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        `Failed to update ${entityName}`;
-
-      toast.error(errorMessage);
+        `Failed to ${getActionVerb(data)} ${entityName}`;
+      toast.error(msg);
       return false;
     } finally {
-      setLoading(false);
+      setActionLoading((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -61,15 +81,9 @@ export const useCrudOperations = (entityName, refetch) => {
       refetch?.();
       return true;
     } catch (error) {
-      console.error(`Error deleting ${entityName}:`, error);
-
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        `Failed to delete ${entityName}`;
-
-      toast.error(errorMessage);
+      const msg =
+        error.response?.data?.message || `Failed to delete ${entityName}`;
+      toast.error(msg);
       return false;
     } finally {
       setDeleteLoading(false);
@@ -79,6 +93,7 @@ export const useCrudOperations = (entityName, refetch) => {
   return {
     loading,
     deleteLoading,
+    actionLoading,
     create,
     update,
     deleteItem,

@@ -1,3 +1,5 @@
+import React from "react";
+import { createPortal } from "react-dom";
 import { X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,65 +11,65 @@ export default function LogoutConfirmModal({
 }) {
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div
-        className={cn(
-          "w-full max-w-md rounded-2xl bg-ui-card p-6 shadow-xl",
-          "animate-in fade-in zoom-in duration-200"
-        )}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-foreground">
+  const handleConfirm = async () => {
+    await onConfirm();
+    onClose();
+  };
+
+  const modalContent = (
+    <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
+      <div className="bg-ui-card rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-in fade-in zoom-in duration-200">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition"
+          disabled={loading}
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-3">
+            <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
+          </div>
+          <h3 className="text-lg font-bold text-foreground font-montserrat">
             Confirm Logout
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition"
-            disabled={loading}
-          >
-            <X className="h-5 w-5" />
-          </button>
+          </h3>
+          <div className="text-xs text-muted-foreground mt-2 space-y-1">
+            <p>You will be redirected to the login page</p>
+          </div>
         </div>
 
-        <p className="text-sm text-muted-foreground mb-6">
-          Are you sure you want to log out? You will be redirected to the login
-          page.
+        <p className="text-sm text-center text-foreground mb-6">
+          Are you sure you want to log out of your account?
         </p>
 
-        <div className="flex gap-3">
+        <div className="space-y-3">
           <button
-            onClick={onClose}
+            onClick={handleConfirm}
             disabled={loading}
-            className={cn(
-              "flex-1 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700",
-              "text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition",
-              loading && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className={cn(
-              "flex-1 py-2 rounded-lg bg-red-600 text-white flex items-center justify-center gap-2",
-              "hover:bg-red-700 transition",
-              loading && "opacity-50 cursor-not-allowed"
-            )}
+            className="w-full py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all bg-red-600 hover:bg-red-700 text-white disabled:opacity-70 shadow hover:shadow-md"
           >
             {loading ? (
-              <span className="animate-pulse">Logging out…</span>
+              "Logging out..."
             ) : (
               <>
-                <LogOut className="h-4 w-4" />
+                <LogOut className="w-4 h-4" />
                 Logout
               </>
             )}
+          </button>
+
+          <button
+            onClick={onClose}
+            disabled={loading}
+            className="w-full text-muted-foreground hover:text-foreground text-sm font-medium"
+          >
+            Cancel
           </button>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

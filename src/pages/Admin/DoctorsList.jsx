@@ -109,15 +109,15 @@ const DoctorsList = () => {
 
   return (
     <>
-      <div className="min-h-screen bg-ui-surface flex flex-col">
+      <div className="min-h-screen flex flex-col">
         <header className="border-b border-ui-border px-4 md:px-6 pt-4 pb-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h1 className="text-xl md:text-2xl font-bold text-foreground">
-            Doctors List
+            Doctors
           </h1>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={handleCreateDoctor}
-              className="bg-blue hover:bg-blue/90 text-white px-3 md:px-4 py-2 rounded-lg shadow transition flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
+              className="bg-blue hover:bg-blue/90 mb-2 text-white px-3 md:px-4 py-2 rounded-lg shadow transition flex items-center gap-2 text-sm md:text-base w-full sm:w-auto justify-center"
             >
               <svg
                 className="w-4 h-4"
@@ -132,8 +132,8 @@ const DoctorsList = () => {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span className="hidden sm:inline">Create Doctor</span>
-              <span className="sm:hidden">Add Doctor</span>
+              <span className="hidden sm:inline">Add a Doctor</span>
+              <span className="sm:hidden">Add a Doctor</span>
             </button>
             <ThemeToggle />
           </div>
