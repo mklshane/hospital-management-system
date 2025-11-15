@@ -218,7 +218,7 @@ const DoctorAppointments = () => {
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 mb-8 gap-3 overflow-hidden min-h-0">
         {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar border-2 rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
+        <div className="scrollbar bg-ui-card border-2 rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -426,10 +426,10 @@ const DoctorAppointments = () => {
                   const currentOrder = sortOrders[filterKey] || "desc";
 
                   return (
-                    <div key={filterKey} className="min-h-0 flex flex-col">
+                    <div key={filterKey} className="min-h-0 flex flex-col border-b-2">
                       <h2
                         onClick={() => toggleSort(filterKey)}
-                        className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
+                        className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 z-10 py-1"
                       >
                         {statusData.label} ({list.length})
                         <ArrowUpDown
@@ -467,7 +467,7 @@ const DoctorAppointments = () => {
         </div>
 
         {/* RIGHT SECTION - DETAILS */}
-        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+        <div className="bg-ui-card border-2 py-2 rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
           {selectedAppointment ? (
             <>
               {/* Sticky Header */}
@@ -633,7 +633,7 @@ const DoctorAppointments = () => {
                           action: "reject",
                         })
                       }
-                      className="w-full text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
+                      className="w-full text-red-600 border border-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
                       <XCircle className="w-4 h-4" />
                       Reject Appointment
