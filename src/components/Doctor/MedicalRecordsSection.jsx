@@ -10,7 +10,6 @@ const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) =
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
 
-  // Fallback to logged-in user only if no prop is passed
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const fallbackId = user?._id || user?.id;
   const patientId = propPatientId || fallbackId;

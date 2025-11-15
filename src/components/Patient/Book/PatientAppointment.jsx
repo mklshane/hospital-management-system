@@ -1,4 +1,3 @@
-// components/PatientAppointment.jsx
 import React, { useState, useMemo } from "react";
 import { Search, Plus, X } from "lucide-react";
 import DoctorCard from "./DoctorCard";
@@ -142,7 +141,7 @@ const PatientAppointment = () => {
         </div>
 
         {/* Right: Doctor Details */}
-        <div className="hidden lg:block w-80 flex-shrink-0">
+        <div className="hidden lg:block w-80 shrink-0">
           <DoctorDetails doctor={selectedDoctor} />
         </div>
       </div>

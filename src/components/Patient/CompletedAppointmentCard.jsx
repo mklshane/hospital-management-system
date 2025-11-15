@@ -13,7 +13,7 @@ const CompletedAppointmentCard = ({ appointment, records = [] }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-11 h-11 bg-linear-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+          <div className="w-11 h-11 bg-linear-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center shadow-md shrink-0">
             <Stethoscope className="w-6 h-6 text-white" />
           </div>
           <div className="min-w-0">
@@ -39,7 +39,7 @@ const CompletedAppointmentCard = ({ appointment, records = [] }) => {
       </div>
 
       {/* Record */}
-      <div className="mt-auto bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800 flex-1">
+      <div className="mt-auto bg-linear-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800 flex-1">
         {records.map((record, idx) => (
           <div
             key={record._id}
@@ -50,7 +50,7 @@ const CompletedAppointmentCard = ({ appointment, records = [] }) => {
             }
           >
             <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+              <div className="w-1.5 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full mt-1.5 shrink-0"></div>
               <p className="font-semibold text-gray-900 dark:text-gray-100">
                 {record.diagnosis || "No diagnosis"}
               </p>

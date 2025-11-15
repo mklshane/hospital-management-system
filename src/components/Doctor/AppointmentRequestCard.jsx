@@ -13,7 +13,7 @@ const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
 
   return (
     <div className="bg-ui-surface border border-ui-border rounded-lg p-3 shadow-xs hover:shadow-sm transition-all duration-200 hover:translate-y-[-1px] hover:border-blue-300">
-      {/* Details Section - Two Columns - SMALLER */}
+      {/* Details Section */}
       <div className="grid grid-cols-2 gap-3 mb-3">
         {/* Left Column - Patient Info */}
         <div className="space-y-2">

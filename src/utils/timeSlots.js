@@ -1,4 +1,3 @@
-// src/utils/timeSlots.js
 /**
  * Convert 12-hour time string (e.g. "8:00 AM") to 24-hour format (e.g. "08:00")
  */

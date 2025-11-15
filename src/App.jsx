@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Patient/PatientDashboard";
 import Profile from "./pages/Patient/PatientProfile";
-import Settings from "./pages/Settings.jsx";
 import DashboardLayout from "./layouts/PatientLayout";
 import "./index.css";
 import Landing from "./pages/Landing";
@@ -175,16 +174,7 @@ function App() {
           <Route path="appointments" element={<AppointmentsList />} />
         </Route>
 
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute allowedUserTypes={["patient", "doctor", "admin"]}>
-              <DashboardLayout>
-                <Settings />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
+       
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

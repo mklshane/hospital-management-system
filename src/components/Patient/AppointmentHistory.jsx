@@ -42,7 +42,7 @@ export default function AppointmentHistory({
         </div>
       </div>
 
-      {/* Scrollable Cards Container - Fixed Behavior */}
+      {/* Scrollable Cards Container */}
       <div className="flex-1 min-h-0 overflow-y-auto -mx-6 -mb-6 px-6 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {loading ? (

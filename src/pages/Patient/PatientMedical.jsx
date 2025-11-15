@@ -113,7 +113,7 @@ const PatientMedical = () => {
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="bg-[#fff] dark:bg-gray-800 rounded-xl p-6 animate-pulse"
+            className="bg-[#ffff] dark:bg-gray-800 rounded-xl p-6 animate-pulse"
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-11 h-11 bg-gray-200 dark:bg-gray-700 rounded-full"></div>

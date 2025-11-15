@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, DollarSign, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 
 const DoctorCard = ({ doctor, onBook, onViewDetails }) => {
   const initials = doctor.name
@@ -41,7 +41,7 @@ const DoctorCard = ({ doctor, onBook, onViewDetails }) => {
           Book Now
         </button>
 
-        {/* Details – neutral with blue border */}
+        {/* Details*/}
         <button
           onClick={() => onViewDetails(doctor)}
           className="flex-1 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 text-sm font-medium py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition"

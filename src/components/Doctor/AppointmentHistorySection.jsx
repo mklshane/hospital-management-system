@@ -1,4 +1,3 @@
-// AppointmentHistorySection.jsx
 import React, { useEffect, useState } from "react";
 import CollapsibleSection from "./CollapsibleSection";
 import { api } from "../../lib/axiosHeader";
