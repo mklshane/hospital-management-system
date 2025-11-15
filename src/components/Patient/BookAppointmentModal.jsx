@@ -120,7 +120,7 @@ export default function BookAppointmentModal({
                 className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
-                <option value="">-- Select a time slot --</option>
+                <option value="">Select a time slot</option>
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
                     {slot.display || slot.label}
