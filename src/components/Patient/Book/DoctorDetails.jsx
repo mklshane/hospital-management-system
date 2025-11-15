@@ -88,7 +88,7 @@ const DoctorDetails = ({ doctor, onBook }) => {
             </button>
 
             {isOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-[#fff] dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
                 {availableSlots.length > 0 ? (
                   availableSlots.map((slot, i) => (
                     <div
