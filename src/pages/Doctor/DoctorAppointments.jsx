@@ -217,8 +217,8 @@ const DoctorAppointments = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 mb-8 gap-3 overflow-hidden min-h-0">
-         {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
+        {/* LEFT SECTION - APPOINTMENTS */}
+        <div className="scrollbar border-2 rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
           {/* Alert Message */}
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
@@ -364,40 +364,45 @@ const DoctorAppointments = () => {
               <div className="h-full overflow-y-auto pr-1 scrollbar">
                 <div className="grid grid-cols-3 gap-3 pb-4">
                   {selectedFilters.map((filterKey) => {
-                    const statusData = statusOptions.find((s) => s.key === filterKey);
+                    const statusData = statusOptions.find(
+                      (s) => s.key === filterKey
+                    );
 
                     return (
                       <div key={filterKey} className="min-h-0 flex flex-col">
                         <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
-                          {statusData.label} ({Math.floor(Math.random() * 5) + 1})
+                          {statusData.label} (
+                          {Math.floor(Math.random() * 5) + 1})
                           <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
                         </h2>
 
                         <div className="space-y-2">
-                          {[...Array(Math.floor(Math.random() * 3) + 3)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
-                            >
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
-                                <div className="flex-1 space-y-2">
-                                  <div className="h-4 bg-ui-muted/60 rounded w-32 animate-pulse" />
-                                  <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse" />
+                          {[...Array(Math.floor(Math.random() * 3) + 3)].map(
+                            (_, i) => (
+                              <div
+                                key={i}
+                                className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
+                              >
+                                <div className="flex items-center gap-3 mb-3">
+                                  <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
+                                  <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-ui-muted/60 rounded w-32 animate-pulse" />
+                                    <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse" />
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
+                                    <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse flex-1" />
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
+                                    <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse flex-1" />
+                                  </div>
                                 </div>
                               </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
-                                  <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse flex-1" />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
-                                  <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse flex-1" />
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                            )
+                          )}
                         </div>
                       </div>
                     );
@@ -414,7 +419,9 @@ const DoctorAppointments = () => {
             >
               <div className="grid grid-cols-3 gap-3 pb-4">
                 {selectedFilters.map((filterKey) => {
-                  const statusData = statusOptions.find((s) => s.key === filterKey);
+                  const statusData = statusOptions.find(
+                    (s) => s.key === filterKey
+                  );
                   const list = filteredAppointments[filterKey] || [];
                   const currentOrder = sortOrders[filterKey] || "desc";
 
@@ -510,7 +517,9 @@ const DoctorAppointments = () => {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-blue shrink-0" />
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Date
+                        </p>
                         <p className="font-bold text-foreground text-sm">
                           {formatDate(selectedAppointment.appointment_date)}
                         </p>
@@ -519,7 +528,9 @@ const DoctorAppointments = () => {
                     <div className="flex items-center gap-2 pr-1">
                       <Clock className="w-4 h-4 text-blue shrink-0" />
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Time</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Time
+                        </p>
                         <p className="font-bold text-foreground text-sm">
                           {selectedAppointment.appointment_time}
                         </p>
@@ -528,10 +539,14 @@ const DoctorAppointments = () => {
                   </div>
 
                   <div>
-                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">Patient Notes</p>
+                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">
+                      Patient Notes
+                    </p>
                     <p className="text-xs text-foreground leading-relaxed">
                       {selectedAppointment.notes || (
-                        <span className="italic text-muted-foreground">No notes provided.</span>
+                        <span className="italic text-muted-foreground">
+                          No notes provided.
+                        </span>
                       )}
                     </p>
                   </div>
@@ -546,7 +561,8 @@ const DoctorAppointments = () => {
                           <SquareUserRound className="w-3 h-3 text-muted-foreground" />
                         </div>
                         <span className="font-medium text-foreground">
-                          {selectedAppointment.patient.age} years old, {selectedAppointment.patient.gender}
+                          {selectedAppointment.patient.age} years old,{" "}
+                          {selectedAppointment.patient.gender}
                         </span>
                       </div>
                     )}
@@ -642,7 +658,7 @@ const DoctorAppointments = () => {
                           action: "complete",
                         })
                       }
-                      className="w-full text-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
+                      className="w-full text-green-600 border border-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Mark as Completed
@@ -655,7 +671,8 @@ const DoctorAppointments = () => {
                   selectedAppointment.status === "Cancelled") && (
                   <div className="text-center py-2">
                     <p className="text-xs text-muted-foreground">
-                      This appointment is {selectedAppointment.status.toLowerCase()}.
+                      This appointment is{" "}
+                      {selectedAppointment.status.toLowerCase()}.
                     </p>
                   </div>
                 )}
@@ -702,7 +719,9 @@ const DoctorAppointments = () => {
 
       <AppointmentActionModal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ isOpen: false, appointment: null, action: null })}
+        onClose={() =>
+          setModal({ isOpen: false, appointment: null, action: null })
+        }
         appointment={modal.appointment}
         actionType={modal.action}
         loading={loading}
