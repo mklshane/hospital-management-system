@@ -185,10 +185,10 @@ const DoctorDashboard = () => {
   );
 
   return (
-    <div className="h-screen grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-surface">
+    <div className="h-full grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-surface">
       {/* Left Column - Stats (Top) and Today's Appointments (Bottom) */}
 
-      <div className="col-span-9 row-span-1 bg-gradient-to-r from-blue-500 to-blue-600 shadow-md rounded-xl p-4 text-white flex flex-col min-h-0">
+      <div className="col-span-9 row-span-1 bg-gradient-to-r from-blue-500 to-blue-600 shadow-md rounded-xl p-4 text-white flex flex-col h-full">
         {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div className="space-y-1">
@@ -275,7 +275,7 @@ const DoctorDashboard = () => {
       </div>
 
       {/* Right Column - Appointment Requests */}
-      <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card border-2 rounded-xl min-h-0">
+      <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card border-2 rounded-xl h-[623px]">
         <div className="p-3 border-b border-ui-border shrink-0">
           <h2 className="text-base font-semibold text-foreground font-montserrat">
             Appointment Requests
