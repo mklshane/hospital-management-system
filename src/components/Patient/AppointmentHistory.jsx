@@ -12,7 +12,7 @@ export default function AppointmentHistory({
   return (
     <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col h-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 gap-4 shrink-0 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white">
           Appointment History
         </h3>
