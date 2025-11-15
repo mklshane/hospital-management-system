@@ -12,12 +12,13 @@ const AppointmentCard = ({ appt, onClick, formatDate, isSelected }) => {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick(appt)}
-      className={`px-4 py-3 bg-ui-card rounded-lg border transition-all duration-200
+      className={`px-4 py-3 bg-ui-surface rounded-lg border transition-all duration-200
                  shadow-xs hover:shadow-sm cursor-pointer
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-1
-                 ${isSelected 
-                   ? "border-blue-400 bg-blue-50/70 dark:bg-blue-900/30" 
-                   : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/40 dark:hover:bg-blue-900/20"
+                 ${
+                   isSelected
+                     ? "border-blue-400 bg-blue-50/70 dark:bg-blue-900/30"
+                     : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/40 dark:hover:bg-blue-900/20"
                  }`}
     >
       {/* Top: Avatar + Name + Status */}
@@ -32,7 +33,9 @@ const AppointmentCard = ({ appt, onClick, formatDate, isSelected }) => {
           >
             {patientName}
           </p>
-          <div className={`flex items-center gap-1 text-xs font-medium ${config.color}`}>
+          <div
+            className={`flex items-center gap-1 text-xs font-medium ${config.color}`}
+          >
             <div className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
             <span className="truncate">{appt.status}</span>
           </div>
