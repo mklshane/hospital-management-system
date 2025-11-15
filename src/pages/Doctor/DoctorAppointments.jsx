@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import AppointmentsBoard from "@/components/Doctor/AppointmentsBoard";
 import AppointmentDetails from "@/components/Doctor/AppointmentDetails";
 import MedicalRecordModal from "@/components/Doctor/MedicalRecordModal";

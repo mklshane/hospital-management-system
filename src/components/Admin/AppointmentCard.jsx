@@ -86,7 +86,6 @@ const AppointmentCard = ({ appointment, onClick }) => {
           </div>
         </div>
 
-        {/* Chevron for visual indication */}
         <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-blue transition-colors ml-2 shrink-0 mt-1 sm:mt-0" />
       </div>
     </div>

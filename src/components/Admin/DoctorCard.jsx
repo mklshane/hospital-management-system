@@ -15,7 +15,7 @@ const DoctorCard = ({ doctor, onClick }) => {
         {/* Doctor Basic Info */}
         <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
           {/* Avatar/Initial */}
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-primary-foreground border-2 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-primary-foreground border-2 rounded-full flex items-center justify-center shrink-0">
             <span className="text-blue font-semibold text-xs md:text-sm">
               Dr. {doctor.name?.charAt(0)?.toUpperCase() || "D"}
             </span>
@@ -37,20 +37,20 @@ const DoctorCard = ({ doctor, onClick }) => {
             {/* Contact Info - Stack on mobile */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1 truncate">
-                <Mail className="w-3 h-3 flex-shrink-0" />
+                <Mail className="w-3 h-3 shrink-0" />
                 <span className="truncate">{doctor.email}</span>
               </div>
 
               {doctor.contact && (
                 <div className="flex items-center gap-1">
-                  <Phone className="w-3 h-3 flex-shrink-0" />
+                  <Phone className="w-3 h-3 shrink-0" />
                   <span className="truncate">{doctor.contact}</span>
                 </div>
               )}
 
               {(doctor.age || doctor.gender) && (
                 <div className="flex items-center gap-1">
-                  <User className="w-3 h-3 flex-shrink-0" />
+                  <User className="w-3 h-3 shrink-0" />
                   <span className="truncate">
                     {doctor.age && `${doctor.age} years`}
                     {doctor.age && doctor.gender && " • "}
@@ -63,7 +63,7 @@ const DoctorCard = ({ doctor, onClick }) => {
             {/* Schedule Times */}
             {doctor.schedule_time && doctor.schedule_time.length > 0 && (
               <div className="flex items-start sm:items-center gap-2 mt-2 text-xs text-muted-foreground">
-                <Clock className="w-3 h-3 flex-shrink-0 mt-0.5 sm:mt-0" />
+                <Clock className="w-3 h-3 shrink-0 mt-0.5 sm:mt-0" />
                 <div className="flex flex-wrap gap-1">
                   {doctor.schedule_time.slice(0, 2).map((time, index) => (
                     <span
@@ -85,7 +85,7 @@ const DoctorCard = ({ doctor, onClick }) => {
         </div>
 
         {/* Chevron for visual indication */}
-        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-blue transition-colors ml-2 flex-shrink-0" />
+        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-blue transition-colors ml-2 shrink-0" />
       </div>
     </div>
   );

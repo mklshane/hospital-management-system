@@ -1,4 +1,3 @@
-// components/PatientAppointment.jsx
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Filter, X } from "lucide-react";
 import DoctorCard from "@/components/Patient/Book/DoctorCard";
@@ -34,7 +33,6 @@ const PatientAppointment = () => {
     notes: "",
   });
 
-  /* ----------  Unique specializations ---------- */
   const specializations = useMemo(() => {
     const specs = [
       ...new Set(doctors.map((d) => d.specialization).filter(Boolean)),
@@ -211,7 +209,7 @@ const PatientAppointment = () => {
         </div>
 
         {/* ==================== RIGHT SIDE (DETAILS) ==================== */}
-        <div className="hidden lg:block w-80 flex-shrink-0">
+        <div className="hidden lg:block w-80 shrink-0">
           <DoctorDetails doctor={selectedDoctor} onBook={handleBook} />
         </div>
       </div>

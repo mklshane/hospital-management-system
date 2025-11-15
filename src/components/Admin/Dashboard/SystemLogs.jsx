@@ -87,14 +87,7 @@ const SystemLogs = () => {
               </div>
             ))}
 
-            {hasMoreLogs && (
-              <div
-                ref={setLogsEndRef}
-                className="py-2 text-center text-sm text-muted-foreground"
-              >
-                {loading ? "Loading..." : "Load more..."}
-              </div>
-            )}
+           
           </>
         )}
       </div>

@@ -23,7 +23,7 @@ const AppointmentCard = ({ appt, onClick, formatDate, isSelected }) => {
     >
       {/* Top: Avatar + Name + Status */}
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-full bg-blue flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-blue flex items-center justify-center text-white font-bold text-xs shrink-0">
           {patientInitial}
         </div>
         <div className="flex-1 min-w-0">
@@ -45,14 +45,14 @@ const AppointmentCard = ({ appt, onClick, formatDate, isSelected }) => {
       {/* Bottom: Date/Time + Notes */}
       <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1.5">
         <div className="flex items-center gap-1.5">
-          <CalendarClock className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+          <CalendarClock className="w-3.5 h-3.5 text-gray-500 shrink-0" />
           <span className="font-medium truncate">
             {formatDate(appt.appointment_date)} • {appt.appointment_time}
           </span>
         </div>
 
         <div className="flex items-start gap-1.5">
-          <NotepadText className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 mt-0.5" />
+          <NotepadText className="w-3.5 h-3.5 text-gray-500 shrink-0 mt-0.5" />
           <span
             className="line-clamp-1 flex-1 min-w-0"
             title={appt.notes || "No notes"}

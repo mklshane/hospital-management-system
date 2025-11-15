@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { generateTimeSlots, convertTo24Hour } from "@/utils/timeSlots";
+import { generateTimeSlots } from "@/utils/timeSlots";
 
 export default function BookAppointmentModal({
   isOpen,

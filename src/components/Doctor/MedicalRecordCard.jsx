@@ -34,7 +34,7 @@ const MedicalRecordCard = ({ record, onClick, formatDate }) => {
       <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
         {record.symptoms && (
           <p className="flex items-center gap-1 truncate">
-            <Stethoscope className="w-3 h-3 flex-shrink-0" />
+            <Stethoscope className="w-3 h-3 shrink-0" />
             {record.symptoms}
           </p>
         )}

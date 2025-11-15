@@ -9,7 +9,7 @@ import { useApiData } from "@/hooks/useApiData";
 const LOGS_HEIGHT = "calc(100vh - 50px)";
 
 const AdminDashboard = () => {
-  // Use custom hooks for data fetching
+  // Data fetching
   const {
     data: appointments,
     loading: appointmentsLoading,
