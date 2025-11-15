@@ -18,6 +18,42 @@ import {
 import { api } from "../../lib/axiosHeader";
 import MedicalRecordCard from "../../components/Doctor/MedicalRecordCard";
 import ThemeToggle from "../../components/ThemeToggle";
+import BoardSkeletonColumn from "@/components/Common/BoardSkeletonColumn";
+
+const Column = ({
+  filterKey,
+  statusData,
+  list,
+  currentOrder,
+  toggleSort,
+  children,
+}) => (
+  <div className="relative min-h-0 flex flex-col bg-ui-surface/30 rounded-lg p-2 border border-ui-border/20">
+    <div
+      className={`absolute top-0 left-0 right-0 h-0.5 ${
+        statusData.color === "blue"
+          ? "bg-blue-500"
+          : statusData.color === "green"
+          ? "bg-green-500"
+          : "bg-gray-400"
+      }`}
+    />
+    <h2
+      onClick={() => toggleSort(filterKey)}
+      className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1 px-1 rounded"
+    >
+      {statusData.label} ({list.length})
+      <ArrowUpDown
+        className={`w-3 h-3 transition-all ${
+          currentOrder === "asc"
+            ? "rotate-180 text-blue"
+            : "text-muted-foreground"
+        }`}
+      />
+    </h2>
+    <div className="space-y-2 flex-1 overflow-y-auto pr-1">{children}</div>
+  </div>
+);
 
 const DoctorMedicalRecords = () => {
   const [records, setRecords] = useState([]);
@@ -97,9 +133,7 @@ const DoctorMedicalRecords = () => {
 
   const toggleFilter = (key) => {
     setSelectedFilters((prev) => {
-      if (prev.includes(key)) {
-        return prev.filter((f) => f !== key);
-      }
+      if (prev.includes(key)) return prev.filter((f) => f !== key);
       if (prev.length >= 3) {
         setAlertMessage("You can select a maximum of 3 categories.");
         setTimeout(() => setAlertMessage(""), 4000);
@@ -178,9 +212,8 @@ const DoctorMedicalRecords = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 gap-3 mb-8 overflow-hidden min-h-0">
-        {/* LEFT SECTION - ALWAYS 9 COLUMNS */}
-        <div className="scrollbar rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs col-span-9">
-          {/* Alert */}
+        {/* LEFT BOARD */}
+        <div className="scrollbar bg-ui-card border-2 rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs col-span-9">
           {alertMessage && (
             <div className="absolute top-3 right-3 z-50 max-w-xs">
               <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg shadow flex items-center gap-2 text-xs">
@@ -195,7 +228,6 @@ const DoctorMedicalRecords = () => {
             </div>
           )}
 
-          {/* Header */}
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-lg font-bold font-montserrat text-foreground">
               Medical Records
@@ -203,7 +235,6 @@ const DoctorMedicalRecords = () => {
             <ThemeToggle />
           </div>
 
-          {/* Search + Filter + Refresh */}
           <div className="flex flex-wrap gap-2 mb-4 items-center">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
@@ -216,7 +247,6 @@ const DoctorMedicalRecords = () => {
               />
             </div>
 
-            {/* Filter */}
             <div className="relative">
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -289,7 +319,7 @@ const DoctorMedicalRecords = () => {
             <button
               onClick={fetchRecords}
               disabled={loading}
-              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-light text-white text-xs font-medium rounded-lg transition"
+              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-dark text-white text-xs font-medium rounded-lg transition"
             >
               <RefreshCw
                 className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
@@ -298,43 +328,21 @@ const DoctorMedicalRecords = () => {
             </button>
           </div>
 
-          {/* COLUMNS WITH SKELETON */}
           <div className="relative flex-1 min-h-0 overflow-hidden">
             {/* SKELETON */}
             {columnsRefreshing && (
               <div className="h-full overflow-y-auto pr-1 scrollbar">
-                <div className="grid grid-cols-3 gap-3 pb-4">
+                <div className="grid grid-cols-3 gap-4 pb-4">
                   {selectedFilters.map((filterKey) => {
-                    const statusData = statusOptions.find((s) => s.key === filterKey);
-
+                    const statusData = statusOptions.find(
+                      (s) => s.key === filterKey
+                    );
                     return (
-                      <div key={filterKey} className="min-h-0 flex flex-col">
-                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
-                          {statusData.label} ({Math.floor(Math.random() * 6) + 1})
-                          <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
-                        </h2>
-
-                        <div className="space-y-2">
-                          {[...Array(Math.floor(Math.random() * 4) + 3)].map((_, i) => (
-                            <div
-                              key={i}
-                              className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
-                            >
-                              <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
-                                <div className="flex-1 space-y-2">
-                                  <div className="h-4 bg-ui-muted/60 rounded w-36 animate-pulse" />
-                                  <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse" />
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="h-3 bg-ui-muted/50 rounded w-full animate-pulse" />
-                                <div className="h-3 bg-ui-muted/50 rounded w-32 animate-pulse" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <BoardSkeletonColumn
+                        key={filterKey}
+                        label={statusData.label}
+                        color={statusData.color}
+                      />
                     );
                   })}
                 </div>
@@ -344,49 +352,44 @@ const DoctorMedicalRecords = () => {
             {/* REAL CONTENT */}
             <div
               className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
-                columnsRefreshing ? "opacity-0" : "opacity-100"
+                columnsRefreshing
+                  ? "opacity-0 pointer-events-none"
+                  : "opacity-100"
               }`}
             >
-              <div className="grid grid-cols-3 gap-3 pb-4">
+              <div className="grid grid-cols-3 gap-4 pb-4">
                 {selectedFilters.map((filterKey) => {
-                  const statusData = statusOptions.find((s) => s.key === filterKey);
+                  const statusData = statusOptions.find(
+                    (s) => s.key === filterKey
+                  );
                   const list = filteredRecords[filterKey] || [];
                   const currentOrder = sortOrders[filterKey] || "desc";
 
                   return (
-                    <div key={filterKey} className="min-h-0 flex flex-col">
-                      <h2
-                        onClick={() => toggleSort(filterKey)}
-                        className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
-                      >
-                        {statusData.label} ({list.length})
-                        <ArrowUpDown
-                          className={`w-3 h-3 transition-all ${
-                            currentOrder === "asc"
-                              ? "rotate-180 text-blue"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </h2>
-
-                      <div className="space-y-2 flex-1">
-                        {list.length === 0 ? (
-                          <p className="text-xs text-muted-foreground text-center py-8">
-                            No {statusData.label.toLowerCase()} records
-                          </p>
-                        ) : (
-                          list.map((record) => (
-                            <MedicalRecordCard
-                              key={record._id}
-                              record={record}
-                              onClick={setSelectedRecord}
-                              formatDate={formatDate}
-                              isSelected={selectedRecord?._id === record._id}
-                            />
-                          ))
-                        )}
-                      </div>
-                    </div>
+                    <Column
+                      key={filterKey}
+                      filterKey={filterKey}
+                      statusData={statusData}
+                      list={list}
+                      currentOrder={currentOrder}
+                      toggleSort={toggleSort}
+                    >
+                      {list.length === 0 ? (
+                        <p className="text-xs text-muted-foreground text-center py-8">
+                          No {statusData.label.toLowerCase()} records
+                        </p>
+                      ) : (
+                        list.map((record) => (
+                          <MedicalRecordCard
+                            key={record._id}
+                            record={record}
+                            onClick={setSelectedRecord}
+                            formatDate={formatDate}
+                            isSelected={selectedRecord?._id === record._id}
+                          />
+                        ))
+                      )}
+                    </Column>
                   );
                 })}
               </div>
@@ -394,20 +397,17 @@ const DoctorMedicalRecords = () => {
           </div>
         </div>
 
-        {/* RIGHT SECTION - ALWAYS VISIBLE, FIXED WIDTH */}
-        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+        {/* RIGHT PANEL */}
+        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3 p-2 border-2">
           {selectedRecord ? (
             <>
-              {/* Sticky Header - No Close Button */}
               <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
                 <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
                   Record Details
                 </h2>
               </div>
 
-              {/* Scrollable Content */}
               <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
-                {/* Patient Header */}
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white shrink-0">
                     {selectedRecord.patient?.name
@@ -427,25 +427,29 @@ const DoctorMedicalRecords = () => {
                   </div>
                 </div>
 
-                {/* Diagnosis */}
                 <div className="space-y-1 pl-1">
                   <div className="flex items-center gap-2">
                     <Stethoscope className="w-4 h-4 text-blue" />
-                    <p className="text-[10px] tracking-wider text-muted-foreground">Diagnosis</p>
+                    <p className="text-[10px] tracking-wider text-muted-foreground">
+                      Diagnosis
+                    </p>
                   </div>
                   <p className="text-xs text-foreground leading-relaxed pl-6">
                     {selectedRecord.diagnosis || (
-                      <span className="italic text-muted-foreground">No diagnosis recorded.</span>
+                      <span className="italic text-muted-foreground">
+                        No diagnosis recorded.
+                      </span>
                     )}
                   </p>
                 </div>
 
-                {/* Symptoms */}
                 {selectedRecord.symptoms && (
                   <div className="space-y-1 pl-1">
                     <div className="flex items-center gap-2">
                       <Activity className="w-4 h-4 text-blue" />
-                      <p className="text-[10px] tracking-wider text-muted-foreground">Symptoms</p>
+                      <p className="text-[10px] tracking-wider text-muted-foreground">
+                        Symptoms
+                      </p>
                     </div>
                     <p className="text-xs text-foreground leading-relaxed pl-6">
                       {selectedRecord.symptoms}
@@ -453,7 +457,6 @@ const DoctorMedicalRecords = () => {
                   </div>
                 )}
 
-                {/* Prescriptions */}
                 {selectedRecord.prescriptions?.length > 0 && (
                   <div className="space-y-1 pl-1">
                     <div className="flex items-center gap-2">
@@ -468,7 +471,9 @@ const DoctorMedicalRecords = () => {
                           key={i}
                           className="bg-ui-muted/50 p-2 rounded-lg text-xs"
                         >
-                          <div className="font-medium text-foreground">{p.medicine}</div>
+                          <div className="font-medium text-foreground">
+                            {p.medicine}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {p.dosage} • {p.duration}
                           </div>
@@ -478,27 +483,35 @@ const DoctorMedicalRecords = () => {
                   </div>
                 )}
 
-                {/* Previous Records Dropdown */}
                 {patientRecords.length > 1 && (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-[10px] tracking-wider text-muted-foreground">Previous Records</p>
+                      <p className="text-[10px] tracking-wider text-muted-foreground">
+                        Previous Records
+                      </p>
                     </div>
                     <div className="relative pl-6">
                       <select
                         className="w-full p-2 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground appearance-none pr-8"
                         onChange={(e) => {
-                          const rec = patientRecords.find((r) => r._id === e.target.value);
+                          const rec = patientRecords.find(
+                            (r) => r._id === e.target.value
+                          );
                           if (rec) setSelectedRecord(rec);
                         }}
                         value={selectedRecord._id}
                       >
                         {patientRecords
-                          .sort((a, b) => new Date(b.appointment.appointment_date) - new Date(a.appointment.appointment_date))
+                          .sort(
+                            (a, b) =>
+                              new Date(b.appointment.appointment_date) -
+                              new Date(a.appointment.appointment_date)
+                          )
                           .map((r) => (
                             <option key={r._id} value={r._id}>
-                              {formatDate(r.appointment.appointment_date)} - {r.diagnosis}
+                              {formatDate(r.appointment.appointment_date)} -{" "}
+                              {r.diagnosis}
                             </option>
                           ))}
                       </select>
@@ -508,7 +521,6 @@ const DoctorMedicalRecords = () => {
                 )}
               </div>
 
-              {/* Fixed Print Button */}
               <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2">
                 <button
                   onClick={() => window.print()}
@@ -520,22 +532,19 @@ const DoctorMedicalRecords = () => {
               </div>
             </>
           ) : (
-            <>
-              {/* Empty State */}
-              <div className="flex-1 flex items-center justify-center px-3">
-                <div className="text-center space-y-2">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
-                    <FileText className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">
-                    No record selected
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Click on any record card to view details.
-                  </p>
+            <div className="flex-1 flex items-center justify-center px-3">
+              <div className="text-center space-y-2">
+                <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-muted-foreground" />
                 </div>
+                <p className="text-sm font-medium text-foreground">
+                  No record selected
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Click on any record card to view details.
+                </p>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>

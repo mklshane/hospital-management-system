@@ -1,705 +1,144 @@
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  Search,
-  RefreshCw,
-  Funnel,
-  ArrowUpDown,
-  Calendar,
-  Clock,
-  X,
-  Check,
-  CheckCircle,
-  XCircle,
-  FileText,
-  Phone,
-  Mail,
-  SquareUserRound,
-} from "lucide-react";
-import { api } from "../../lib/axiosHeader";
-import AppointmentCard from "../../components/Doctor/AppointmentCard";
-import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
-import CollapsibleSection from "../../components/Doctor/CollapsibleSection";
-import AppointmentHistorySection from "../../components/Doctor/AppointmentHistorySection";
-import MedicalRecordsSection from "../../components/Doctor/MedicalRecordsSection";
-import AppointmentActionModal from "../../components/Doctor/AppointmentActionModal";
-import ThemeToggle from "../../components/ThemeToggle";
+import React, { useState, useMemo } from "react";
+import AppointmentsBoard from "@/components/Doctor/AppointmentsBoard";
+import AppointmentDetails from "@/components/Doctor/AppointmentDetails";
+import MedicalRecordModal from "@/components/Doctor/MedicalRecordModal";
+import DeleteModal from "@/components/Common/DeleteModal";
+import AppointmentActionModal from "@/components/Doctor/AppointmentActionModal";
+import { useApiData } from "@/hooks/useApiData";
+import { useCrudOperations } from "@/hooks/useCrudOperations";
 
 const DoctorAppointments = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [columnsRefreshing, setColumnsRefreshing] = useState(false);
-  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
-
-  const [sortOrders, setSortOrders] = useState({
-    pending: "asc",
-    scheduled: "asc",
-    completed: "desc",
-    cancelled: "desc",
-    rejected: "desc",
+  const {
+    data: appointments = [],
+    loading: loadingAppointments,
+    refetch: refetchAppointments,
+  } = useApiData("/appointment", {
+    entityName: "appointments",
+    dataKey: "appointments",
   });
 
+  const {
+    update: updateAppointment,
+    deleteItem: deleteAppointment,
+    actionLoading,
+  } = useCrudOperations("Appointment", refetchAppointments);
+
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
   const [selectedFilters, setSelectedFilters] = useState([
     "pending",
     "scheduled",
     "completed",
   ]);
-  
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const [modal, setModal] = useState({
-    isOpen: false,
+  // Modals
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState(null);
+  const [actionModal, setActionModal] = useState({
+    open: false,
+    type: null,
     appointment: null,
-    action: null, 
   });
 
-  const statusOptions = [
-    { key: "pending", label: "Pending", color: "yellow" },
-    { key: "scheduled", label: "Scheduled", color: "blue" },
-    { key: "completed", label: "Completed", color: "green" },
-    { key: "cancelled", label: "Cancelled", color: "red" },
-    { key: "rejected", label: "Rejected", color: "purple" },
-  ];
-
-  const toggleFilter = (key) => {
-    setSelectedFilters((prev) => {
-      if (prev.includes(key)) {
-        return prev.filter((f) => f !== key);
-      }
-      if (prev.length >= 3) {
-        setAlertMessage("You can select a maximum of 3 statuses.");
-        setTimeout(() => setAlertMessage(""), 4000);
-        return prev;
-      }
-      return [...prev, key];
-    });
+  // Handlers
+  const openDeleteModal = (appt) => {
+    setAppointmentToDelete(appt);
+    setDeleteModalOpen(true);
   };
 
-  const fetchAppointments = async () => {
-    try {
-      setColumnsRefreshing(true);
-      setLoading(true);
-      const res = await api.get("/appointment");
-      setAppointments(res.data.appointments || []);
-    } catch (err) {
-      console.error("Error fetching appointments:", err);
-    } finally {
-      setLoading(false);
-      setTimeout(() => setColumnsRefreshing(false), 300); 
-      setRefreshTrigger((prev) => prev + 1);
+  const closeDeleteModal = () => {
+    setAppointmentToDelete(null);
+    setDeleteModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!appointmentToDelete) return;
+    const ok = await deleteAppointment(appointmentToDelete._id, "/appointment");
+    if (ok) {
+      setSelectedAppointment(null);
+      closeDeleteModal();
     }
   };
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
-  const sortByDate = (appointments, order) => {
-    return [...appointments].sort((a, b) => {
-      const parseAppointmentTime = (appt) => {
-        const dateObj = new Date(appt.appointment_date);
-        if (isNaN(dateObj.getTime())) return 0;
-
-        const timeStr = appt.appointment_time?.trim();
-        if (!timeStr) return dateObj.getTime();
-
-        let hours, minutes;
-        const upperTime = timeStr.toUpperCase();
-
-        if (upperTime.includes('AM') || upperTime.includes('PM')) {
-          const [time, period] = upperTime.split(' ');
-          const [h, m = '0'] = time.split(':').map(Number);
-          hours = h;
-          minutes = m;
-
-          if (period === 'PM' && hours !== 12) hours += 12;
-          if (period === 'AM' && hours === 12) hours = 0;
-        } else {
-          const [h, m = '0'] = timeStr.split(':').map(Number);
-          hours = h;
-          minutes = m;
-        }
-
-        dateObj.setHours(hours, minutes, 0, 0);
-        return dateObj.getTime();
-      };
-
-      const timeA = parseAppointmentTime(a);
-      const timeB = parseAppointmentTime(b);
-
-      if (timeA === 0 && timeB === 0) return 0;
-      if (timeA === 0) return 1;
-      if (timeB === 0) return -1;
-
-      return order === "desc" ? timeB - timeA : timeA - timeB;
-    });
+  const openActionModal = (type, appt) => {
+    setActionModal({ open: true, type, appointment: appt });
   };
 
-  const toggleSort = (column) => {
-    setSortOrders(prev => ({
-      ...prev,
-      [column]: prev[column] === "desc" ? "asc" : "desc"
-    }));
+  const closeActionModal = () => {
+    setActionModal({ open: false, type: null, appointment: null });
   };
 
-  const filteredAppointments = useMemo(() => {
-    const lowerSearch = searchTerm.toLowerCase().trim();
-    const searched = lowerSearch
-      ? appointments.filter((appt) => {
-          const name = appt.patient?.name?.toLowerCase() ?? "";
-          const date = appt.appointment_date?.toLowerCase() ?? "";
-          const time = appt.appointment_time?.toLowerCase() ?? "";
-          const notes = appt.notes?.toLowerCase() ?? "";
-          return (
-            name.includes(lowerSearch) ||
-            date.includes(lowerSearch) ||
-            time.includes(lowerSearch) ||
-            notes.includes(lowerSearch)
-          );
-        })
-      : appointments;
+  const confirmAction = async () => {
+    if (!actionModal.appointment) return;
+    const newStatus = actionModal.type === "accept" ? "Scheduled" : "Rejected";
+    const ok = await updateAppointment(
+      actionModal.appointment._id,
+      { status: newStatus },
+      "/appointment"
+    );
+    if (ok) {
+      setSelectedAppointment((prev) =>
+        prev?._id === actionModal.appointment._id
+          ? { ...prev, status: newStatus }
+          : prev
+      );
+      closeActionModal();
+    }
+  };
 
-    const statusMap = {
-      pending: searched.filter((a) => a.status === "Pending"),
-      scheduled: searched.filter((a) => a.status === "Scheduled"),
-      completed: searched.filter((a) => a.status === "Completed"),
-      cancelled: searched.filter((a) => a.status === "Cancelled"),
-      rejected: searched.filter((a) => a.status === "Rejected"),
-    };
+  const onRecordSaved = async () => {
+    setIsRecordModalOpen(false);
+    refetchAppointments();
+    setRefreshTrigger((p) => p + 1);
+    if (selectedAppointment?._id) {
+      await updateAppointment(
+        selectedAppointment._id,
+        { status: "Completed" },
+        "/appointment"
+      );
+    }
+  };
 
-    const result = {};
-
-    selectedFilters.forEach((key) => {
-      const list = statusMap[key] || [];
-      const order = sortOrders[key] || "desc";
-      result[key] = sortByDate(list, order);
-    });
-
-    return result;
-  }, [appointments, searchTerm, selectedFilters, sortOrders]);
-
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+  const formatDate = (dateStr) =>
+    new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const updateStatus = async (id, status) => {
-    try {
-      await api.put(`/appointment/${id}`, { status });
-      setAppointments((prev) =>
-        prev.map((appt) => (appt._id === id ? { ...appt, status } : appt))
-      );
-      if (selectedAppointment?._id === id)
-        setSelectedAppointment((prev) => ({ ...prev, status }));
-      setRefreshTrigger((prev) => prev + 1);
-    } catch (err) {
-      console.error("Error updating status:", err);
-      alert(err.response?.data?.message || "Failed to update status");
-    }
-  };
-
-  // Initial full-screen loading
-  if (loading && appointments.length === 0) {
-    return (
-      <p className="text-center py-4 text-foreground text-sm">
-        Loading appointments...
-      </p>
-    );
-  }
 
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-1 grid grid-cols-12 mb-8 gap-3 overflow-hidden min-h-0">
-        {/* LEFT SECTION - APPOINTMENTS */}
-        <div className="scrollbar border-2 rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
-          {/* Alert Message */}
-          {alertMessage && (
-            <div className="absolute top-3 right-3 z-50 max-w-xs">
-              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg shadow flex items-center gap-2 text-xs">
-                <span className="font-medium">{alertMessage}</span>
-                <button
-                  onClick={() => setAlertMessage("")}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          )}
+        <AppointmentsBoard
+          appointments={appointments}
+          loading={loadingAppointments}
+          refetch={refetchAppointments}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+          selectedAppointment={selectedAppointment}
+          setSelectedAppointment={setSelectedAppointment}
+          openActionModal={openActionModal}
+          openDeleteModal={openDeleteModal}
+          formatDate={formatDate}
+          actionLoading={actionLoading}
+        />
 
-          {/* Header */}
-          <div className="flex justify-between items-start mb-4">
-            <h1 className="text-lg font-bold font-montserrat text-foreground">
-              Appointments
-            </h1>
-            <ThemeToggle />
-          </div>
-
-          {/* Search + Buttons */}
-          <div className="flex flex-wrap gap-2 mb-4 items-center">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search name, date, notes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-8 pl-7 pr-3 bg-ui-muted border border-ui-border rounded-lg text-xs text-foreground placeholder-muted-foreground font-figtree focus:outline-none focus:ring-1 focus:ring-ui-ring"
-              />
-            </div>
-
-            {/* Filter Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="flex items-center justify-center gap-1 h-8 px-3 border border-border rounded-lg text-xs font-medium text-foreground hover:bg-muted transition"
-              >
-                <Funnel className="w-3 h-3" />
-                Filter ({selectedFilters.length})
-              </button>
-
-              {isFilterOpen && (
-                <div className="absolute top-full mt-1 left-0 w-48 bg-ui-card border border-ui-border rounded-lg shadow z-50 p-2">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-xs font-semibold text-foreground">
-                      Select up to 3
-                    </p>
-                    <button
-                      onClick={() => setIsFilterOpen(false)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-1">
-                    {statusOptions.map((opt) => {
-                      const isChecked = selectedFilters.includes(opt.key);
-                      return (
-                        <label
-                          key={opt.key}
-                          onClick={() => toggleFilter(opt.key)}
-                          className="flex items-center gap-2 p-1.5 rounded cursor-pointer hover:bg-ui-muted transition text-xs"
-                        >
-                          <div
-                            className={`w-3 h-3 rounded border flex items-center justify-center transition ${
-                              isChecked
-                                ? "bg-blue border-blue"
-                                : "border-ui-border"
-                            }`}
-                          >
-                            {isChecked && (
-                              <Check className="w-2 h-2 text-white" />
-                            )}
-                          </div>
-                          <span className="text-foreground capitalize">
-                            {opt.label}
-                          </span>
-                          <span
-                            className={`ml-auto text-xs font-medium ${
-                              opt.color === "yellow"
-                                ? "text-yellow-600"
-                                : opt.color === "blue"
-                                ? "text-blue-600"
-                                : opt.color === "green"
-                                ? "text-green-600"
-                                : opt.color === "red"
-                                ? "text-red-600"
-                                : "text-purple-600"
-                            }`}
-                          >
-                            {
-                              appointments.filter(
-                                (a) => a.status.toLowerCase() === opt.key
-                              ).length
-                            }
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-2 pt-2 border-t border-ui-border">
-                    <button
-                      onClick={() => {
-                        setSelectedFilters([
-                          "pending",
-                          "scheduled",
-                          "completed",
-                        ]);
-                        setIsFilterOpen(false);
-                      }}
-                      className="w-full text-xs text-blue hover:underline"
-                    >
-                      Reset to default
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={fetchAppointments}
-              disabled={loading}
-              className="flex items-center justify-center gap-1 h-8 px-3 bg-blue hover:bg-blue-dark text-white text-xs font-medium rounded-lg transition"
-            >
-              <RefreshCw
-                className={`w-3 h-3 ${loading ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </button>
-          </div>
-
-          {/* COLUMNS AREA WITH SKELETON */}
-          <div className="relative flex-1 min-h-0 overflow-hidden">
-            {/* SKELETON LOADING */}
-            {columnsRefreshing && (
-              <div className="h-full overflow-y-auto pr-1 scrollbar">
-                <div className="grid grid-cols-3 gap-3 pb-4">
-                  {selectedFilters.map((filterKey) => {
-                    const statusData = statusOptions.find(
-                      (s) => s.key === filterKey
-                    );
-
-                    return (
-                      <div key={filterKey} className="min-h-0 flex flex-col">
-                        <h2 className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground sticky top-0 bg-ui-surface z-10 py-1">
-                          {statusData.label} (
-                          {Math.floor(Math.random() * 5) + 1})
-                          <ArrowUpDown className="w-3 h-3 text-muted-foreground" />
-                        </h2>
-
-                        <div className="space-y-2">
-                          {[...Array(Math.floor(Math.random() * 3) + 3)].map(
-                            (_, i) => (
-                              <div
-                                key={i}
-                                className="bg-ui-muted/50 backdrop-blur-sm border border-ui-border/30 rounded-xl p-3 animate-pulse"
-                              >
-                                <div className="flex items-center gap-3 mb-3">
-                                  <div className="w-10 h-10 rounded-full bg-ui-muted/70 animate-pulse" />
-                                  <div className="flex-1 space-y-2">
-                                    <div className="h-4 bg-ui-muted/60 rounded w-32 animate-pulse" />
-                                    <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse" />
-                                  </div>
-                                </div>
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
-                                    <div className="h-3 bg-ui-muted/50 rounded w-24 animate-pulse flex-1" />
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 bg-ui-muted/60 rounded animate-pulse" />
-                                    <div className="h-3 bg-ui-muted/50 rounded w-20 animate-pulse flex-1" />
-                                  </div>
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* REAL CONTENT */}
-            <div
-              className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
-                columnsRefreshing ? "opacity-0" : "opacity-100"
-              }`}
-            >
-              <div className="grid grid-cols-3 gap-3 pb-4">
-                {selectedFilters.map((filterKey) => {
-                  const statusData = statusOptions.find(
-                    (s) => s.key === filterKey
-                  );
-                  const list = filteredAppointments[filterKey] || [];
-                  const currentOrder = sortOrders[filterKey] || "desc";
-
-                  return (
-                    <div key={filterKey} className="min-h-0 flex flex-col">
-                      <h2
-                        onClick={() => toggleSort(filterKey)}
-                        className="flex items-center gap-1 text-sm font-semibold mb-2 pl-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface z-10 py-1"
-                      >
-                        {statusData.label} ({list.length})
-                        <ArrowUpDown
-                          className={`w-3 h-3 transition-all ${
-                            currentOrder === "asc"
-                              ? "rotate-180 text-blue"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </h2>
-
-                      <div className="space-y-2 flex-1">
-                        {list.length === 0 ? (
-                          <p className="text-xs text-muted-foreground text-center py-8">
-                            No {statusData.label.toLowerCase()} appointments
-                          </p>
-                        ) : (
-                          list.map((appt) => (
-                            <AppointmentCard
-                              key={appt._id}
-                              appt={appt}
-                              onClick={setSelectedAppointment}
-                              formatDate={formatDate}
-                              isSelected={selectedAppointment?._id === appt._id}
-                            />
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT SECTION - DETAILS */}
-        <div className="bg-ui-card rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
-          {selectedAppointment ? (
-            <>
-              {/* Sticky Header */}
-              <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
-                <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
-                  Appointment Details
-                </h2>
-              </div>
-
-              {/* Scrollable Content */}
-              <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
-                {/* Patient Header */}
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue flex items-center justify-center text-sm font-bold text-white shrink-0">
-                    {selectedAppointment.patient?.name
-                      ?.split(" ")
-                      .map((n) => n[0].toUpperCase())
-                      .join("")
-                      .slice(0, 2)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-foreground truncate text-sm">
-                      {selectedAppointment.patient?.name}
-                    </h3>
-                    <div
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-0.5 ${
-                        selectedAppointment.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : selectedAppointment.status === "Scheduled"
-                          ? "bg-blue-100 text-blue-800"
-                          : selectedAppointment.status === "Completed"
-                          ? "bg-green-100 text-green-800"
-                          : selectedAppointment.status === "Cancelled"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-purple-100 text-purple-800"
-                      }`}
-                    >
-                      <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
-                      {selectedAppointment.status}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Date, Time, Notes Card */}
-                <div className="bg-ui-muted/50 rounded-lg p-3 space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-blue shrink-0" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Date
-                        </p>
-                        <p className="font-bold text-foreground text-sm">
-                          {formatDate(selectedAppointment.appointment_date)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 pr-1">
-                      <Clock className="w-4 h-4 text-blue shrink-0" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Time
-                        </p>
-                        <p className="font-bold text-foreground text-sm">
-                          {selectedAppointment.appointment_time}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] tracking-wider text-muted-foreground mb-1">
-                      Patient Notes
-                    </p>
-                    <p className="text-xs text-foreground leading-relaxed">
-                      {selectedAppointment.notes || (
-                        <span className="italic text-muted-foreground">
-                          No notes provided.
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Collapsible Sections */}
-                <CollapsibleSection title="Patient Details" defaultOpen={false}>
-                  <div className="grid gap-3 text-xs px-3">
-                    {selectedAppointment.patient?.age && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <SquareUserRound className="w-3 h-3 text-muted-foreground" />
-                        </div>
-                        <span className="font-medium text-foreground">
-                          {selectedAppointment.patient.age} years old,{" "}
-                          {selectedAppointment.patient.gender}
-                        </span>
-                      </div>
-                    )}
-                    {selectedAppointment.patient?.contact && (
-                      <div className="flex items-center gap-2 col-span-2">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <Phone className="w-3 h-3 text-muted-foreground" />
-                        </div>
-                        <a
-                          href={`tel:${selectedAppointment.patient.contact}`}
-                          className="font-medium text-foreground hover:text-blue transition text-xs truncate"
-                        >
-                          {selectedAppointment.patient.contact}
-                        </a>
-                      </div>
-                    )}
-                    {selectedAppointment.patient?.email && (
-                      <div className="flex items-center gap-2 col-span-2">
-                        <div className="w-6 h-6 rounded bg-ui-muted flex items-center justify-center">
-                          <Mail className="w-3 h-3 text-muted-foreground" />
-                        </div>
-                        <a
-                          href={`mailto:${selectedAppointment.patient.email}`}
-                          className="font-medium text-foreground hover:text-blue transition text-xs truncate"
-                        >
-                          {selectedAppointment.patient.email}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </CollapsibleSection>
-
-                <AppointmentHistorySection
-                  key={selectedAppointment?.patient?._id}
-                  patientId={selectedAppointment.patient?._id}
-                  patientName={selectedAppointment.patient?.name}
-                  refreshTrigger={refreshTrigger}
-                />
-
-                <MedicalRecordsSection
-                  patientId={selectedAppointment.patient?._id}
-                  patientName={selectedAppointment.patient?.name}
-                />
-              </div>
-
-              {/* Fixed Action Buttons */}
-              <div className="sticky bottom-0 bg-ui-card px-3 pb-3 pt-2 space-y-2">
-                {selectedAppointment.status === "Pending" && (
-                  <>
-                    <button
-                      onClick={() =>
-                        setModal({
-                          isOpen: true,
-                          appointment: selectedAppointment,
-                          action: "accept",
-                        })
-                      }
-                      className="w-full bg-blue hover:bg-blue-dark text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Accept Appointment
-                    </button>
-                    <button
-                      onClick={() =>
-                        setModal({
-                          isOpen: true,
-                          appointment: selectedAppointment,
-                          action: "reject",
-                        })
-                      }
-                      className="w-full text-red-600 hover:bg-red-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Reject Appointment
-                    </button>
-                  </>
-                )}
-
-                {selectedAppointment.status === "Scheduled" && (
-                  <>
-                    <button
-                      onClick={() => setIsRecordModalOpen(true)}
-                      className="w-full bg-blue hover:bg-navy text-white py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm shadow-sm"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Add Medical Record
-                    </button>
-                    <button
-                      onClick={() =>
-                        setModal({
-                          isOpen: true,
-                          appointment: selectedAppointment,
-                          action: "complete",
-                        })
-                      }
-                      className="w-full text-green-600 border border-green-600 hover:bg-green-50 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 text-sm"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Mark as Completed
-                    </button>
-                  </>
-                )}
-
-                {(selectedAppointment.status === "Completed" ||
-                  selectedAppointment.status === "Rejected" ||
-                  selectedAppointment.status === "Cancelled") && (
-                  <div className="text-center py-2">
-                    <p className="text-xs text-muted-foreground">
-                      This appointment is{" "}
-                      {selectedAppointment.status.toLowerCase()}.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Empty State */}
-              <div className="flex-1 flex items-center justify-center px-3">
-                <div className="text-center space-y-2">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
-                    <FileText className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">
-                    No appointment selected
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Click on any appointment card to view details.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+        <AppointmentDetails
+          appointment={selectedAppointment}
+          formatDate={formatDate}
+          openActionModal={openActionModal}
+          openDeleteModal={openDeleteModal}
+          setIsRecordModalOpen={setIsRecordModalOpen}
+          refreshTrigger={refreshTrigger}
+          actionLoading={actionLoading}
+        />
       </div>
 
-      {/* MODALS */}
+      {/* Modals */}
       <MedicalRecordModal
         isOpen={isRecordModalOpen}
         onClose={() => setIsRecordModalOpen(false)}
@@ -710,30 +149,35 @@ const DoctorAppointments = () => {
           time: selectedAppointment?.appointment_time,
           notes: selectedAppointment?.notes,
         }}
-        onRecordAdded={() => {
-          fetchAppointments();
-          setSelectedAppointment(null);
-          setRefreshTrigger((prev) => prev + 1);
-        }}
+        onRecordSaved={onRecordSaved}
+        refetchAppointments={refetchAppointments}
+      />
+
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title="Delete Appointment"
+        description="This will permanently remove the appointment and any associated medical record."
+        confirmText="Delete Appointment"
+        cancelText="Keep Appointment"
+        loading={actionLoading[appointmentToDelete?._id]}
+        itemName={
+          appointmentToDelete
+            ? `${appointmentToDelete.patient?.name} – ${formatDate(
+                appointmentToDelete.appointment_date
+              )} at ${appointmentToDelete.appointment_time}`
+            : ""
+        }
       />
 
       <AppointmentActionModal
-        isOpen={modal.isOpen}
-        onClose={() =>
-          setModal({ isOpen: false, appointment: null, action: null })
-        }
-        appointment={modal.appointment}
-        actionType={modal.action}
-        loading={loading}
-        onConfirm={async () => {
-          if (!modal.appointment || !modal.action) return;
-          const statusMap = {
-            accept: "Scheduled",
-            reject: "Rejected",
-            complete: "Completed",
-          };
-          await updateStatus(modal.appointment._id, statusMap[modal.action]);
-        }}
+        isOpen={actionModal.open}
+        onClose={closeActionModal}
+        appointment={actionModal.appointment}
+        onConfirm={confirmAction}
+        loading={actionLoading[actionModal.appointment?._id]}
+        actionType={actionModal.type}
       />
     </div>
   );

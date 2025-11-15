@@ -1,50 +1,62 @@
 import { useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
-import { api } from "../../lib/axiosHeader";
+import { X, Plus, Trash2, CheckCircle } from "lucide-react";
+import { api } from "@/lib/axiosHeader";
 import toast from "react-hot-toast";
+import { useCrudOperations } from "@/hooks/useCrudOperations";
 
 const MedicalRecordModal = ({
   isOpen,
   onClose,
   appointment,
-  onRecordAdded,
-  onRecordUpdated,
-  onRecordDeleted,
   existingRecord,
+  onRecordSaved,
+  refetchAppointments,
 }) => {
-  const isEdit = !!existingRecord;
+  const isEdit = !!existingRecord?._id;
+  const isViewOnly =
+    isEdit && existingRecord?.appointment?.status === "Completed";
+
+  const { create, update, deleteItem, loading } = useCrudOperations(
+    "Medical Record",
+    refetchAppointments
+  );
 
   const [symptoms, setSymptoms] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
   const [prescriptions, setPrescriptions] = useState([
     { medicine: "", dosage: "", duration: "" },
   ]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Reset form on open
   useEffect(() => {
-    if (isEdit && existingRecord) {
-      setSymptoms(existingRecord.symptoms || "");
-      setDiagnosis(existingRecord.diagnosis || "");
-      setPrescriptions(
-        existingRecord.prescriptions.length > 0
-          ? existingRecord.prescriptions.map(p => ({
-              medicine: p.medicine,
-              dosage: p.dosage,
-              duration: p.duration,
-            }))
-          : [{ medicine: "", dosage: "", duration: "" }]
-      );
-    } else {
-      setSymptoms("");
-      setDiagnosis("");
-      setPrescriptions([{ medicine: "", dosage: "", duration: "" }]);
+    if (isOpen) {
+      if (isEdit && existingRecord) {
+        setSymptoms(existingRecord.symptoms || "");
+        setDiagnosis(existingRecord.diagnosis || "");
+        setPrescriptions(
+          existingRecord.prescriptions?.length > 0
+            ? existingRecord.prescriptions.map((p) => ({
+                medicine: p.medicine || "",
+                dosage: p.dosage || "",
+                duration: p.duration || "",
+              }))
+            : [{ medicine: "", dosage: "", duration: "" }]
+        );
+      } else {
+        setSymptoms("");
+        setDiagnosis("");
+        setPrescriptions([{ medicine: "", dosage: "", duration: "" }]);
+      }
     }
-  }, [isEdit, existingRecord, isOpen]);
+  }, [isOpen, isEdit, existingRecord]);
 
   const addPrescription = () => {
-    setPrescriptions([...prescriptions, { medicine: "", dosage: "", duration: "" }]);
+    setPrescriptions([
+      ...prescriptions,
+      { medicine: "", dosage: "", duration: "" },
+    ]);
   };
 
   const updatePrescription = (index, field, value) => {
@@ -54,14 +66,30 @@ const MedicalRecordModal = ({
   };
 
   const removePrescription = (index) => {
+    if (prescriptions.length === 1) return;
     setPrescriptions(prescriptions.filter((_, i) => i !== index));
   };
 
-  const handleSave = async () => {
+  const validateForm = () => {
     if (!diagnosis.trim()) {
       toast.error("Diagnosis is required");
-      return;
+      return false;
     }
+
+    const validPrescriptions = prescriptions.filter(
+      (p) => p.medicine.trim() && p.dosage.trim() && p.duration.trim()
+    );
+
+    if (validPrescriptions.length === 0) {
+      toast.error("At least one complete prescription is required");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) return;
 
     const validPrescriptions = prescriptions
       .filter((p) => p.medicine.trim() && p.dosage.trim() && p.duration.trim())
@@ -71,42 +99,78 @@ const MedicalRecordModal = ({
         duration: p.duration.trim(),
       }));
 
-    if (validPrescriptions.length === 0) {
-      toast.error("At least one complete prescription is required");
-      return;
-    }
-
     const payload = {
       symptoms: symptoms.trim(),
       diagnosis: diagnosis.trim(),
       prescriptions: validPrescriptions,
     };
 
-    setIsSubmitting(true);
     try {
       let res;
-      if (isEdit && existingRecord?._id) {
-        res = await api.put(`/record/${existingRecord._id}`, payload);
-        toast.success("Record updated successfully!");
-        onRecordUpdated?.(res.data.record);
+      if (isEdit) {
+        res = await update(
+          existingRecord._id,
+          payload,
+          `/record/${existingRecord._id}`
+        );
       } else {
-        res = await api.post(`/record/${appointment._id}`, payload);
-        toast.success("Medical record saved successfully!");
-        onRecordAdded?.(res.data.record);
-        setSymptoms("");
-        setDiagnosis("");
-        setPrescriptions([{ medicine: "", dosage: "", duration: "" }]);
+        res = await create(payload, `/record/${appointment._id}`);
       }
+
+      const apptId = isEdit ? existingRecord.appointment?._id : appointment._id;
+      if (apptId) {
+        await api.put(`/appointment/${apptId}`, { status: "Completed" });
+
+      }
+
+      onRecordSaved?.();
       onClose();
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to save record";
+      const message = error.response?.data?.message || "Failed to save record";
       toast.error(message);
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!existingRecord?._id) return;
+
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-3 p-1">
+          <p className="text-sm font-medium">Delete this medical record?</p>
+          <p className="text-xs text-muted-foreground">
+            This action cannot be undone.
+          </p>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1.5 text-xs rounded border border-ui-border hover:bg-ui-muted transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await deleteItem(
+                    existingRecord._id,
+                    `/record/${existingRecord._id}`
+                  );
+                  refetchAppointments?.();
+                  onClose();
+                } catch (err) {
+                  toast.error("Failed to delete record");
+                }
+              }}
+              className="px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: 10000 }
+    );
   };
 
   return (
@@ -121,11 +185,11 @@ const MedicalRecordModal = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/50" />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
+          <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -135,131 +199,123 @@ const MedicalRecordModal = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              {/* Main Panel */}
-              <Dialog.Panel
-                className="w-full max-w-4xl max-h-[90vh] transform overflow-hidden rounded-xl bg-ui-card p-4 sm:p-6 shadow-xl transition-all flex flex-col"
-              >
+              <Dialog.Panel className="w-full max-w-4xl max-h-[90vh] transform overflow-hidden rounded-xl bg-[#ffff] dark:bg-gray-950 border-2  p-4 sm:p-6 shadow-2xl transition-all flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                   <Dialog.Title className="text-lg sm:text-xl font-semibold text-foreground">
-                    {isEdit
-                      ? existingRecord?.appointment?.status === "Completed"
-                        ? "View Medical Record"
-                        : "Edit Medical Record"
+                    {isViewOnly
+                      ? "View Medical Record"
+                      : isEdit
+                      ? "Edit Medical Record"
                       : "Add Medical Record"}
                   </Dialog.Title>
                   <button
                     onClick={onClose}
-                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-ui-muted"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 {/* Patient Info */}
-                {/* DEBUG: Missing notes when editing record */}
                 {appointment && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-sm text-muted-foreground bg-ui-muted p-3 rounded-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5 text-sm bg-ui-muted/50 p-3 rounded-lg border border-ui-border/50">
                     <div>
-                      <span className="font-medium">Patient Name</span>
-                      <p className="truncate">{appointment.patientName}</p>
+                      <span className="font-medium text-muted-foreground">
+                        Patient
+                      </span>
+                      <p className="truncate font-medium text-foreground">
+                        {appointment.patientName}
+                      </p>
                     </div>
                     <div>
-                      <span className="font-medium">Appointment</span>
-                      <p className="truncate">
+                      <span className="font-medium text-muted-foreground">
+                        Date & Time
+                      </span>
+                      <p className="truncate font-medium text-foreground">
                         {appointment.date} | {appointment.time}
                       </p>
                     </div>
                     <div>
-                      <span className="font-medium">Notes</span>
-                      <p className="truncate">{appointment.notes || "-"}</p>
+                      <span className="font-medium text-muted-foreground">
+                        Notes
+                      </span>
+                      <p className="truncate text-foreground text-xs italic">
+                        {appointment.notes || "—"}
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto pr-2 -mr-2 scrollbar">
-                  {/* READ-ONLY (Completed) */}
-                  {isEdit && existingRecord?.appointment?.status === "Completed" ? (
-                    <div className="space-y-4">
-                      {/* Symptoms */}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Symptoms
-                        </label>
-                        <p className="w-full px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground text-sm min-h-[60px]">
-                          {symptoms || "-"}
-                        </p>
-                      </div>
+                {/* Scrollable Form */}
+                <div className="flex-1 overflow-y-auto pr-2 -mr-2 scrollbar space-y-5">
+                  {/* Symptoms */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Symptoms <span className="text-red-500">*</span>
+                    </label>
+                    {isViewOnly ? (
+                      <p className="px-3 py-2 bg-ui-card border border-ui-border rounded-lg text-sm text-foreground min-h-[60px] whitespace-pre-wrap">
+                        {symptoms || "—"}
+                      </p>
+                    ) : (
+                      <textarea
+                        value={symptoms}
+                        onChange={(e) => setSymptoms(e.target.value)}
+                        placeholder="Describe patient symptoms..."
+                        className="w-full px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue focus:border-transparent resize-none text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
+                        rows={3}
+                      />
+                    )}
+                  </div>
 
-                      {/* Diagnosis */}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Diagnosis <span className="text-red-500">*</span>
-                        </label>
-                        <p className="w-full px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground text-sm min-h-[60px]">
-                          {diagnosis}
-                        </p>
-                      </div>
+                  {/* Diagnosis */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Diagnosis <span className="text-red-500">*</span>
+                    </label>
+                    {isViewOnly ? (
+                      <p className="px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-sm text-foreground min-h-[60px] whitespace-pre-wrap">
+                        {diagnosis}
+                      </p>
+                    ) : (
+                      <textarea
+                        value={diagnosis}
+                        onChange={(e) => setDiagnosis(e.target.value)}
+                        placeholder="Enter diagnosis..."
+                        className="w-full px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue focus:border-transparent resize-none text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
+                        rows={3}
+                      />
+                    )}
+                  </div>
 
-                      {/* Prescriptions */}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Prescription <span className="text-red-500">*</span>
-                        </label>
-                        <div className="space-y-2">
-                          {prescriptions.map((p, i) => (
-                            <div key={i} className="flex gap-2 text-sm">
-                              <div className="flex-1 px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground">
-                                {p.medicine}
-                              </div>
-                              <div className="flex-1 px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground">
-                                {p.dosage}
-                              </div>
-                              <div className="flex-1 px-3 py-2 bg-ui-muted border border-ui-border rounded-lg text-foreground">
-                                {p.duration}
-                              </div>
+                  {/* Prescriptions */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Prescriptions <span className="text-red-500">*</span>
+                    </label>
+
+                    {isViewOnly ? (
+                      <div className="space-y-2">
+                        {prescriptions.map((p, i) => (
+                          <div
+                            key={i}
+                            className="grid grid-cols-3 gap-2 text-sm"
+                          >
+                            <div className="px-3 py-2 bg-ui-muted border border-ui-border rounded-lg">
+                              {p.medicine || "—"}
                             </div>
-                          ))}
-                        </div>
+                            <div className="px-3 py-2 bg-ui-muted border border-ui-border rounded-lg">
+                              {p.dosage || "—"}
+                            </div>
+                            <div className="px-3 py-2 bg-ui-muted border border-ui-border rounded-lg">
+                              {p.duration || "—"}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  ) : (
-                    /* EDITABLE MODE */
-                    <div className="space-y-4">
-                      {/* Symptoms */}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Symptoms
-                        </label>
-                        <textarea
-                          value={symptoms}
-                          onChange={(e) => setSymptoms(e.target.value)}
-                          placeholder="Enter symptoms..."
-                          className="w-full px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue focus:border-transparent resize-none text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
-                          rows={2}
-                        />
-                      </div>
-
-                      {/* Diagnosis */}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Diagnosis <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          value={diagnosis}
-                          onChange={(e) => setDiagnosis(e.target.value)}
-                          placeholder="Enter diagnosis..."
-                          className="w-full px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue focus:border-transparent resize-none text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
-                          rows={2}
-                        />
-                      </div>
-
-                      {/* Prescriptions */}
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          Prescription <span className="text-red-500">*</span>
-                        </label>
+                    ) : (
+                      <>
                         <div className="space-y-2">
                           {prescriptions.map((p, i) => (
                             <div key={i} className="flex gap-2 items-start">
@@ -268,32 +324,44 @@ const MedicalRecordModal = ({
                                 placeholder="Medicine"
                                 value={p.medicine}
                                 onChange={(e) =>
-                                  updatePrescription(i, "medicine", e.target.value)
+                                  updatePrescription(
+                                    i,
+                                    "medicine",
+                                    e.target.value
+                                  )
                                 }
-                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
+                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground text-left"
                               />
                               <input
                                 type="text"
                                 placeholder="Dosage"
                                 value={p.dosage}
                                 onChange={(e) =>
-                                  updatePrescription(i, "dosage", e.target.value)
+                                  updatePrescription(
+                                    i,
+                                    "dosage",
+                                    e.target.value
+                                  )
                                 }
-                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
+                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground text-left"
                               />
                               <input
                                 type="text"
                                 placeholder="Duration"
                                 value={p.duration}
                                 onChange={(e) =>
-                                  updatePrescription(i, "duration", e.target.value)
+                                  updatePrescription(
+                                    i,
+                                    "duration",
+                                    e.target.value
+                                  )
                                 }
-                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground"
+                                className="flex-1 px-3 py-2 border border-ui-border rounded-lg focus:ring-2 focus:ring-blue text-sm bg-ui-card text-foreground placeholder:text-muted-foreground text-left"
                               />
                               <button
                                 onClick={() => removePrescription(i)}
-                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors mt-0.5"
                                 disabled={prescriptions.length === 1}
+                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors mt-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -302,95 +370,58 @@ const MedicalRecordModal = ({
                         </div>
                         <button
                           onClick={addPrescription}
-                          className="mt-2 flex items-center gap-1 text-blue hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm"
+                          className="mt-3 flex items-center gap-1.5 text-blue hover:text-blue-700 font-medium text-sm"
                         >
                           <Plus className="w-4 h-4" />
                           Add Prescription
                         </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 mt-4 border-t border-ui-border">
-                  {/* Left: Cancel + Delete */}
-                  <div className="flex gap-2">
-                    {isEdit && existingRecord?.appointment?.status !== "Completed" && (
-                      <>
-                        <button
-                          onClick={onClose}
-                          className="px-4 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors text-sm flex-1 sm:flex-none"
-                        >
-                          Cancel
-                        </button>
-
-                        {/* DELETE BUTTON */}
-                        <button
-                          onClick={() => {
-                            toast(
-                              (t) => (
-                                <div className="flex flex-col gap-3">
-                                  <p className="text-sm">Are you sure you want to delete this record?</p>
-                                  <div className="flex gap-2 justify-end">
-                                    <button
-                                      onClick={() => toast.dismiss(t.id)}
-                                      className="px-3 py-1 text-sm text-muted-foreground hover:bg-ui-muted rounded"
-                                    >
-                                      No, keep it
-                                    </button>
-                                    <button
-                                      onClick={async () => {
-                                        toast.dismiss(t.id);
-                                        try {
-                                          await api.delete(`/record/${existingRecord._id}`);
-                                          toast.success("Record deleted successfully");
-                                          onRecordDeleted?.(existingRecord._id);
-                                          onClose();
-                                        } catch (err) {
-                                          toast.error("Failed to delete record");
-                                        }
-                                      }}
-                                      className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-                                    >
-                                      Yes, delete
-                                    </button>
-                                  </div>
-                                </div>
-                              ),
-                              { duration: 10000 }
-                            );
-                          }}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2 text-sm flex-1 sm:flex-none"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Delete
-                        </button>
                       </>
                     )}
                   </div>
+                </div>
 
-                  {/* Right: Save / Close */}
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-between gap-3 pt-5 mt-5 border-t border-ui-border">
                   <div className="flex gap-2">
-                    {!(isEdit && existingRecord?.appointment?.status === "Completed") ? (
+                    {isEdit && !isViewOnly && (
                       <button
-                        onClick={handleSave}
-                        disabled={isSubmitting}
-                        className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm flex-1"
+                        onClick={handleDelete}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2 text-sm"
                       >
-                        {isSubmitting
-                          ? "Saving..."
-                          : isEdit
-                          ? "Update Record"
-                          : "Save Record"}
+                        <Trash2 className="w-4 h-4" />
+                        Delete Record
                       </button>
-                    ) : (
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    {isViewOnly ? (
                       <button
                         onClick={onClose}
-                        className="px-4 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors text-sm flex-1"
+                        className="px-5 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors text-sm font-medium"
                       >
                         Close
                       </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={onClose}
+                          className="px-5 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors text-sm font-medium"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSave}
+                          disabled={loading}
+                          className="px-5 py-2 bg-blue text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm flex items-center gap-1.5"
+                        >
+                          {loading ? (
+                            "Saving..."
+                          ) : (
+                            <>{isEdit ? "Update" : "Save"} Record</>
+                          )}
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
