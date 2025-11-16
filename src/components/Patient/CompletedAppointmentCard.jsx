@@ -1,12 +1,16 @@
 import React from "react";
 import { format } from "date-fns";
 import { Calendar, Clock, Stethoscope, Pill } from "lucide-react";
+import { PrintRecordButton } from "./PrintRecordButton";
 
 const CompletedAppointmentCard = ({ appointment, records = [] }) => {
   const doctor = appointment.doctor || {
     name: "Unknown",
     specialization: "General",
   };
+
+  const formatDate = (dateStr) =>
+    dateStr ? format(new Date(dateStr), "dd MMM yyyy") : "—";
 
   return (
     <div className="bg-ui-card dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg dark:hover:shadow-xl transition-all duration-200 h-full flex flex-col">
@@ -29,7 +33,7 @@ const CompletedAppointmentCard = ({ appointment, records = [] }) => {
         <div className="text-right ml-3">
           <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
             <Calendar className="w-4 h-4" />
-            {format(new Date(appointment.appointment_date), "dd MMM yyyy")}
+            {formatDate(appointment.appointment_date)}
           </div>
           <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-500 mt-1">
             <Clock className="w-3.5 h-3.5" />
@@ -97,6 +101,15 @@ const CompletedAppointmentCard = ({ appointment, records = [] }) => {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Print Button */}
+      <div className="mt-4 flex justify-end">
+        <PrintRecordButton
+          appointment={appointment}
+          records={records}
+          formatDate={formatDate}
+        />
       </div>
     </div>
   );

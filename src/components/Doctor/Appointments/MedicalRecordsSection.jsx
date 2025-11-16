@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import CollapsibleSection from "./CollapsibleSection";
-import { api } from "../../lib/axiosHeader";
+import { api } from "../../../lib/axiosHeader";
 import { format } from "date-fns";
-import MedicalRecordModal from "./MedicalRecordModal";
+import MedicalRecordModal from "../MedicalRecords/MedicalRecordModal";
 
 const MedicalRecordsSection = ({ patientId: propPatientId, patientName = "" }) => {
   const [records, setRecords] = useState([]);

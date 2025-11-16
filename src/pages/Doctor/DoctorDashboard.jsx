@@ -13,9 +13,9 @@ import {
   Mail,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
-import AppointmentRequestCard from "../../components/Doctor/AppointmentRequestCard";
-import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
-import AppointmentActionModal from "../../components/Doctor/AppointmentActionModal";
+import AppointmentRequestCard from "@/components/Doctor/Dashboard/AppointmentRequestCard";
+import MedicalRecordModal from "../../components/Doctor/MedicalRecords/MedicalRecordModal";
+import AppointmentActionModal from "../../components/Doctor/Appointments/AppointmentActionModal";
 import ThemeToggle from "../../components/ThemeToggle";
 
 const DoctorDashboard = () => {
