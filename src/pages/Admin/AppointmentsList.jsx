@@ -8,7 +8,6 @@ import ActiveFilters from "@/components/Common/ActiveFilters";
 import { useApiData } from "@/hooks/useApiData";
 import { useSearch } from "@/hooks/useSearch";
 import { useFilter } from "@/hooks/useFilter";
-import { useSort } from "@/hooks/useSort";
 import { useModal } from "@/hooks/useModal";
 
 const AppointmentsList = () => {
@@ -62,45 +61,7 @@ const AppointmentsList = () => {
     appointmentFilterConfig
   );
 
-  const { sortedData, sortField, sortOrder, handleSort } = useSort(
-    filterFilteredData,
-    "appointment_time",
-    "asc"
-  );
-
   const detailsModal = useModal();
-
-  // Sort options - only date options
-  const appointmentSortOptions = [
-    { value: "appointment_time-asc", label: "Date: Oldest First" },
-    { value: "appointment_time-desc", label: "Date: Newest First" },
-  ];
-
-  // Handle sort selection
-  const handleSortSelection = (value) => {
-    if (value === "") {
-      handleSort(""); // Clear sort
-      return;
-    }
-
-    const [field, order] = value.split("-");
-    handleSort(field, order); // Set both field and order
-  };
-
-  // Get current sort value for dropdown
-  const getCurrentSortValue = () => {
-    if (!sortField) return "";
-    return `${sortField}-${sortOrder}`;
-  };
-
-  // Get display label for current sort
-  const getSortDisplayLabel = () => {
-    if (!sortField) return "";
-    const currentOption = appointmentSortOptions.find(
-      (opt) => opt.value === getCurrentSortValue()
-    );
-    return currentOption ? currentOption.label : "";
-  };
 
   const handleViewAppointment = (appointment) => {
     detailsModal.open(appointment);
@@ -111,7 +72,8 @@ const AppointmentsList = () => {
     refetch();
   };
 
-  const displayData = sortedData;
+  // Use the filtered data directly (no sorting applied)
+  const displayData = filterFilteredData;
 
   return (
     <>
@@ -143,16 +105,6 @@ const AppointmentsList = () => {
                   value={filters.status}
                   onChange={(value) => updateFilter("status", value)}
                   onClear={() => clearFilter("status")}
-                  className="w-full"
-                />
-              </div>
-              <div className="w-full sm:w-48">
-                <FilterDropdown
-                  label="Sort by"
-                  options={appointmentSortOptions}
-                  value={getCurrentSortValue()}
-                  onChange={handleSortSelection}
-                  onClear={() => handleSortSelection("")}
                   className="w-full"
                 />
               </div>
@@ -194,7 +146,6 @@ const AppointmentsList = () => {
                 <p className="text-xs md:text-sm text-muted-foreground">
                   Showing {displayData.length} of {appointments.length}{" "}
                   appointments
-                  {sortField && ` • ${getSortDisplayLabel()}`}
                 </p>
               </div>
 
