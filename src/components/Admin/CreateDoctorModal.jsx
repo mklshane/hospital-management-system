@@ -111,7 +111,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform rounded-2xl bg-ui-card p-8 shadow-xl transition-all border border-ui-border">
+              <Dialog.Panel className="w-full max-w-4xl transform rounded-2xl bg-ui-surface p-8 shadow-xl transition-all border border-ui-border">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-xl font-semibold text-foreground">
