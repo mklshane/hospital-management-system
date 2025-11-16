@@ -25,11 +25,11 @@ const DoctorDashboard = () => {
   const {
     data: allAppointments,
     loading: appointmentsLoading,
-    error: appointmentsError, // Add this
+    error: appointmentsError,
     refetch: refetchAppointments,
   } = useApiData("/appointment", {
     entityName: "Appointments",
-    dataKey: "appointments", // Try without this if it doesn't work
+    dataKey: "appointments", 
   });
 
   const { loading: actionLoading, update } = useCrudOperations(

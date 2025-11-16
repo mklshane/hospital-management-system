@@ -88,17 +88,34 @@ const DoctorAppointments = () => {
     }
   };
 
+  // FIXED: Update appointment status to "Completed" when medical record is saved
   const onRecordSaved = async () => {
-    setIsRecordModalOpen(false);
-    refetchAppointments();
-    setRefreshTrigger((p) => p + 1);
     if (selectedAppointment?._id) {
-      await updateAppointment(
+      // Update the appointment status to "Completed"
+      const ok = await updateAppointment(
         selectedAppointment._id,
         { status: "Completed" },
         "/appointment"
       );
+
+      if (ok) {
+        // Update the local state immediately for better UX
+        setSelectedAppointment((prev) => ({
+          ...prev,
+          status: "Completed",
+        }));
+
+        // Refresh the appointments list
+        refetchAppointments();
+        setRefreshTrigger((p) => p + 1);
+
+        toast.success(
+          "Medical record saved and appointment marked as completed"
+        );
+      }
     }
+
+    setIsRecordModalOpen(false);
   };
 
   const formatDate = (dateStr) =>
@@ -149,7 +166,7 @@ const DoctorAppointments = () => {
           time: selectedAppointment?.appointment_time,
           notes: selectedAppointment?.notes,
         }}
-        onRecordSaved={onRecordSaved}
+        onRecordUpdated={onRecordSaved} // Changed from onRecordSaved to onRecordUpdated
         refetchAppointments={refetchAppointments}
       />
 

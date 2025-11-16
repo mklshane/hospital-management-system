@@ -15,6 +15,7 @@ import { useCrudOperations } from "@/hooks/useCrudOperations";
 import toast from "react-hot-toast";
 import DeleteModal from "../Common/DeleteModal";
 import { generateTimeSlots } from "@/utils/timeSlots";
+import { format } from "date-fns";
 
 const PatientAppointmentDetailsModal = ({
   isOpen,
@@ -46,15 +47,20 @@ const PatientAppointmentDetailsModal = ({
     }
   }, [appointment]);
 
-  // Generate slots when editing
+  // Generate available time slots based on doctor's schedule
   useEffect(() => {
-    if (isEditing && appointment?.doctor?.schedule_time?.length > 0) {
+    if (
+      isEditing &&
+      appointment?.doctor &&
+      appointment.doctor.schedule_time &&
+      appointment.doctor.schedule_time.length > 0
+    ) {
       const slots = generateTimeSlots(appointment.doctor.schedule_time);
       setAvailableSlots(slots);
     } else {
       setAvailableSlots([]);
     }
-  }, [isEditing, appointment?.doctor?.schedule_time]);
+  }, [isEditing, appointment?.doctor]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -108,7 +114,8 @@ const PatientAppointmentDetailsModal = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const canModify = appointment?.status === "Pending";
+  const canModify =
+    appointment?.status === "Pending" || appointment?.status === "Scheduled";
   const today = new Date().toISOString().split("T")[0];
 
   if (!appointment) return null;
@@ -195,7 +202,7 @@ const PatientAppointmentDetailsModal = ({
 
                           <div className="flex flex-col gap-1">
                             <label className="text-xs text-muted-foreground">
-                              Time
+                              Time Slot
                             </label>
                             {availableSlots.length > 0 ? (
                               <select
@@ -203,18 +210,24 @@ const PatientAppointmentDetailsModal = ({
                                 value={formData.appointment_time}
                                 onChange={handleInputChange}
                                 className="px-2 py-1 border border-ui-border rounded text-sm w-44"
+                                required
                               >
-                                <option value="">-- Select slot --</option>
+                                <option value="">Select a time slot</option>
                                 {availableSlots.map((slot) => (
                                   <option key={slot.value} value={slot.value}>
-                                    {slot.display}
+                                    {slot.display || slot.label}
                                   </option>
                                 ))}
                               </select>
                             ) : (
-                              <div className="px-2 py-1 text-xs text-gray-500 bg-gray-50 rounded border">
-                                No slots available
+                              <div className="px-2 py-1 text-xs text-gray-500 bg-gray-50 rounded border w-44">
+                                No available time slots
                               </div>
+                            )}
+                            {availableSlots.length > 0 && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {availableSlots.length} available slot(s)
+                              </p>
                             )}
                           </div>
                         </div>
@@ -312,7 +325,7 @@ const PatientAppointmentDetailsModal = ({
                     <div>
                       {canModify && (
                         <button
-                          onClick={handleCancelClick} // ← Open DeleteModal
+                          onClick={handleCancelClick}
                           disabled={loading}
                           className="px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors font-medium disabled:opacity-50"
                         >

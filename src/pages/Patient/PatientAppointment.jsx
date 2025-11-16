@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Search, Plus, Filter, X } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 import DoctorCard from "@/components/Patient/Book/DoctorCard";
 import DoctorDetails from "@/components/Patient/Book/DoctorDetails";
 import BookAppointmentModal from "@/components/Patient/BookAppointmentModal";
@@ -8,6 +10,7 @@ import { useCrudOperations } from "@/hooks/useCrudOperations";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const PatientAppointment = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSpecialization, setSelectedSpecialization] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -87,8 +90,34 @@ const PatientAppointment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await create(form, "/appointments");
-    if (success) handleModalClose();
+
+    // Add validation like in dashboard
+    if (!form.doctor_id || !form.appointment_date || !form.appointment_time) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    if (!user?._id) {
+      toast.error("User not authenticated");
+      return;
+    }
+
+    const success = await create(
+      {
+        doctor_id: form.doctor_id,
+        patient_id: user._id,
+        appointment_date: form.appointment_date,
+        appointment_time: form.appointment_time,
+        notes: form.notes,
+      },
+      "/appointment" // ✅ Fixed endpoint - changed from "/appointments"
+    );
+
+    if (success) {
+      handleModalClose();
+      // Optionally refetch doctors if needed
+      refetch();
+    }
   };
 
   const clearFilter = () => setSelectedSpecialization("");
