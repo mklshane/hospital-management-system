@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CheckCircle, XCircle, User, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
-import AppointmentActionModal from "../Doctor/AppointmentActionModal.jsx";
+import AppointmentActionModal from "../Appointments/AppointmentActionModal";
 
 const AppointmentRequestCard = ({ request, onApprove, onReject, loading }) => {
   const { _id, patient, appointment_date, appointment_time, notes } = request;

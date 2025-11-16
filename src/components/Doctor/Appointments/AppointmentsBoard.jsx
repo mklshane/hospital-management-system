@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Search, RefreshCw, Funnel, ArrowUpDown, X, Check } from "lucide-react";
-import AppointmentCard from "@/components/Doctor/AppointmentCard";
+import AppointmentCard from "./AppointmentCard";
 import ThemeToggle from "@/components/ThemeToggle";
 import BoardSkeletonColumn from "@/components/Common/BoardSkeletonColumn";
 

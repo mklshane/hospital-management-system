@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import AppointmentsBoard from "@/components/Doctor/AppointmentsBoard";
-import AppointmentDetails from "@/components/Doctor/AppointmentDetails";
-import MedicalRecordModal from "@/components/Doctor/MedicalRecordModal";
+import AppointmentsBoard from "@/components/Doctor/Appointments/AppointmentsBoard";
+import AppointmentDetails from "@/components/Doctor/Appointments/AppointmentDetails";
+import MedicalRecordModal from "@/components/Doctor/MedicalRecords/MedicalRecordModal";
 import DeleteModal from "@/components/Common/DeleteModal";
-import AppointmentActionModal from "@/components/Doctor/AppointmentActionModal";
+import AppointmentActionModal from "@/components/Doctor/Appointments/AppointmentActionModal";
 import { useApiData } from "@/hooks/useApiData";
 import { useCrudOperations } from "@/hooks/useCrudOperations";
 

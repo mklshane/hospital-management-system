@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CollapsibleSection from "./CollapsibleSection";
-import { api } from "../../lib/axiosHeader";
+import { api } from "@/lib/axiosHeader";
 import { format } from "date-fns";
 
 const AppointmentHistorySection = ({
