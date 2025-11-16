@@ -8,24 +8,21 @@ const generateTimeSlots = () => {
     for (let minute of ["00", "30"]) {
       if (hour === 20 && minute === "30") break;
 
+      const startHour24 = hour;
       const startHour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-      const endHour24 = minute === "30" ? hour : hour + 1;
-      const endMinute = minute === "00" ? "30" : "00";
+      const startPeriod = hour < 12 ? "AM" : "PM";
+
+      let endHour24 = hour;
+      let endMinute = minute === "00" ? "30" : "00";
+      if (minute === "30") endHour24 += 1;
+
       const endHour12 =
         endHour24 > 12 ? endHour24 - 12 : endHour24 === 0 ? 12 : endHour24;
-
-      const startPeriod = hour < 12 ? "AM" : "PM";
-      const endPeriod = endHour24 < 12 ? "AM" : "PM";
+      const endPeriod = endHour24 < 12 ? "AM" : endHour24 >= 12 ? "PM" : "AM";
 
       const slot = {
         value: `${startHour12}:${minute} ${startPeriod}`,
-        display: `${String(startHour12).padStart(
-          2,
-          " "
-        )}:${minute} ${startPeriod} – ${String(endHour12).padStart(
-          2,
-          " "
-        )}:${endMinute} ${endPeriod}`,
+        display: `${startHour12}:${minute} ${startPeriod} – ${endHour12}:${endMinute} ${endPeriod}`,
         startTime: `${hour.toString().padStart(2, "0")}:${minute}`,
       };
       slots.push(slot);
