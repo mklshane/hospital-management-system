@@ -19,9 +19,7 @@ import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
 import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
 import { api } from "@/lib/axiosHeader";
-import DeleteModal from "@/components/Common/DeleteModal";
 import toast from "react-hot-toast";
-import InfoCard from "../Common/InfoCard";
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -39,7 +37,6 @@ const SPECIALIZATIONS = [
 const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -105,19 +102,6 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
     setIsEditing(false);
   };
 
-  const handleDeleteClick = () => setShowDeleteModal(true);
-  const handleDeleteConfirm = async () => {
-    try {
-      await api.delete(`/doctor/${doctor._id}`);
-      toast.success("Doctor deleted successfully!");
-      setShowDeleteModal(false);
-      onClose();
-      onDelete?.();
-    } catch (error) {
-      toast.error("Failed to delete doctor");
-    }
-  };
-
   if (!doctor) return null;
 
   return (
@@ -177,7 +161,10 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
                             <Edit2 className="w-5 h-5" />
                           </button>
                           <button
-                            onClick={handleDeleteClick}
+                            onClick={() => {
+                              onDelete(doctor);
+                              onClose();
+                            }}
                             className="p-2.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-xl transition-all"
                             title="Delete"
                           >
@@ -400,17 +387,6 @@ const DoctorDetailsModal = ({ isOpen, onClose, doctor, onDelete }) => {
           </div>
         </Dialog>
       </Transition>
-
-      {/* Delete Modal */}
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Doctor"
-        description="This will permanently remove the doctor and all associated appointments."
-        confirmText="Delete Doctor"
-        itemName={`Dr. ${doctor.name}`}
-      />
     </>
   );
 };

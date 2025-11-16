@@ -72,7 +72,7 @@ const DoctorsList = () => {
   const detailsModal = useModal();
   const deleteModal = useModal();
 
-  const { deleteLoading, deleteItem } = useCrudOperations("doctor", refetch);
+  const { deleteLoading, deleteItem } = useCrudOperations("Doctor", refetch);
 
   const handleCreateDoctor = () => {
     createModal.open();
@@ -86,14 +86,14 @@ const DoctorsList = () => {
     deleteModal.open(doctor);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteModal.selectedItem) return;
+ const handleDeleteConfirm = async () => {
+   if (!deleteModal.selectedItem) return;
 
-    const success = await deleteItem(deleteModal.selectedItem._id, "/doctor");
-    if (success) {
-      deleteModal.close();
-    }
-  };
+   const success = await deleteItem(deleteModal.selectedItem._id, "/doctor");
+   if (success) {
+     deleteModal.close(); 
+   }
+ };
 
   const handleModalClose = () => {
     createModal.close();
@@ -247,11 +247,15 @@ const DoctorsList = () => {
         description="Are you sure you want to delete this doctor? All associated data including appointments will be permanently removed. This action cannot be undone."
         confirmText="Delete Doctor"
         loading={deleteLoading}
-        itemName={`Dr. ${deleteModal.selectedItem?.name || ""}${
-          deleteModal.selectedItem?.specialization
-            ? ` (${deleteModal.selectedItem.specialization})`
-            : ""
-        }`}
+        itemName={
+          deleteModal.selectedItem
+            ? `Dr. ${deleteModal.selectedItem.name}${
+                deleteModal.selectedItem.specialization
+                  ? ` (${deleteModal.selectedItem.specialization})`
+                  : ""
+              }`
+            : "this doctor"
+        }
       />
     </>
   );
