@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { X } from "lucide-react";
-import { api } from "@/lib/axiosHeader";
+import { X, Eye, EyeOff } from "lucide-react";
 import Input from "@/components/Common/Input";
 import Select from "@/components/Common/Select";
 import TimeSlotSelector from "@/components/Common/TimeSlotSelector";
-import toast from "react-hot-toast"; 
+import { useCrudOperations } from "@/hooks/useCrudOperations";
+import toast from "react-hot-toast";
 
 const SPECIALIZATIONS = [
   "Cardiology",
@@ -21,13 +21,13 @@ const SPECIALIZATIONS = [
   "Radiology",
 ];
 
-const CreateDoctorModal = ({ isOpen, onClose }) => {
+const CreateDoctorModal = ({ isOpen, onClose, refetch }) => {
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     age: "",
     gender: "",
     contact: "",
@@ -35,12 +35,20 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
   });
   const [scheduleTime, setScheduleTime] = useState([]);
 
+  // Password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Use your custom hook
+  const { create, loading } = useCrudOperations("Doctor", refetch);
+
   useEffect(() => {
     if (isOpen) {
       setFormData({
         name: "",
         email: "",
         password: "",
+        confirmPassword: "",
         age: "",
         gender: "",
         contact: "",
@@ -48,6 +56,8 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
       });
       setScheduleTime([]);
       setStep(1);
+      setShowPassword(false);
+      setShowConfirmPassword(false);
     }
   }, [isOpen]);
 
@@ -60,6 +70,7 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async () => {
+    // Client-side validation
     if (scheduleTime.length === 0) {
       toast.error(
         "Please select at least one time slot for the doctor's schedule"
@@ -67,21 +78,26 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const payload = {
-        ...formData,
-        schedule_time: scheduleTime,
-      };
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
 
-      await api.post("/auth/doctor/register", payload);
-      toast.success("Doctor created successfully!"); 
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      schedule_time: scheduleTime,
+    };
+    delete payload.confirmPassword;
+
+    // Use hook's create() — handles API, toast, loading, refetch
+    const success = await create(payload, "/auth/doctor/register");
+    if (success) {
       onClose();
-    } catch (error) {
-      console.error("Error creating doctor:", error);
-      toast.error(error.message || "Failed to create doctor"); 
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -210,35 +226,65 @@ const CreateDoctorModal = ({ isOpen, onClose }) => {
                   {/* Step 3: Password */}
                   {step === 3 && (
                     <div className="grid grid-cols-2 gap-4 py-2">
-                      <Input
-                        label="Password"
-                        name="password"
-                        type="password"
-                        placeholder="*******"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                      />
-                      <div className="relative z-0">
+                      {/* Password */}
+                      <div className="relative">
+                        <label className="block text-sm font-medium text-foreground mb-1">
+                          Password <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <Input
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="*******"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPassword ? (
+                              <Eye className="w-5 h-5" />
+                            ) : (
+                              <EyeOff className="w-5 h-5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Confirm Password */}
+                      <div className="relative">
                         <label className="block text-sm font-medium text-foreground mb-1">
                           Confirm Password{" "}
                           <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="password"
-                          placeholder="*******"
-                          className="w-full px-4 py-3 bg-ui-muted border border-ui-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue focus:ring-offset-2 focus:ring-offset-ui-card focus:border-transparent"
-                          onChange={(e) => {
-                            if (e.target.value !== formData.password) {
-                              e.target.setCustomValidity(
-                                "Passwords do not match"
-                              );
-                            } else {
-                              e.target.setCustomValidity("");
+                        <div className="relative">
+                          <Input
+                            name="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="*******"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
                             }
-                          }}
-                          required
-                        />
+                            className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                          >
+                            {showConfirmPassword ? (
+                              <Eye className="w-5 h-5" />
+                            ) : (
+                              <EyeOff className="w-5 h-5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}

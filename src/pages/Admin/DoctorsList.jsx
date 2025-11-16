@@ -230,6 +230,7 @@ const DoctorsList = () => {
         onClose={handleModalClose}
         doctor={createModal.selectedItem}
         mode={createModal.selectedItem ? "edit" : "create"}
+        refetch={refetch}
       />
 
       <DoctorDetailsModal
@@ -237,6 +238,7 @@ const DoctorsList = () => {
         onClose={handleModalClose}
         doctor={detailsModal.selectedItem}
         onDelete={handleDeleteDoctor}
+        refetch={refetch}
       />
 
       <DeleteModal
