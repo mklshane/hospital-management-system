@@ -13,7 +13,6 @@ import {
   Mail,
 } from "lucide-react";
 import { api } from "../../lib/axiosHeader";
-import AppointmentCard from "../../components/Doctor/AppointmentCard";
 import AppointmentRequestCard from "../../components/Doctor/AppointmentRequestCard";
 import MedicalRecordModal from "../../components/Doctor/MedicalRecordModal";
 import AppointmentActionModal from "../../components/Doctor/AppointmentActionModal";

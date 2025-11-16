@@ -1,14 +1,24 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/axiosHeader";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext"; // Import auth context
 
 export const useApiData = (endpoint, options = {}) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth(); // Get auth state
 
   const fetchData = async () => {
+    // Don't fetch if user is not authenticated
+    if (!user) {
+      setLoading(false);
+      setData([]);
+      setFilteredData([]);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -20,7 +30,7 @@ export const useApiData = (endpoint, options = {}) => {
       } else if (Array.isArray(response.data)) {
         result = response.data;
       } else if (response.data.doctors) {
-        result = response.data.doctors; 
+        result = response.data.doctors;
       } else if (response.data.data) {
         result = response.data.data;
       } else {
@@ -28,8 +38,6 @@ export const useApiData = (endpoint, options = {}) => {
       }
 
       const dataArray = Array.isArray(result) ? result : [];
-
-
       setData(dataArray);
       setFilteredData(dataArray);
     } catch (err) {
@@ -45,7 +53,7 @@ export const useApiData = (endpoint, options = {}) => {
 
   useEffect(() => {
     fetchData();
-  }, [endpoint]);
+  }, [endpoint, user]); // Add user as dependency
 
   const refetch = () => {
     fetchData();
