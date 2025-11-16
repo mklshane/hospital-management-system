@@ -116,7 +116,10 @@ const MedicalRecordModal = ({
         }
       } else {
         res = await create(payload, `/record/${appointment._id}`);
-       
+        if (res) {
+          // Call the callback when a new record is created
+          onRecordUpdated?.(res);
+        }
       }
 
       onClose();
