@@ -135,7 +135,7 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content */}
-      <main className="flex-1 flex flex-col overflow-hidden md:mt-0 mt-16">
+      {/* <main className="flex-1 flex flex-col overflow-hidden md:mt-0 mt-16"> */}
         <div className="flex-1 overflow-y-auto p-4 bg-ui-surface">
           {children}
           <LogoutConfirmModal
@@ -145,7 +145,7 @@ export default function DoctorLayout({ children }) {
             loading={loggingOut}
           />
         </div>
-      </main>
+      {/* </main> */}
     </div>
   );
 }
