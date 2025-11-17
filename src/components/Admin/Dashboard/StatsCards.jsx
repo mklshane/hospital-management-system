@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Stethoscope, Clock, Users } from 'lucide-react';
 
 const StatsCards = ({ stats, loading }) => {
   const navigate = useNavigate();
@@ -11,9 +12,12 @@ const StatsCards = ({ stats, loading }) => {
         className="cursor-pointer bg-linear-to-r from-blue-400 to-blue-500 text-white p-4 sm:p-6 rounded-xl shadow hover:opacity-90 transition"
       >
         <h3 className="text-base sm:text-lg font-semibold">Total Doctors</h3>
-        <p className="text-2xl sm:text-3xl font-bold mt-2">
-          {loading ? "..." : stats.totalDoctors}
-        </p>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-2xl sm:text-3xl font-bold mt-2">
+            {loading ? "..." : stats.totalDoctors}
+          </p>
+          <Stethoscope className="w-8 h-8 opacity-90"/>
+        </div>
       </div>
 
       <div
@@ -21,22 +25,27 @@ const StatsCards = ({ stats, loading }) => {
         className="cursor-pointer bg-linear-to-r from-blue-400 to-blue-500 text-white p-4 sm:p-6 rounded-xl shadow hover:opacity-90 transition"
       >
         <h3 className="text-base sm:text-lg font-semibold">Total Patients</h3>
-        <p className="text-2xl sm:text-3xl font-bold mt-2">
-          {loading ? "..." : stats.totalPatients}
-        </p>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-2xl sm:text-3xl font-bold mt-2">
+            {loading ? "..." : stats.totalPatients}
+          </p>
+          <Users className="w-8 h-8 opacity-90"/>
+        </div>
       </div>
 
       <div
         onClick={() => navigate("/admin/appointments")}
         className="cursor-pointer bg-linear-to-r from-blue-400 to-blue-500 text-white p-4 sm:p-6 rounded-xl shadow hover:opacity-90 transition"
       >
-        <h3 className="text-base sm:text-lg font-semibold">
-          Appointments for Today
-        </h3>
-        <p className="text-2xl sm:text-3xl font-bold mt-2">
-          {loading ? "..." : stats.todayAppointments}
-        </p>
+        <h3 className="text-base sm:text-lg font-semibold">Appointments for Today</h3>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-2xl sm:text-3xl font-bold mt-2">
+            {loading ? "..." : stats.todayAppointments}
+          </p> 
+          <Clock className="w-8 h-8 opacity-90"/>
+        </div>
       </div>
+      
     </div>
   );
 };
