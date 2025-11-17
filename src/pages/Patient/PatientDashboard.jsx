@@ -114,17 +114,17 @@ export default function PatientDashboard() {
   };
 
   return (
-    <div className="h-full rounded-2xl ">
+    <div className="h-full rounded-2xl overflow-hidden">
       <div className="max-w-7xl mx-auto h-full">
-        {/* Add h-full here */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
-          {/* Sidebar: Profile + Calendar */}
-          <aside className="lg:col-span-3 flex flex-col gap-4 h-full">
-            <div className="h-[38%] min-h-0">
+          <aside className="lg:col-span-3 gap-4 flex flex-col h-full overflow-hidden">
+            <div className="min-h-0">
               <PatientProfile user={user} />
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <div className="h-full">
               <Calendar appointments={appointments} />
+              </div>
             </div>
           </aside>
 
