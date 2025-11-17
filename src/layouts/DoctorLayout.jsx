@@ -135,15 +135,17 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content */}
-      <main className="flex-1 p-4 overflow-hidden md:mt-0 mt-16">
-        {children}
-        <LogoutConfirmModal
-          isOpen={showLogoutModal}
-          onClose={() => setShowLogoutModal(false)}
-          onConfirm={handleLogout}
-          loading={loggingOut}
-        />
-      </main>
+      {/* <main className="flex-1 flex flex-col overflow-hidden md:mt-0 mt-16"> */}
+        <div className="flex-1 overflow-y-auto p-4 bg-ui-surface">
+          {children}
+          <LogoutConfirmModal
+            isOpen={showLogoutModal}
+            onClose={() => setShowLogoutModal(false)}
+            onConfirm={handleLogout}
+            loading={loggingOut}
+          />
+        </div>
+      {/* </main> */}
     </div>
   );
 }
