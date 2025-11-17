@@ -41,12 +41,14 @@ const Column = ({
     {/* Sticky header */}
     <h2
       onClick={() => toggleSort(filterKey)}
-      className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface/30 z-10 py-1 px-1"
+      className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1 px-1"
     >
       {statusData.label} ({list.length})
       <ArrowUpDown
         className={`w-3 h-3 transition-all ${
-          currentOrder === "asc" ? "rotate-180 text-blue" : "text-muted-foreground"
+          currentOrder === "asc"
+            ? "rotate-180 text-blue"
+            : "text-muted-foreground"
         }`}
       />
     </h2>

@@ -225,9 +225,19 @@ const DoctorDashboard = () => {
           time: selectedAppointment?.appointment_time,
           notes: selectedAppointment?.notes,
         }}
-        onRecordAdded={() => {
-          refetchAppointments();
-          fetchDoctorProfile();
+        onRecordUpdated={async () => {
+          if (selectedAppointment?._id) {
+            const success = await update(
+              selectedAppointment._id,
+              { status: "Completed" },
+              "/appointment"
+            );
+            if (success) {
+              toast.success("Medical record saved and appointment completed!");
+            }
+          }
+          await refetchAppointments();
+          await fetchDoctorProfile();
         }}
       />
 
