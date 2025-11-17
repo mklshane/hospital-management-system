@@ -14,14 +14,18 @@ export default function BookAppointmentModal({
 }) {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [filteredSlots, setFilteredSlots] = useState([]); // slots after filtering past times
 
+  // Reset on close
   useEffect(() => {
     if (!isOpen) {
       setSelectedDoctor(null);
       setAvailableSlots([]);
+      setFilteredSlots([]);
     }
   }, [isOpen]);
 
+  // Sync selected doctor from form
   useEffect(() => {
     if (form.doctor_id) {
       const doctor = doctors.find((doc) => doc._id === form.doctor_id);
@@ -29,10 +33,11 @@ export default function BookAppointmentModal({
     } else {
       setSelectedDoctor(null);
       setAvailableSlots([]);
+      setFilteredSlots([]);
     }
   }, [form.doctor_id, doctors]);
 
-  // Generate available time slots based on doctor's schedule
+  // Generate base slots from doctor's schedule
   useEffect(() => {
     if (
       selectedDoctor &&
@@ -43,19 +48,59 @@ export default function BookAppointmentModal({
       setAvailableSlots(slots);
     } else {
       setAvailableSlots([]);
+      setFilteredSlots([]);
     }
   }, [selectedDoctor]);
 
-
-  const handleDoctorChange = (e) => {
-    onChange(e); 
+  // Helper: parse date + time string → Date object (same logic as BookingCard)
+  const parseDateTime = (date, time) => {
+    return new Date(`${date}T${time}`);
   };
 
-  const handleTimeChange = (e) => {
+  // Filter out past time slots when date is today
+  useEffect(() => {
+    if (!form.appointment_date || availableSlots.length === 0) {
+      setFilteredSlots([]);
+      return;
+    }
+
+    const selectedDate = form.appointment_date;
+    const today = format(new Date(), "yyyy-MM-dd");
+
+    if (selectedDate !== today) {
+      // Not today → all slots are allowed
+      setFilteredSlots(availableSlots);
+      return;
+    }
+
+    // Today → filter out past slots
+    const now = new Date();
+    const filtered = availableSlots.filter((slot) => {
+      // slot.value is like "09:00:00"
+      const slotTime = parseDateTime(selectedDate, slot.value);
+      return slotTime > now;
+    });
+
+    setFilteredSlots(filtered);
+  }, [form.appointment_date, availableSlots]);
+
+  const handleDoctorChange = (e) => {
     onChange(e);
+    // Clear date & time when doctor changes
+    onChange({ target: { name: "appointment_date", value: "" } });
+    onChange({ target: { name: "appointment_time", value: "" } });
+  };
+
+  const handleDateChange = (e) => {
+    onChange(e);
+    // Clear time when date changes
+    onChange({ target: { name: "appointment_time", value: "" } });
   };
 
   if (!isOpen) return null;
+
+  // Determine if time slot should be disabled
+  const isTimeSlotDisabled = !selectedDoctor || !form.appointment_date;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -73,13 +118,14 @@ export default function BookAppointmentModal({
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
+          {/* Doctor Selection */}
           <div>
             <label className="block text-sm font-medium text-primary mb-1">
               Select Doctor <span className="text-red-500">*</span>
             </label>
             <select
               name="doctor_id"
-              value={form.doctor_id}
+              value={form.doctor_id || ""}
               onChange={handleDoctorChange}
               className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -93,6 +139,7 @@ export default function BookAppointmentModal({
             </select>
           </div>
 
+          {/* Date Selection */}
           <div>
             <label className="block text-sm font-medium text-primary mb-1">
               Date <span className="text-red-500">*</span>
@@ -100,55 +147,65 @@ export default function BookAppointmentModal({
             <input
               type="date"
               name="appointment_date"
-              value={form.appointment_date}
-              onChange={onChange}
+              value={form.appointment_date || ""}
+              onChange={handleDateChange}
               min={format(new Date(), "yyyy-MM-dd")}
-              className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={!form.doctor_id}
+              className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               required
             />
           </div>
 
+          {/* Time Slot Selection */}
           <div>
             <label className="block text-sm font-medium text-primary mb-1">
               Time Slot <span className="text-red-500">*</span>
             </label>
-            {availableSlots.length > 0 ? (
+
+            {isTimeSlotDisabled ? (
+              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50">
+                {form.doctor_id
+                  ? !form.appointment_date
+                    ? "Please select a date first"
+                    : "Loading available slots..."
+                  : "Please select a doctor first"}
+              </div>
+            ) : filteredSlots.length > 0 ? (
               <select
                 name="appointment_time"
-                value={form.appointment_time}
-                onChange={handleTimeChange}
+                value={form.appointment_time || ""}
+                onChange={onChange}
                 className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               >
                 <option value="">Select a time slot</option>
-                {availableSlots.map((slot) => (
+                {filteredSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
                     {slot.display || slot.label}
                   </option>
                 ))}
               </select>
             ) : (
-              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                {form.doctor_id
-                  ? "No available time slots for this doctor"
-                  : "Please select a doctor first"}
+              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50">
+                No available time slots for the selected date
               </div>
             )}
-            {selectedDoctor && availableSlots.length > 0 && (
+
+            {selectedDoctor && form.appointment_date && filteredSlots.length > 0 && (
               <p className="text-xs text-gray-500 mt-1">
-                {availableSlots.length} available slot(s) based on Dr.{" "}
-                {selectedDoctor.name}'s schedule
+                {filteredSlots.length} available slot(s) for Dr. {selectedDoctor.name}
               </p>
             )}
           </div>
 
+          {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-primary mb-1">
               Notes (optional)
             </label>
             <textarea
               name="notes"
-              value={form.notes}
+              value={form.notes || ""}
               onChange={onChange}
               rows={3}
               className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -156,6 +213,7 @@ export default function BookAppointmentModal({
             />
           </div>
 
+          {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
@@ -166,7 +224,13 @@ export default function BookAppointmentModal({
             </button>
             <button
               type="submit"
-              disabled={submitting || availableSlots.length === 0}
+              disabled={
+                submitting ||
+                !form.doctor_id ||
+                !form.appointment_date ||
+                !form.appointment_time ||
+                filteredSlots.length === 0
+              }
               className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
             >
               {submitting ? "Booking..." : "Book Appointment"}
