@@ -5,7 +5,6 @@ import {
   Search,
   RefreshCw,
   FileText,
-  CheckCircle,
   SquareUserRound,
   Phone,
   Mail,
@@ -126,20 +125,24 @@ const TodayAppointments = ({
         <div className="flex gap-2 mt-auto">
           <button
             onClick={() => onAddRecord(appt)}
-            disabled={actionLoading[appt._id]}
-            className="flex-1 bg-blue hover:bg-blue-700 text-white py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+            disabled={actionLoading[appt._id] || appt.status === "Completed"}
+            className={`flex-1 py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+              appt.status === "Completed"
+                ? "bg-green-600 text-white cursor-not-allowed"
+                : "bg-blue hover:bg-blue-700 text-white"
+            }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            Add Record
+            {appt.status === "Completed" ? "Completed" : "Add Record"}
           </button>
-          <button
+          {/*  <button
             onClick={() => onComplete(appt)}
             disabled={actionLoading[appt._id]}
             className="flex-1 border border-green-200 text-green-600 hover:bg-green-50 py-2 rounded-lg font-medium text-xs transition-all flex items-center justify-center gap-1 disabled:opacity-50"
           >
             <CheckCircle className="w-3.5 h-3.5" />
             Complete
-          </button>
+          </button> */}
         </div>
       </div>
     );
