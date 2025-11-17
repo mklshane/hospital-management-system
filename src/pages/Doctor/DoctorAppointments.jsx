@@ -126,8 +126,8 @@ const DoctorAppointments = () => {
     });
 
   return (
-    <div className="h-dvh flex flex-col">
-      <div className="flex-1 grid grid-cols-12 gap-3 overflow-hidden min-h-0 pb-8">
+    <div className="h-full flex flex-col">
+      <div className="flex-1 grid grid-cols-12 gap-3 overflow-hidden min-h-0">
         <AppointmentsBoard
           appointments={appointments}
           loading={loadingAppointments}
