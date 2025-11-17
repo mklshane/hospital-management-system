@@ -275,7 +275,7 @@ const AppointmentsBoard = ({
         {/* SKELETON */}
         {loading && (
           <div className="h-full overflow-y-auto pr-1 scrollbar">
-            <div className="grid grid-cols-3 gap-4 pb-4">
+            <div className="grid grid-cols-3 gap-4">
               {selectedFilters.map((filterKey) => {
                 const statusData = statusOptions.find(
                   (s) => s.key === filterKey
@@ -298,7 +298,7 @@ const AppointmentsBoard = ({
             loading ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
-          <div className="grid grid-cols-3 gap-4 pb-4">
+          <div className="grid grid-cols-3 gap-4">
             {selectedFilters.map((filterKey) => {
               const statusData = statusOptions.find((s) => s.key === filterKey);
               const list = filteredAppointments[filterKey] || [];

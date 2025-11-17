@@ -135,7 +135,7 @@ export default function DoctorLayout({ children }) {
       </Sidebar>
 
       {/* Page content */}
-      <main className="flex-1 p-4 overflow-y-auto md:mt-0 mt-16">
+      <main className="flex-1 p-4 overflow-hidden md:mt-0 mt-16">
         {children}
         <LogoutConfirmModal
           isOpen={showLogoutModal}

@@ -175,7 +175,7 @@ const DoctorMedicalRecords = () => {
         />
       )}
 
-      <div className="flex-1 grid grid-cols-12 gap-3 mb-8 overflow-hidden min-h-0">
+      <div className="flex-1 grid grid-cols-12 gap-3 overflow-hidden min-h-0 pb-8">
         {/* LEFT BOARD */}
         <div className="scrollbar bg-ui-card border-2 rounded-xl pl-4 pt-4 pr-4 flex flex-col overflow-hidden shadow-xs col-span-9">
           <MedicalRecordsHeader />
