@@ -32,7 +32,7 @@ export const getSimpleStatusColor = (status) => {
     case "Cancelled":
       return "bg-red-100 text-red-800 border-red-200";
     case "Rejected":
-      return "bg-red-100 text-red-800 border-red-200";
+      return "bg-gray-100 text-gray-800 border-gray-200";
     case "Pending":
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
     case "Scheduled":
@@ -70,9 +70,9 @@ export const getStatusConfig = (status) => {
       dot: "bg-gray-500",
     },
     Rejected: {
-      color: "text-red-600",
-      bg: "bg-red-100",
-      dot: "bg-red-500",
+      color: "text-gray-600",
+      bg: "bg-gray-100",
+      dot: "bg-gray-500",
     },
   };
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { createPortal } from "react-dom"; 
+import { createPortal } from "react-dom";
 import { CheckCircle, XCircle, CheckCircle2, X } from "lucide-react";
 
 const AppointmentActionModal = ({
@@ -14,22 +14,46 @@ const AppointmentActionModal = ({
 
   const config = {
     accept: {
-      title: "Do you want to accept this appointment?",
+      title: "Accept Appointment",
+      subtitle: "This action cannot be undone",
+      description: "The patient will be notified and the appointment will be scheduled.",
       buttonText: "Accept Appointment",
-      buttonClass: "bg-blue hover:bg-blue-light text-white",
-      icon: <CheckCircle className="w-4 h-4" />,
+      icon: <CheckCircle className="w-5 h-5" />,
+      iconColor: "text-blue-600",
+      iconBg: "bg-blue-100",
+      pillBg: "bg-blue-50",
+      pillBorder: "border-blue-200",
+      pillText: "text-blue-700",
+      buttonBg: "bg-blue",
+      buttonHover: "hover:bg-blue-700",
     },
     reject: {
-      title: "Do you want to reject this appointment?",
+      title: "Reject Appointment",
+      subtitle: "This action cannot be undone",
+      description: "The patient will be notified that the appointment was rejected.",
       buttonText: "Reject Appointment",
-      buttonClass: "border border-red-300 text-red-600 hover:bg-red-50",
-      icon: <XCircle className="w-4 h-4" />,
+      icon: <XCircle className="w-5 h-5" />,
+      iconColor: "text-red-600",
+      iconBg: "bg-red-100",
+      pillBg: "bg-red-50",
+      pillBorder: "border-red-200",
+      pillText: "text-red-700",
+      buttonBg: "bg-red-600",
+      buttonHover: "hover:bg-red-700",
     },
     complete: {
-      title: "Do you want to mark this appointment as completed?",
+      title: "Mark as Completed",
+      subtitle: "This action cannot be undone",
+      description: "The appointment will be marked as completed and archived.",
       buttonText: "Mark as Completed",
-      buttonClass: "bg-green-600 hover:bg-green-700 text-white",
-      icon: <CheckCircle2 className="w-4 h-4" />,
+      icon: <CheckCircle2 className="w-5 h-5" />,
+      iconColor: "text-green-600",
+      iconBg: "bg-green-100",
+      pillBg: "bg-green-50",
+      pillBorder: "border-green-200",
+      pillText: "text-green-700",
+      buttonBg: "bg-green-600",
+      buttonHover: "hover:bg-green-700",
     },
   };
 
@@ -40,47 +64,66 @@ const AppointmentActionModal = ({
     onClose();
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const appointmentLabel = `${appointment.patient?.name} – ${formatDate(
+    appointment.appointment_date
+  )} at ${appointment.appointment_time}`;
+
   const modalContent = (
     <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4">
-      <div className="bg-ui-card rounded-xl shadow-2xl max-w-sm w-full p-6 relative animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-ui-card border-2 rounded-xl shadow-xs w-full max-w-sm p-6 space-y-5 text-center">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition"
           disabled={loading}
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition"
         >
           <X className="w-4 h-4" />
         </button>
 
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-full bg-blue/10 flex items-center justify-center mx-auto mb-3">
-            {cfg.icon}
-          </div>
-          <h3 className="text-lg font-bold text-foreground font-montserrat">
-            {cfg.title}
-          </h3>
-          <div className="text-xs text-muted-foreground mt-2 space-y-1">
-            <p>{appointment.patient?.name}</p>
-            <p>
-              {new Date(appointment.appointment_date).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}{" "}
-              • {appointment.appointment_time}
-            </p>
-          </div>
+        {/* Icon Circle */}
+        <div className={`mx-auto w-12 h-12 rounded-full ${cfg.iconBg} flex items-center justify-center`}>
+          <div className={cfg.iconColor}>{cfg.icon}</div>
         </div>
 
-        <p className="text-sm text-center text-foreground mb-6">
-          {cfg.message}
+        {/* Title */}
+        <h3 className="text-lg font-bold font-montserrat text-foreground">
+          {cfg.title}
+        </h3>
+
+        {/* Subtitle */}
+        <p className="text-sm text-muted-foreground">
+          {cfg.subtitle}
         </p>
 
+        {/* Description */}
+        <p className="text-sm text-foreground">
+          {cfg.description}
+        </p>
+
+        {/* Appointment Pill */}
+        <div
+          className={`mx-auto w-full ${cfg.pillBg} ${cfg.pillBorder} border rounded-md px-4 py-2 text-sm font-medium ${cfg.pillText} flex items-center justify-center`}
+        >
+          <span className="truncate">{appointmentLabel}</span>
+        </div>
+
+        {/* Action Buttons */}
         <div className="space-y-3">
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className={`w-full py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all ${cfg.buttonClass} disabled:opacity-70 shadow hover:shadow-md`}
+            className={`w-full ${cfg.buttonBg} ${cfg.buttonHover} text-white py-2.5 rounded-md font-medium flex items-center justify-center gap-2 text-sm transition-all shadow-sm disabled:opacity-70`}
           >
+            {cfg.icon}
             {loading ? "Processing..." : cfg.buttonText}
           </button>
 

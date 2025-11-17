@@ -185,7 +185,7 @@ const DoctorDashboard = () => {
   const { scheduledAppointments, requests } = processAppointmentsData();
 
   return (
-    <div className="h-full grid grid-cols-12 grid-rows-[auto_1fr] gap-3 pb-8 overflow-hidden bg-ui-surface">
+    <div className="h-full grid grid-cols-12 grid-rows-[auto_1fr] gap-3 overflow-hidden bg-ui-surface">
       {/* Stats Section */}
       <DashboardStats
         stats={stats}

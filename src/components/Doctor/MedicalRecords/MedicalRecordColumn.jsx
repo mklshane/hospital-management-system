@@ -13,7 +13,7 @@ export const MedicalRecordColumn = ({
   formatDate,
   isRefreshing,
 }) => (
-  <div className="relative min-h-0 flex flex-col bg-ui-surface/30 rounded-lg p-2 border border-ui-border/20">
+  <div className="relative min-h-0 flex flex-col bg-ui-surface/30 rounded-b-lg p-2 border border-ui-border/20">
     <div
       className={`absolute top-0 left-0 right-0 h-0.5 ${
         statusData.color === "blue"

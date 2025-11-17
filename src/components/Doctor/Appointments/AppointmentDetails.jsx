@@ -25,7 +25,7 @@ const AppointmentDetails = ({
 }) => {
   if (!appointment) {
     return (
-      <div className="bg-ui-card border-2 py-2 rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+      <div className="bg-ui-card border-2 rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
         <div className="flex-1 flex items-center justify-center px-3">
           <div className="text-center space-y-2">
             <div className="w-16 h-16 mx-auto rounded-full bg-ui-muted/50 flex items-center justify-center">
@@ -52,14 +52,14 @@ const AppointmentDetails = ({
   }[appointment.status];
 
   return (
-    <div className="bg-ui-card border-2 py-2 rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
+    <div className="bg-ui-card border-2 rounded-xl flex flex-col overflow-hidden shadow-xs col-span-3">
       <div className="sticky top-0 bg-ui-card z-10 border-b border-ui-border px-3 py-2.5">
         <h2 className="text-base font-bold font-montserrat text-foreground leading-tight">
           Appointment Details
         </h2>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 pb-24 space-y-4 text-sm">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar px-3 pt-3 space-y-4 text-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-blue flex items-center justify-center text-sm font-bold text-white shrink-0">
             {appointment.patient?.name

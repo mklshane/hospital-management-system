@@ -9,7 +9,7 @@ const statusOptions = [
   { key: "scheduled", label: "Scheduled", color: "blue" },
   { key: "completed", label: "Completed", color: "green" },
   { key: "cancelled", label: "Cancelled", color: "red" },
-  { key: "rejected", label: "Rejected", color: "purple" },
+  { key: "rejected", label: "Rejected", color: "gray" },
 ];
 
 const Column = ({
@@ -20,7 +20,8 @@ const Column = ({
   toggleSort,
   children,
 }) => (
-  <div className="relative min-h-0 flex flex-col bg-ui-surface/30 rounded-lg p-2 border border-ui-border/20">
+  <div className="relative min-h-0 flex flex-col bg-ui-surface/30 rounded-b-lg p-2 border border-ui-border/20">
+    {/* Top color indicator bar */}
     <div
       className={`absolute top-0 left-0 right-0 h-0.5 ${
         statusData.color === "yellow"
@@ -31,22 +32,26 @@ const Column = ({
           ? "bg-green-500"
           : statusData.color === "red"
           ? "bg-red-500"
-          : "bgPurple-500"
+          : statusData.color === "gray"
+          ? "bg-gray-500"
+          : "bg-purple-500"
       }`}
     />
+
+    {/* Sticky header */}
     <h2
       onClick={() => toggleSort(filterKey)}
-      className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-card z-10 py-1 px-1 rounded"
+      className="flex items-center gap-1 text-sm font-semibold mb-2 text-foreground cursor-pointer hover:text-blue transition select-none sticky top-0 bg-ui-surface/30 z-10 py-1 px-1"
     >
       {statusData.label} ({list.length})
       <ArrowUpDown
         className={`w-3 h-3 transition-all ${
-          currentOrder === "asc"
-            ? "rotate-180 text-blue"
-            : "text-muted-foreground"
+          currentOrder === "asc" ? "rotate-180 text-blue" : "text-muted-foreground"
         }`}
       />
     </h2>
+
+    {/* Scrollable content */}
     <div className="space-y-2 flex-1 overflow-y-auto pr-1">{children}</div>
   </div>
 );
@@ -150,6 +155,7 @@ const AppointmentsBoard = ({
 
   return (
     <div className="scrollbar bg-ui-card border-2 rounded-xl pl-3 pt-3 pr-3 flex flex-col overflow-hidden shadow-xs col-span-9">
+      {/* Alert */}
       {alertMessage && (
         <div className="absolute top-3 right-3 z-50 max-w-xs">
           <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg shadow flex items-center gap-2 text-xs">
@@ -164,6 +170,7 @@ const AppointmentsBoard = ({
         </div>
       )}
 
+      {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <h1 className="text-lg font-bold font-montserrat text-foreground">
           Appointments
@@ -171,7 +178,9 @@ const AppointmentsBoard = ({
         <ThemeToggle />
       </div>
 
+      {/* Controls */}
       <div className="flex flex-wrap gap-2 mb-4 items-center">
+        {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
           <input
@@ -183,6 +192,7 @@ const AppointmentsBoard = ({
           />
         </div>
 
+        {/* Filter Dropdown */}
         <div className="relative">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -237,6 +247,8 @@ const AppointmentsBoard = ({
                             ? "text-green-600"
                             : opt.color === "red"
                             ? "text-red-600"
+                            : opt.color === "gray"
+                            ? "text-gray-600"
                             : "text-purple-600"
                         }`}
                       >
@@ -261,6 +273,7 @@ const AppointmentsBoard = ({
           )}
         </div>
 
+        {/* Refresh */}
         <button
           onClick={refetch}
           disabled={loading}
@@ -271,15 +284,14 @@ const AppointmentsBoard = ({
         </button>
       </div>
 
+      {/* Board */}
       <div className="relative flex-1 min-h-0 overflow-hidden">
-        {/* SKELETON */}
+        {/* Skeleton */}
         {loading && (
           <div className="h-full overflow-y-auto pr-1 scrollbar">
-            <div className="grid grid-cols-3 gap-4 pb-4">
+            <div className="grid grid-cols-3 gap-4">
               {selectedFilters.map((filterKey) => {
-                const statusData = statusOptions.find(
-                  (s) => s.key === filterKey
-                );
+                const statusData = statusOptions.find((s) => s.key === filterKey);
                 return (
                   <BoardSkeletonColumn
                     key={filterKey}
@@ -292,13 +304,13 @@ const AppointmentsBoard = ({
           </div>
         )}
 
-        {/* REAL CONTENT */}
+        {/* Real Content */}
         <div
           className={`h-full overflow-y-auto pr-1 scrollbar transition-opacity duration-500 ${
             loading ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
         >
-          <div className="grid grid-cols-3 gap-4 pb-4">
+          <div className="grid grid-cols-3 gap-4">
             {selectedFilters.map((filterKey) => {
               const statusData = statusOptions.find((s) => s.key === filterKey);
               const list = filteredAppointments[filterKey] || [];

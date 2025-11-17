@@ -22,7 +22,7 @@ const AppointmentRequests = ({
   );
 
   return (
-    <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card border-2 rounded-xl h-[623px]">
+    <div className="col-span-3 row-span-2 flex flex-col overflow-hidden bg-ui-card border-2 rounded-xl h-full">
       <div className="p-3 border-b border-ui-border shrink-0">
         <h2 className="text-base font-semibold text-foreground font-montserrat">
           Appointment Requests
