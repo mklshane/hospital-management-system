@@ -54,7 +54,7 @@ const Calendar = ({ appointments = [] }) => {
   return (
     <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 
                     flex flex-col h-full min-h-0 overflow-hidden 
-                    p-2 origin-top">
+                    p-3 origin-top">
 
       <div className="flex items-center justify-between mb-2 px-1">
         <button

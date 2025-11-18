@@ -1,7 +1,7 @@
 import { User, Mail, Phone, MapPin } from "lucide-react";
 export default function PatientProfile({ user }) {
   return (
-    <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-4 shadow-lg h-full flex flex-col">
+    <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-4 shadow-lg h-full flex flex-col min-h-0">
       {/* Avatar + name */}
       <div className="flex items-center gap-3 mb-4">
         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -14,7 +14,7 @@ export default function PatientProfile({ user }) {
       </div>
 
       {/* Info rows */}
-      <div className="space-y-2 text-sm flex-1">
+      <div className="space-y-3 text-sm flex-1">
         {user?.email && (
           <div className="flex items-center gap-2">
             <Mail className="w-3.5 h-3.5 opacity-80" />

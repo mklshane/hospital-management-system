@@ -118,7 +118,7 @@ export default function PatientDashboard() {
       <div className="max-w-7xl mx-auto h-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
           <aside className="lg:col-span-3 gap-4 flex flex-col h-full overflow-hidden">
-            <div className="min-h-0">
+            <div className="flex-[0_0_36%] min-h-0">
               <PatientProfile user={user} />
             </div>
             <div className="flex-1 min-h-0 overflow-hidden">
