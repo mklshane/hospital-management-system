@@ -139,58 +139,66 @@ const PatientMedical = () => {
   }
 
   return (
-    <div className="bg-[#ffff] dark:bg-transparent h-full p-6 rounded-2xl border-2 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-            Medical Records
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {filteredAppointments.length} record
-            {filteredAppointments.length !== 1 ? "s" : ""}
-          </p>
+    <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-gray-900">
+      {/* This outer container now takes full height */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-ui-card border-2 rounded-2xl">
+
+        {/* Fixed Header */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 shrink-0 pb-3">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+                Medical Records
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {filteredAppointments.length} record{filteredAppointments.length !== 1 && "s"}
+              </p>
+            </div>
+
+            <div className="flex gap-3 w-full sm:w-auto">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search doctor, diagnosis, medicine..."
+                className="flex-1 sm:flex-initial sm:min-w-80"
+              />
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
 
-        <div className="flex gap-3 w-full sm:w-auto">
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search doctor, diagnosis, medicine..."
-            className="flex-1 sm:flex-initial sm:w-100"
-          />
-          <ThemeToggle />
+        {/* Scrollable Content with safe bottom padding */}
+        <div className="flex-1 overflow-y-auto pb-8 md:pb-8"> 
+          <div className="p-6"> 
+            {filteredAppointments.length === 0 ? (
+              <div className="text-center py-16">
+                {/* your empty state */}
+                <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <FileText className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+                </div>
+                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                  {searchTerm ? `No results for "${searchTerm}"` : "No medical records yet"}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {searchTerm
+                    ? "Try a different search term."
+                    : "Records will appear after your completed visits."}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {filteredAppointments.map((appt) => (
+                  <CompletedAppointmentCard
+                    key={appt._id}
+                    appointment={appt}
+                    records={recordsMap[appt._id] || []}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Cards Grid */}
-      {filteredAppointments.length === 0 ? (
-        <div className="text-center py-16 col-span-full">
-          <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-            <FileText className="w-10 h-10 text-gray-400 dark:text-gray-500" />
-          </div>
-          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-            {searchTerm
-              ? `No results for "${searchTerm}"`
-              : "No medical records yet"}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {searchTerm
-              ? "Try a different search term."
-              : "Records will appear after your completed visits."}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredAppointments.map((appt) => (
-            <CompletedAppointmentCard
-              key={appt._id}
-              appointment={appt}
-              records={recordsMap[appt._id] || []}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

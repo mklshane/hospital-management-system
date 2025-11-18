@@ -52,11 +52,14 @@ const Calendar = ({ appointments = [] }) => {
   ];
 
   return (
-    <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-ui-card rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 
+                    flex flex-col h-full min-h-0 overflow-hidden 
+                    p-3 origin-top">
+
+      <div className="flex items-center justify-between mb-2 px-1">
         <button
           onClick={prevMonth}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           aria-label="Previous month"
         >
           <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
@@ -68,25 +71,22 @@ const Calendar = ({ appointments = [] }) => {
 
         <button
           onClick={nextMonth}
-          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           aria-label="Next month"
         >
           <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
         {dayHeaders.map((day) => (
-          <div
-            key={day.key}
-            className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-1"
-          >
+          <div key={day.key} className="text-center py-1">
             {day.label}
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1 flex-1 text-xs">
+      <div className="grid grid-cols-7 gap-1 flex-1 text-xs min-h-0">
         {Array.from({ length: firstDayOfMonth }).map((_, i) => (
           <div key={`empty-${year}-${currentDate.getMonth()}-${i}`} />
         ))}
@@ -100,17 +100,12 @@ const Calendar = ({ appointments = [] }) => {
             <div
               key={`day-${year}-${currentDate.getMonth()}-${day}`}
               className={`
-                flex items-center justify-center h-8 rounded-lg transition-colors
-                ${
-                  today
-                    ? "bg-blue-100 text-blue-700 font-bold"
-                    : "text-gray-700 dark:text-gray-300"
-                }
-                ${
-                  hasAppt
-                    ? "border-2 border-blue-500"
-                    : "hover:bg-gray-50 dark:hover:bg-gray-700"
-                }
+                flex items-center justify-center 
+                h-7 w-7                /* ← Fixed square size (was h-8) */
+                mx-auto                /* ← Centers number perfectly */
+                rounded-lg transition-colors text-center
+                ${today ? "bg-blue-100 text-blue-700 font-bold" : "text-gray-700 dark:text-gray-300"}
+                ${hasAppt ? "border-2 border-blue-500" : "hover:bg-gray-50 dark:hover:bg-gray-700"}
               `}
             >
               {day}
@@ -119,7 +114,7 @@ const Calendar = ({ appointments = [] }) => {
         })}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
         <div className="flex justify-center gap-4 text-xs text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 border-2 border-blue-500 rounded" />
