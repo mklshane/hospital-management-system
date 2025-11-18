@@ -151,8 +151,7 @@ export default function BookAppointmentModal({
               onChange={handleDateChange}
               min={format(new Date(), "yyyy-MM-dd")}
               disabled={!form.doctor_id}
-              className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              required
+              className="w-full border border-gray-600 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed"              required
             />
           </div>
 
@@ -163,7 +162,7 @@ export default function BookAppointmentModal({
             </label>
 
             {isTimeSlotDisabled ? (
-              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50">
+              <div className="w-full border border-gray-600 rounded-lg px-3 py-2 text-gray-400 bg-primary-foreground/50">
                 {form.doctor_id
                   ? !form.appointment_date
                     ? "Please select a date first"
@@ -175,8 +174,7 @@ export default function BookAppointmentModal({
                 name="appointment_time"
                 value={form.appointment_time || ""}
                 onChange={onChange}
-                className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className="w-full border border-gray-300 bg-primary-foreground rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"                      required
               >
                 <option value="">Select a time slot</option>
                 {filteredSlots.map((slot) => (
@@ -186,7 +184,7 @@ export default function BookAppointmentModal({
                 ))}
               </select>
             ) : (
-              <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500 bg-gray-50">
+              <div className="w-full border border-gray-600 rounded-lg px-3 py-2 text-gray-400 bg-primary-foreground/50">
                 No available time slots for the selected date
               </div>
             )}
