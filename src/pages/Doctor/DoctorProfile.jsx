@@ -157,7 +157,7 @@ const DoctorProfile = () => {
 
   return (
     <>
-      <div className="bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8 rounded-md">
+      <div className="py-8 px-4 sm:px-6 lg:px-8 rounded-md">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
