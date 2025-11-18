@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import {
   X,
   Calendar,
@@ -17,6 +16,13 @@ import DeleteModal from "../Common/DeleteModal";
 import { generateTimeSlots } from "@/utils/timeSlots";
 import { format } from "date-fns";
 
+const Detail = ({ label, value }) => (
+  <div>
+    <p className="text-muted-foreground">{label}</p>
+    <p className="font-medium">{value}</p>
+  </div>
+);
+
 const PatientAppointmentDetailsModal = ({
   isOpen,
   onClose,
@@ -30,13 +36,13 @@ const PatientAppointmentDetailsModal = ({
     appointment_time: "",
   });
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [filteredSlots, setFilteredSlots] = useState([]);
 
   const { update: updateAppointment, loading } = useCrudOperations(
     "Appointment",
     onUpdate
   );
 
-  // Reset form when appointment changes
   useEffect(() => {
     if (appointment) {
       setFormData({
@@ -47,12 +53,9 @@ const PatientAppointmentDetailsModal = ({
     }
   }, [appointment]);
 
-  // Generate available time slots based on doctor's schedule
   useEffect(() => {
     if (
-      isEditing &&
-      appointment?.doctor &&
-      appointment.doctor.schedule_time &&
+      appointment?.doctor?.schedule_time &&
       appointment.doctor.schedule_time.length > 0
     ) {
       const slots = generateTimeSlots(appointment.doctor.schedule_time);
@@ -60,7 +63,30 @@ const PatientAppointmentDetailsModal = ({
     } else {
       setAvailableSlots([]);
     }
-  }, [isEditing, appointment?.doctor]);
+  }, [appointment?.doctor?.schedule_time]);
+
+  useEffect(() => {
+    if (!formData.appointment_date || availableSlots.length === 0) {
+      setFilteredSlots([]);
+      return;
+    }
+
+    const selectedDate = formData.appointment_date;
+    const today = format(new Date(), "yyyy-MM-dd");
+
+    if (selectedDate !== today) {
+      setFilteredSlots(availableSlots);
+      return;
+    }
+
+    const now = new Date();
+    const filtered = availableSlots.filter((slot) => {
+      const slotTime = new Date(`${selectedDate}T${slot.value}`);
+      return slotTime > now;
+    });
+
+    setFilteredSlots(filtered);
+  }, [formData.appointment_date, availableSlots]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -72,9 +98,7 @@ const PatientAppointmentDetailsModal = ({
     });
   };
 
-  const handleCancelClick = () => {
-    setShowCancelModal(true);
-  };
+  const handleCancelClick = () => setShowCancelModal(true);
 
   const handleConfirmCancel = async () => {
     const success = await updateAppointment(
@@ -116,6 +140,7 @@ const PatientAppointmentDetailsModal = ({
 
   const canModify =
     appointment?.status === "Pending" || appointment?.status === "Scheduled";
+
   const today = new Date().toISOString().split("T")[0];
 
   if (!appointment) return null;
@@ -133,7 +158,7 @@ const PatientAppointmentDetailsModal = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -147,206 +172,202 @@ const PatientAppointmentDetailsModal = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-ui-card p-6 shadow-xl transition-all border border-ui-border">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <Dialog.Title className="text-xl font-bold text-foreground">
+                {/* PANEL */}
+                <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-ui-card p-0 shadow-xl transition-all border border-ui-border overflow-hidden">
+                  {/* HEADER */}
+                  <header className="flex items-center justify-between px-6 py-4 border-b border-ui-border bg-ui-muted/50">
+                    <Dialog.Title className="text-xl font-semibold text-foreground">
                       Appointment Details
                     </Dialog.Title>
+
                     <div className="flex items-center gap-2">
                       {canModify && !isEditing && (
                         <button
                           onClick={() => setIsEditing(true)}
-                          className="p-2 text-muted-foreground hover:text-blue hover:bg-blue/10 rounded-lg transition-colors"
-                          title="Reschedule"
+                          className="p-2 rounded-xl text-muted-foreground hover:text-blue hover:bg-blue/10 transition"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                       )}
                       <button
                         onClick={onClose}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-ui-muted transition"
                       >
                         <X className="w-5 h-5" />
                       </button>
                     </div>
-                  </div>
+                  </header>
 
-                  {/* Main Content */}
-                  <div className="space-y-6">
-                    {/* Status + Date/Time */}
-                    <div className="flex items-center justify-between p-4 bg-ui-muted rounded-lg">
-                      <div
-                        className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(
-                          appointment.status
-                        )}`}
-                      >
-                        {appointment.status}
-                      </div>
+                  {/* BODY */}
+                  <div className="p-6 space-y-8">
+                    {/* STATUS + TIME CARD */}
+                    <div className="p-4 rounded-xl bg-ui-muted/40 border border-ui-border/70 shadow-sm">
+                      <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div
+                          className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(
+                            appointment.status
+                          )}`}
+                        >
+                          {appointment.status}
+                        </div>
 
-                      {isEditing ? (
-                        <div className="flex items-center gap-4">
-                          <div className="flex flex-col gap-1">
-                            <label className="text-xs text-muted-foreground">
-                              Date
-                            </label>
-                            <input
-                              type="date"
-                              name="appointment_date"
-                              value={formData.appointment_date}
-                              onChange={handleInputChange}
-                              min={today}
-                              className="px-2 py-1 border border-ui-border rounded text-sm"
-                            />
-                          </div>
+                        {/* EDIT MODE */}
+                        {isEditing ? (
+                          <div className="flex items-center gap-6">
+                            {/* Date */}
+                            <div className="flex flex-col gap-1">
+                              <label className="text-xs text-muted-foreground font-medium">
+                                Date
+                              </label>
+                              <input
+                                type="date"
+                                name="appointment_date"
+                                value={formData.appointment_date}
+                                onChange={handleInputChange}
+                                min={today}
+                                className="w-40 px-3 py-2 rounded-lg border border-ui-border bg-background text-sm focus:ring-2 focus:ring-blue/30 outline-none"
+                              />
+                            </div>
 
-                          <div className="flex flex-col gap-1">
-                            <label className="text-xs text-muted-foreground">
-                              Time Slot
-                            </label>
-                            {availableSlots.length > 0 ? (
+                            {/* Time */}
+                            <div className="flex flex-col gap-1">
+                              <label className="text-xs text-muted-foreground font-medium">
+                                Time Slot
+                              </label>
                               <select
                                 name="appointment_time"
                                 value={formData.appointment_time}
                                 onChange={handleInputChange}
-                                className="px-2 py-1 border border-ui-border rounded text-sm w-44"
-                                required
+                                disabled={
+                                  !formData.appointment_date ||
+                                  filteredSlots.length === 0
+                                }
+                                className="w-44 px-3 py-2 rounded-lg border border-ui-border bg-background text-sm focus:ring-2 focus:ring-blue/30 outline-none disabled:bg-ui-muted/40 disabled:text-muted-foreground"
                               >
                                 <option value="">Select a time slot</option>
-                                {availableSlots.map((slot) => (
+                                {filteredSlots.map((slot) => (
                                   <option key={slot.value} value={slot.value}>
                                     {slot.display || slot.label}
                                   </option>
                                 ))}
                               </select>
-                            ) : (
-                              <div className="px-2 py-1 text-xs text-gray-500 bg-gray-50 rounded border w-44">
-                                No available time slots
-                              </div>
-                            )}
-                            {availableSlots.length > 0 && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {availableSlots.length} available slot(s)
-                              </p>
-                            )}
+
+                              {!formData.appointment_date ? (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Select a date first
+                                </p>
+                              ) : filteredSlots.length === 0 ? (
+                                <p className="text-xs text-red-500 mt-1">
+                                  No available time slots
+                                </p>
+                              ) : (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {filteredSlots.length} available slot(s)
+                                </p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-2 text-foreground">
-                            <Calendar className="w-4 h-4 text-blue" />
-                            <span>
+                        ) : (
+                          <div className="flex items-center gap-6 text-sm text-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-blue" />
                               {formatDate(appointment.appointment_date)}
-                            </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-blue" />
+                              {appointment.appointment_time}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-foreground">
-                            <Clock className="w-4 h-4 text-blue" />
-                            <span>{appointment.appointment_time}</span>
-                          </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
 
-                    {/* Doctor & Patient Info */}
+                    {/* DOCTOR & PATIENT GRID */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                          <Stethoscope className="w-5 h-5 text-blue" />
-                          Doctor
+                      <div className="p-5 rounded-xl border border-ui-border bg-ui-muted/30 shadow-sm">
+                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                          <Stethoscope className="w-5 h-5 text-blue" /> Doctor
                         </h3>
                         <div className="space-y-3 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Name</p>
-                            <p className="font-medium">
-                              Dr. {appointment.doctor?.name}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">
-                              Specialization
-                            </p>
-                            <p className="font-medium">
-                              {appointment.doctor?.specialization}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Email</p>
-                            <p className="font-medium">
-                              {appointment.doctor?.email}
-                            </p>
-                          </div>
+                          <Detail
+                            label="Name"
+                            value={`Dr. ${appointment.doctor?.name}`}
+                          />
+                          <Detail
+                            label="Specialization"
+                            value={appointment.doctor?.specialization}
+                          />
+                          <Detail
+                            label="Email"
+                            value={appointment.doctor?.email}
+                          />
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                          <User className="w-5 h-5 text-blue" />
-                          You
+                      <div className="p-5 rounded-xl border border-ui-border bg-ui-muted/30 shadow-sm">
+                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-3">
+                          <User className="w-5 h-5 text-blue" /> You
                         </h3>
                         <div className="space-y-3 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Name</p>
-                            <p className="font-medium">
-                              {appointment.patient?.name}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Email</p>
-                            <p className="font-medium">
-                              {appointment.patient?.email}
-                            </p>
-                          </div>
+                          <Detail
+                            label="Name"
+                            value={appointment.patient?.name}
+                          />
+                          <Detail
+                            label="Email"
+                            value={appointment.patient?.email}
+                          />
                           {appointment.patient?.contact && (
-                            <div>
-                              <p className="text-muted-foreground">Contact</p>
-                              <p className="font-medium">
-                                {appointment.patient.contact}
-                              </p>
-                            </div>
+                            <Detail
+                              label="Contact"
+                              value={appointment.patient.contact}
+                            />
                           )}
                         </div>
                       </div>
                     </div>
 
+                    {/* NOTES */}
                     {appointment.notes && (
-                      <div className="pt-4 border-t border-ui-border">
-                        <h3 className="text-lg font-semibold text-foreground mb-3">
-                          Notes
-                        </h3>
-                        <div className="p-3 bg-ui-muted rounded-lg">
-                          <p className="text-foreground">{appointment.notes}</p>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">Notes</h3>
+                        <div className="p-4 rounded-lg bg-ui-muted/40 border border-ui-border/60 shadow-sm text-sm">
+                          {appointment.notes}
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-between items-center mt-6 pt-4 border-t border-ui-border">
-                    <div>
-                      {canModify && (
-                        <button
-                          onClick={handleCancelClick}
-                          disabled={loading}
-                          className="px-4 py-2 border border-red-500 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors font-medium disabled:opacity-50"
-                        >
-                          Cancel Appointment
-                        </button>
-                      )}
-                    </div>
+                  {/* FOOTER */}
+                  <footer className="px-6 py-4 border-t border-ui-border bg-ui-muted/50 flex justify-between items-center">
+                    {canModify && (
+                      <button
+                        onClick={handleCancelClick}
+                        disabled={loading}
+                        className="px-4 py-2 rounded-lg border border-red-500 text-red-600 bg-red-500/5 hover:bg-red-500/15 transition disabled:opacity-50"
+                      >
+                        Cancel Appointment
+                      </button>
+                    )}
 
                     <div className="flex gap-3">
                       {isEditing ? (
                         <>
                           <button
                             onClick={() => setIsEditing(false)}
-                            className="px-5 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors"
+                            className="px-5 py-2 rounded-lg border border-ui-border bg-background hover:bg-ui-muted transition"
                           >
                             Cancel
                           </button>
+
                           <button
                             onClick={handleReschedule}
-                            disabled={loading || availableSlots.length === 0}
-                            className="px-5 py-2 bg-blue hover:bg-blue/90 text-white rounded-lg transition-colors font-medium disabled:opacity-50 flex items-center gap-2"
+                            disabled={
+                              loading ||
+                              filteredSlots.length === 0 ||
+                              !formData.appointment_time
+                            }
+                            className="px-5 py-2 rounded-lg bg-blue text-white hover:bg-blue/90 transition flex items-center gap-2 disabled:opacity-50"
                           >
                             <Save className="w-4 h-4" />
                             {loading ? "Saving..." : "Save Changes"}
@@ -355,13 +376,13 @@ const PatientAppointmentDetailsModal = ({
                       ) : (
                         <button
                           onClick={onClose}
-                          className="px-5 py-2 border border-ui-border text-foreground rounded-lg hover:bg-ui-muted transition-colors"
+                          className="px-5 py-2 rounded-lg border border-ui-border bg-background hover:bg-ui-muted transition"
                         >
                           Close
                         </button>
                       )}
                     </div>
-                  </div>
+                  </footer>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
@@ -369,7 +390,7 @@ const PatientAppointmentDetailsModal = ({
         </Dialog>
       </Transition>
 
-      {/* ── DELETE CONFIRMATION MODAL ── */}
+      {/* CANCEL MODAL */}
       <DeleteModal
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
