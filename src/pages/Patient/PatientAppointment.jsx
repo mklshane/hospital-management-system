@@ -8,6 +8,7 @@ import BookAppointmentModal from "@/components/Patient/BookAppointmentModal";
 import { useApiData } from "@/hooks/useApiData";
 import { useCrudOperations } from "@/hooks/useCrudOperations";
 import ThemeToggle from "@/components/ThemeToggle";
+import EmptyState from "@/components/Common/EmptyState";
 
 const PatientAppointment = () => {
   const { user } = useAuth();
@@ -110,17 +111,45 @@ const PatientAppointment = () => {
         appointment_time: form.appointment_time,
         notes: form.notes,
       },
-      "/appointment" // ✅ Fixed endpoint - changed from "/appointments"
+      "/appointment"
     );
 
     if (success) {
       handleModalClose();
-      // Optionally refetch doctors if needed
       refetch();
     }
   };
 
   const clearFilter = () => setSelectedSpecialization("");
+
+  // Determine empty state content
+  const getEmptyStateContent = () => {
+    if (selectedSpecialization && searchTerm) {
+      return {
+        title: "No matching doctors found",
+        description: `No doctors found in "${selectedSpecialization}" matching "${searchTerm}".`,
+        icon: "search",
+      };
+    } else if (selectedSpecialization) {
+      return {
+        title: "No doctors in this specialty",
+        description: `No doctors found in "${selectedSpecialization}". Try selecting a different specialty.`,
+        icon: "search",
+      };
+    } else if (searchTerm) {
+      return {
+        title: "No doctors found",
+        description: `No doctors match "${searchTerm}". Try a different search term.`,
+        icon: "search",
+      };
+    } else {
+      return {
+        title: "No doctors available",
+        description: "There are currently no doctors available in the system.",
+        icon: "medical",
+      };
+    }
+  };
 
   return (
     <>
@@ -216,11 +245,11 @@ const PatientAppointment = () => {
                   ))}
                 </div>
               ) : filteredDoctors.length === 0 ? (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                  {selectedSpecialization
-                    ? `No doctors found in "${selectedSpecialization}"`
-                    : "No doctors match your search."}
-                </div>
+                <EmptyState
+                  title={getEmptyStateContent().title}
+                  description={getEmptyStateContent().description}
+                  icon={getEmptyStateContent().icon}
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredDoctors.map((doctor) => (

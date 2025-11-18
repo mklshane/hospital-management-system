@@ -4,6 +4,7 @@ import { api } from "@/lib/axiosHeader";
 import ThemeToggle from "@/components/ThemeToggle";
 import CompletedAppointmentCard from "@/components/Patient/CompletedAppointmentCard";
 import SearchBar from "@/components/Common/SearchBar";
+import EmptyState from "@/components/Common/EmptyState";
 
 const PatientMedical = () => {
   const [appointments, setAppointments] = useState([]);
@@ -142,7 +143,6 @@ const PatientMedical = () => {
     <div className="w-full h-full flex flex-col bg-gray-50 dark:bg-gray-900">
       {/* This outer container now takes full height */}
       <div className="flex-1 flex flex-col overflow-hidden bg-ui-card border-2 rounded-2xl">
-
         {/* Fixed Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 shrink-0 pb-3">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -152,7 +152,8 @@ const PatientMedical = () => {
                 Medical Records
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {filteredAppointments.length} record{filteredAppointments.length !== 1 && "s"}
+                {filteredAppointments.length} record
+                {filteredAppointments.length !== 1 && "s"}
               </p>
             </div>
 
@@ -168,23 +169,25 @@ const PatientMedical = () => {
         </div>
 
         {/* Scrollable Content with safe bottom padding */}
-        <div className="flex-1 overflow-y-auto pb-8 md:pb-8"> 
-          <div className="p-6"> 
+        <div className="flex-1 overflow-y-auto pb-8 md:pb-8">
+          <div className="p-6">
             {filteredAppointments.length === 0 ? (
-              <div className="text-center py-16">
-                {/* your empty state */}
-                <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                  <FileText className="w-10 h-10 text-gray-400 dark:text-gray-500" />
-                </div>
-                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                  {searchTerm ? `No results for "${searchTerm}"` : "No medical records yet"}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {searchTerm
-                    ? "Try a different search term."
-                    : "Records will appear after your completed visits."}
-                </p>
-              </div>
+              <EmptyState
+                title={
+                  searchTerm ? "No records found" : "No Medical Records Yet"
+                }
+                description={
+                  searchTerm
+                    ? `No medical records match "${searchTerm}". Try a different search term.`
+                    : "You haven't completed any appointments with medical records yet."
+                }
+                additionalInfo={
+                  searchTerm
+                    ? "Check your spelling or try searching by doctor name, diagnosis, or medication."
+                    : "Your medical records will appear here after your completed visits with doctors."
+                }
+                icon="medical"
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredAppointments.map((appt) => (

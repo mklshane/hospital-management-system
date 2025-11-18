@@ -1,7 +1,7 @@
 import { Search, Plus } from "lucide-react";
 import AppointmentCard from "./AppointmentCard";
 import ThemeToggle from "@/components/ThemeToggle";
-import EmptyState from "./EmptyState";
+import EmptyState from "../Common/EmptyState";
 export default function AppointmentHistory({
   appointments,
   loading,
@@ -55,7 +55,22 @@ export default function AppointmentHistory({
             ))
           ) : appointments.length === 0 ? (
             <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-300">
-              <EmptyState />
+              <EmptyState
+                title={
+                  searchTerm ? "No appointments found" : "No Appointments Yet"
+                }
+                description={
+                  searchTerm
+                    ? `No appointments match "${searchTerm}". Try a different search term.`
+                    : "You haven't scheduled any appointments yet. Book your first appointment to get started with managing your healthcare."
+                }
+                additionalInfo={
+                  searchTerm
+                    ? ""
+                    : "All your upcoming and past appointments will appear here for easy access."
+                }
+                icon="default"
+              />
             </div>
           ) : (
             appointments.map((apt) => (
