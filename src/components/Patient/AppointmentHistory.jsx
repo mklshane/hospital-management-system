@@ -1,6 +1,7 @@
 import { Search, Plus } from "lucide-react";
 import AppointmentCard from "./AppointmentCard";
 import ThemeToggle from "@/components/ThemeToggle";
+import EmptyState from "./EmptyState";
 export default function AppointmentHistory({
   appointments,
   loading,
@@ -54,7 +55,7 @@ export default function AppointmentHistory({
             ))
           ) : appointments.length === 0 ? (
             <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-300">
-              No appointments found
+              <EmptyState />
             </div>
           ) : (
             appointments.map((apt) => (
