@@ -1,7 +1,7 @@
 import { Search, Plus } from "lucide-react";
 import AppointmentCard from "./AppointmentCard";
 import ThemeToggle from "@/components/ThemeToggle";
-import EmptyState from "../Common/EmptyState";
+import EmptyState from "@/components/Common/EmptyState";
 export default function AppointmentHistory({
   appointments,
   loading,

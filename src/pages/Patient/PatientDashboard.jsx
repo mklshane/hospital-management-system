@@ -3,10 +3,10 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import PatientProfile from "@/components/Patient/PatientProfile";
-import AppointmentHistory from "@/components/Patient/AppointmentHistory";
+import AppointmentHistory from "@/components/Patient/Dashboard/AppointmentHistory";
 import BookAppointmentModal from "@/components/Patient/BookAppointmentModal";
 import PatientAppointmentDetailsModal from "@/components/Patient/PatientAppointmentDetailsModal";
-import Calendar from "@/components/Patient/Calendar";
+import Calendar from "@/components/Patient/Dashboard/Calendar";
 
 import { usePatientAppointments } from "@/hooks/usePatientAppointments";
 import { useApiData } from "@/hooks/useApiData";

@@ -78,3 +78,23 @@ export const getStatusConfig = (status) => {
 
   return configs[status] || configs.Pending;
 };
+
+export const getSpecializationColor = (specialization) => {
+  const colors = {
+    Cardiology: "bg-red-600 text-white ring-red-600/20",
+    Neurology: "bg-purple-600 text-white ring-purple-600/20",
+    Pediatrics: "bg-pink-600 text-white ring-pink-600/20",
+    Orthopedics: "bg-amber-600 text-white ring-amber-600/20",
+    Dermatology: "bg-teal-600 text-white ring-teal-600/20",
+    "General Medicine": "bg-blue-600 text-white ring-blue-600/20",
+    Ophthalmology: "bg-indigo-600 text-white ring-indigo-600/20",
+    Psychiatry: "bg-emerald-600 text-white ring-emerald-600/20",
+    ENT: "bg-orange-600 text-white ring-orange-600/20",
+    Radiology: "bg-cyan-600 text-white ring-cyan-600/20",
+  };
+
+  return (
+    colors[specialization] ||
+    "bg-gray-600 text-white ring-gray-600/20"
+  );
+};

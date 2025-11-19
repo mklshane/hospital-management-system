@@ -1,7 +1,8 @@
 import React from "react";
 import { Phone } from "lucide-react";
+import { getSpecializationColor } from "@/utils/statusColors";
 
-const DoctorCard = ({ doctor, onBook, onViewDetails }) => {
+const DoctorCard = ({ doctor, onViewDetails }) => {
   const initials = doctor.name
     .split(" ")
     .map((n) => n[0])
@@ -9,10 +10,15 @@ const DoctorCard = ({ doctor, onBook, onViewDetails }) => {
     .toUpperCase()
     .slice(0, 2);
 
+  const avatarColor = getSpecializationColor(doctor.specialization);
+
   return (
-    <div className="bg-slate-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md dark:hover:shadow-lg transition-shadow">
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-700 dark:text-gray-300 font-semibold text-sm">
+    <div className="bg-[#ffff] dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-4">
+        {/* Only the avatar is colored — rest is neutral */}
+        <div
+          className={`w-12 h-12 ${avatarColor} rounded-full flex items-center justify-center font-bold text-sm ring-4 ring-inset shadow-sm`}
+        >
           {initials}
         </div>
 
@@ -20,33 +26,22 @@ const DoctorCard = ({ doctor, onBook, onViewDetails }) => {
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
             Dr. {doctor.name}
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
             {doctor.specialization}
           </p>
-
-          {/* Date */}
-          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">
-            <Phone className="w-3 h-3" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 mt-2">
+            <Phone className="w-3.5 h-3.5" />
             <span>{doctor.contact}</span>
           </div>
-
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4">
-        <button
-          onClick={() => onBook(doctor)}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white text-sm font-medium py-2 rounded-lg transition"
-        >
-          Book Now
-        </button>
-
-        {/* Details*/}
+      <div className="mt-8">
         <button
           onClick={() => onViewDetails(doctor)}
-          className="flex-1 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 text-sm font-medium py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition"
+          className="w-full text-blue-600 bg-blue-50 dark:text-blue-400 border border-blue-700 hover:bg-blue-100 dark:bg-transparent dark:hover:bg-blue-900/20 font-medium text-sm py-1.75 rounded-lg transition-colors"
         >
-          Details
+          View Details
         </button>
       </div>
     </div>

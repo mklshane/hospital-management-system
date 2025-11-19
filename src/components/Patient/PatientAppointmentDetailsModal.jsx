@@ -172,9 +172,7 @@ const PatientAppointmentDetailsModal = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                {/* PANEL */}
                 <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-ui-card p-0 shadow-xl transition-all border border-ui-border overflow-hidden">
-                  {/* HEADER */}
                   <header className="flex items-center justify-between px-6 py-4 border-b border-ui-border bg-ui-muted/50">
                     <Dialog.Title className="text-xl font-semibold text-foreground">
                       Appointment Details
@@ -198,10 +196,8 @@ const PatientAppointmentDetailsModal = ({
                     </div>
                   </header>
 
-                  {/* BODY */}
-                  <div className="p-6 space-y-8">
-                    {/* STATUS + TIME CARD */}
-                    <div className="p-4 rounded-xl bg-ui-muted/40 border border-ui-border/70 shadow-sm">
+                  <div className="p-6 space-y-4">
+                    <div className="rounded-xl bg-ui-muted/40 ">
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <div
                           className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(
@@ -211,10 +207,8 @@ const PatientAppointmentDetailsModal = ({
                           {appointment.status}
                         </div>
 
-                        {/* EDIT MODE */}
                         {isEditing ? (
                           <div className="flex items-center gap-6">
-                            {/* Date */}
                             <div className="flex flex-col gap-1">
                               <label className="text-xs text-muted-foreground font-medium">
                                 Date
@@ -225,11 +219,10 @@ const PatientAppointmentDetailsModal = ({
                                 value={formData.appointment_date}
                                 onChange={handleInputChange}
                                 min={today}
-                                className="w-40 px-3 py-2 rounded-lg border border-ui-border bg-background text-sm focus:ring-2 focus:ring-blue/30 outline-none"
+                                className="w-40 px-3 py-2 rounded-lg border border-ui-border bg-primary-foreground text-sm focus:ring-2 focus:ring-blue/30 outline-none"
                               />
                             </div>
 
-                            {/* Time */}
                             <div className="flex flex-col gap-1">
                               <label className="text-xs text-muted-foreground font-medium">
                                 Time Slot
@@ -242,7 +235,7 @@ const PatientAppointmentDetailsModal = ({
                                   !formData.appointment_date ||
                                   filteredSlots.length === 0
                                 }
-                                className="w-44 px-3 py-2 rounded-lg border border-ui-border bg-background text-sm focus:ring-2 focus:ring-blue/30 outline-none disabled:bg-ui-muted/40 disabled:text-muted-foreground"
+                                className="w-44 px-3 py-2 rounded-lg border border-ui-border bg-primary-foreground text-sm focus:ring-2 focus:ring-blue/30 outline-none disabled:bg-ui-muted/40 disabled:text-muted-foreground"
                               >
                                 <option value="">Select a time slot</option>
                                 {filteredSlots.map((slot) => (
@@ -251,20 +244,6 @@ const PatientAppointmentDetailsModal = ({
                                   </option>
                                 ))}
                               </select>
-
-                              {!formData.appointment_date ? (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Select a date first
-                                </p>
-                              ) : filteredSlots.length === 0 ? (
-                                <p className="text-xs text-red-500 mt-1">
-                                  No available time slots
-                                </p>
-                              ) : (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {filteredSlots.length} available slot(s)
-                                </p>
-                              )}
                             </div>
                           </div>
                         ) : (
@@ -282,7 +261,6 @@ const PatientAppointmentDetailsModal = ({
                       </div>
                     </div>
 
-                    {/* DOCTOR & PATIENT GRID */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="p-5 rounded-xl border border-ui-border bg-ui-muted/30 shadow-sm">
                         <h3 className="text-lg font-semibold flex items-center gap-2 mb-3">
@@ -327,7 +305,6 @@ const PatientAppointmentDetailsModal = ({
                       </div>
                     </div>
 
-                    {/* NOTES */}
                     {appointment.notes && (
                       <div>
                         <h3 className="text-lg font-semibold mb-2">Notes</h3>
@@ -338,7 +315,6 @@ const PatientAppointmentDetailsModal = ({
                     )}
                   </div>
 
-                  {/* FOOTER */}
                   <footer className="px-6 py-4 border-t border-ui-border bg-ui-muted/50 flex justify-between items-center">
                     {canModify && (
                       <button
@@ -355,7 +331,7 @@ const PatientAppointmentDetailsModal = ({
                         <>
                           <button
                             onClick={() => setIsEditing(false)}
-                            className="px-5 py-2 rounded-lg border border-ui-border bg-background hover:bg-ui-muted transition"
+                            className="px-5 py-2 rounded-lg border border-ui-border bg-transparent hover:bg-ui-muted transition"
                           >
                             Cancel
                           </button>
@@ -376,7 +352,7 @@ const PatientAppointmentDetailsModal = ({
                       ) : (
                         <button
                           onClick={onClose}
-                          className="px-5 py-2 rounded-lg border border-ui-border bg-background hover:bg-ui-muted transition"
+                          className="px-5 py-2 rounded-lg border border-ui-border bg-transparent hover:bg-ui-muted transition"
                         >
                           Close
                         </button>
@@ -390,7 +366,6 @@ const PatientAppointmentDetailsModal = ({
         </Dialog>
       </Transition>
 
-      {/* CANCEL MODAL */}
       <DeleteModal
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
