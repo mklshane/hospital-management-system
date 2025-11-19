@@ -1,12 +1,11 @@
-// components/Common/EmptyState.jsx
 import React from "react";
-import { Calendar, Stethoscope, FileText, Search } from "lucide-react";
+import { Calendar, Stethoscope, FileText, Search, FilterX, ChevronDown} from "lucide-react";
 
 const EmptyState = ({
   title = "No data found",
   description = "There's nothing to display here yet.",
   additionalInfo,
-  icon = "default", // 'default' | 'medical' | 'search'
+  icon = "default", // 'default' | 'medical' | 'search' | 'filter'
 }) => {
   // Icon configurations
   const iconConfigs = {
@@ -55,6 +54,28 @@ const EmptyState = ({
       showBadge: false,
       floating: [],
     },
+    filter: {
+      main: (
+        <FilterX className="w-12 h-12 text-purple-500 dark:text-purple-400" />
+      ),
+      showBadge: true,
+      floating: [
+        {
+          icon: (
+            <ChevronDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          ),
+          position: "top-4 -left-4",
+          bg: "bg-blue-100 dark:bg-blue-900/30",
+        },
+        {
+          icon: (
+            <FileText className="w-4 h-4 text-green-600 dark:text-green-400" />
+          ),
+          position: "bottom-4 -right-4",
+          bg: "bg-green-100 dark:bg-green-900/30",
+        },
+      ],
+    },
   };
 
   const config = iconConfigs[icon] || iconConfigs.default;
@@ -63,7 +84,15 @@ const EmptyState = ({
     <div className="flex flex-col items-center justify-center px-4 text-center py-12">
       {/* Animated Illustration */}
       <div className="relative mb-8">
-        <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full flex items-center justify-center mx-auto">
+        <div
+          className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto ${
+            icon === "filter"
+              ? "bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20"
+              : icon === "search"
+              ? "bg-gradient-to-br from-gray-100 to-blue-100 dark:from-gray-900/20 dark:to-blue-900/20"
+              : "bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20"
+          }`}
+        >
           <div className="relative">
             {config.main}
             {config.showBadge && (

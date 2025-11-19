@@ -1,9 +1,10 @@
 import { User, Mail, Phone, MapPin } from "lucide-react";
 export default function PatientProfile({ user }) {
   return (
-    <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-4 shadow-lg h-full flex flex-col min-h-0">
+    <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-4 shadow-lg h-full flex flex-col">
+
       {/* Avatar + name */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
           <User className="w-6 h-6" />
         </div>
@@ -14,27 +15,27 @@ export default function PatientProfile({ user }) {
       </div>
 
       {/* Info rows */}
-      <div className="space-y-3 text-sm flex-1">
+      <div className="space-y-1 text-sm flex-1">
         {user?.email && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Mail className="w-3.5 h-3.5 opacity-80" />
             <span className="truncate">{user.email}</span>
           </div>
         )}
         {user?.contact && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Phone className="w-3.5 h-3.5 opacity-80" />
             <span>{user.contact}</span>
           </div>
         )}
         {user?.address && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <MapPin className="w-3.5 h-3.5 opacity-80" />
             <span className="truncate">{user.address}</span>
           </div>
         )}
         {(user?.age || user?.gender) && (
-          <div className="grid grid-cols-2 gap-3 mt-3">
+          <div className="flex justify-center gap-24 mt-5">
             {user?.age && (
               <div>
                 <p className="opacity-80 text-xs">Age</p>
