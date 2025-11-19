@@ -1,8 +1,8 @@
-import { Search, Plus, ChevronDown } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { Search, Plus, FilterX, ChevronDown } from "lucide-react";
 import AppointmentCard from "./AppointmentCard";
 import ThemeToggle from "@/components/ThemeToggle";
 import EmptyState from "@/components/Common/EmptyState";
+import StatusDropdown from "@/components/Common/StatusDropdown";
 
 export default function AppointmentHistory({
   appointments,
@@ -11,57 +11,16 @@ export default function AppointmentHistory({
   setSearchTerm,
   statusFilter,
   setStatusFilter,
-  dateFilter,
-  setDateFilter,
   onNewAppointment,
   onAppointmentClick,
 }) {
-  const StatusDropdown = ({ value, onChange, className = "" }) => {
-    const options = ["All", "Scheduled", "Pending", "Completed", "Rejected"];
-    const [open, setOpen] = useState(false);
-    const ref = useRef(null);
+  // Check if we're in a status-filtered empty state
+  const isStatusFilteredEmptyState =
+    !loading && appointments.length === 0 && statusFilter !== "All";
 
-    useEffect(() => {
-      const onDocClick = (e) => {
-        if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-      };
-      document.addEventListener("mousedown", onDocClick);
-      return () => document.removeEventListener("mousedown", onDocClick);
-    }, []);
-
-    return (
-      <div ref={ref} className={`relative ${className}`}>
-        <button
-          type="button"
-          onClick={() => setOpen((s) => !s)}
-          className="w-full flex items-center justify-between px-4 h-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-base font-normal focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <span className="truncate">{value}</span>
-          <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-300 ml-2" />
-        </button>
-
-        {open && (
-          <ul className="absolute right-0 mt-2 w-28 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-50 py-1 text-base">
-            {options.map((opt) => (
-              <li key={opt}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChange(opt);
-                    setOpen(false);
-                  }}
-                  className={`w-full flex items-center h-10 text-left px-3 hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                    opt === value ? "bg-gray-100 dark:bg-gray-600" : ""
-                  } text-gray-900 dark:text-white text-base font-normal`}
-                >
-                  {opt}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    );
+  // Function to clear status filter
+  const clearStatusFilter = () => {
+    setStatusFilter("All");
   };
 
   return (
@@ -73,7 +32,7 @@ export default function AppointmentHistory({
         </h3>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-80">
+          <div className="relative flex-1 sm:w-70">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
@@ -83,20 +42,6 @@ export default function AppointmentHistory({
               className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-
-          {/* Date filter pill */}
-          {dateFilter && (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-sm">
-              <span className="opacity-80 mr-2">{dateFilter}</span>
-              <button
-                onClick={() => setDateFilter(null)}
-                className="text-xs text-gray-600 dark:text-gray-300 hover:text-gray-800"
-                aria-label="Clear date filter"
-              >
-                ✕
-              </button>
-            </div>
-          )}
 
           <StatusDropdown value={statusFilter} onChange={setStatusFilter} />
 
@@ -125,22 +70,76 @@ export default function AppointmentHistory({
             ))
           ) : appointments.length === 0 ? (
             <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-300">
-              <EmptyState
-                title={
-                  searchTerm ? "No appointments found" : "No Appointments Yet"
-                }
-                description={
-                  searchTerm
-                    ? `No appointments match "${searchTerm}". Try a different search term.`
-                    : "You haven't scheduled any appointments yet. Book your first appointment to get started with managing your healthcare."
-                }
-                additionalInfo={
-                  searchTerm
-                    ? ""
-                    : "All your upcoming and past appointments will appear here for easy access."
-                }
-                icon="default"
-              />
+              {isStatusFilteredEmptyState ? (
+                // Status filter empty state
+                <div className="flex flex-col items-center justify-center px-4 text-center py-12">
+                  {/* Status-specific illustration */}
+                  <div className="relative mb-8">
+                    <div className="w-32 h-32 bg-linear-to-br from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full flex items-center justify-center mx-auto">
+                      <div className="relative">
+                        <FilterX className="w-12 h-12 text-purple-500 dark:text-purple-400" />
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">
+                            0
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Floating elements for status filter state */}
+                    <div className="absolute top-4 -left-4 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                      <ChevronDown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="absolute bottom-4 -right-4 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                      <span className="text-xs font-bold text-green-600 dark:text-green-400">
+                        {statusFilter.charAt(0)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Text Content for status filter state */}
+                  <div className="max-w-md mx-auto">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                      No {statusFilter.toLowerCase()} appointments
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                      {statusFilter === "Scheduled"
+                        ? "You don't have any scheduled appointments at the moment. Scheduled appointments will appear here once they're confirmed."
+                        : statusFilter === "Pending"
+                        ? "There are no pending appointments requiring your attention right now."
+                        : statusFilter === "Completed"
+                        ? "No completed appointments found. Completed appointments will show up here once they're finished."
+                        : statusFilter === "Rejected"
+                        ? "No rejected appointments in your history."
+                        : `No appointments found with status "${statusFilter}".`}
+                    </p>
+
+                    {/* Clear filter button */}
+                    <button
+                      onClick={clearStatusFilter}
+                      className="bg-purple-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 hover:bg-purple-600 transition mx-auto"
+                    >
+                      <FilterX className="w-4 h-4" />
+                      Show All Appointments
+                    </button>
+                  </div>
+                </div>
+              ) : searchTerm ? (
+                // Search empty state
+                <EmptyState
+                  title="No appointments found"
+                  description={`No appointments match "${searchTerm}". Try a different search term.`}
+                  icon="search"
+                />
+              ) : (
+                // Regular empty state (no appointments at all)
+                <EmptyState
+                  title="No Appointments Yet"
+                  description="You haven't scheduled any appointments yet. Book your first appointment to get started with managing your healthcare."
+                  additionalInfo="All your upcoming and past appointments will appear here for easy access."
+                  icon="default"
+                />
+              )}
             </div>
           ) : (
             appointments.map((apt) => (
