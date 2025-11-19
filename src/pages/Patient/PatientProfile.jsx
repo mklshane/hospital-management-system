@@ -90,7 +90,6 @@ const PatientProfile = () => {
       );
 
       if (success) {
-        toast.success("Profile updated successfully");
         setOriginalData(formData);
         setIsEditing(false);
       } else {
