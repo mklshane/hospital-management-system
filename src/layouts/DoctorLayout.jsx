@@ -7,7 +7,7 @@ import {
   IconClipboardHeart,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import LogoutConfirmModal from "@/components/Common/LogoutConfirmModal";

@@ -6,7 +6,7 @@ import {
   IconSettings,
   IconUserBolt,
 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { Logo, LogoIcon } from "./Logo";

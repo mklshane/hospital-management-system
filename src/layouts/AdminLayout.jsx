@@ -7,7 +7,7 @@ import {
   IconUsersGroup,
   IconCalendarTime,
 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Logo, LogoIcon } from "./Logo";
