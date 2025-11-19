@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const Calendar = ({ appointments = [] }) => {
+const Calendar = ({ appointments = [], onDateClick, selectedDate }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const month = currentDate.toLocaleString("default", { month: "long" });
@@ -96,20 +96,38 @@ const Calendar = ({ appointments = [] }) => {
           const hasAppt = hasScheduledAppointment(day);
           const today = isToday(day);
 
+          const monthStr = String(currentDate.getMonth() + 1).padStart(2, "0");
+          const dayStr = String(day).padStart(2, "0");
+          const dateStr = `${year}-${monthStr}-${dayStr}`;
+
+          const selected = selectedDate === dateStr;
+
           return (
-            <div
+            <button
               key={`day-${year}-${currentDate.getMonth()}-${day}`}
+              onClick={() => onDateClick && onDateClick(dateStr)}
               className={`
+<<<<<<< Updated upstream:src/components/Patient/Dashboard/Calendar.jsx
                 flex items-center justify-center 
                 h-7 w-7                /* ← Fixed square size (was h-8) */
                 mx-auto                /* ← Centers number perfectly */
                 rounded-lg transition-colors text-center
                 ${today ? "bg-blue-100 text-blue-700 font-bold" : "text-gray-700 dark:text-gray-300"}
                 ${hasAppt ? "border-2 border-blue-500" : "hover:bg-gray-50 dark:hover:bg-gray-700"}
+=======
+                flex items-center justify-center h-8 rounded-lg transition-colors focus:outline-none
+                ${
+                  today
+                    ? "bg-blue-100 text-blue-700 font-bold"
+                    : "text-gray-700 dark:text-gray-300"
+                }
+                ${hasAppt ? "border-2 border-blue-500" : "hover:bg-gray-50 dark:hover:bg-gray-700"}
+                ${selected ? "ring-2 ring-blue-400" : ""}
+>>>>>>> Stashed changes:src/components/Patient/Calendar.jsx
               `}
             >
               {day}
-            </div>
+            </button>
           );
         })}
       </div>

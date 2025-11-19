@@ -34,14 +34,32 @@ export default function PatientDashboard() {
     dataKey: "doctors",
   });
 
+  // Date filter: null or 'YYYY-MM-DD'
+  const [dateFilter, setDateFilter] = useState(null);
+  // Status filter
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  // Apply status filter before passing data to the search hook so the
+  // search only operates on the selected status subset.
+  const baseAppointments = appointments.filter((apt) => apt.status !== "Cancelled");
+
+  // Apply date filter if set (compare YYYY-MM-DD)
+  const toYMD = (d) => new Date(d).toISOString().split("T")[0];
+  const dateFilteredAppointments = dateFilter
+    ? baseAppointments.filter((apt) => toYMD(apt.appointment_date) === dateFilter)
+    : baseAppointments;
+
+  // Apply status filter after date filter
+  const statusFilteredAppointments = dateFilteredAppointments.filter(
+    (apt) => statusFilter === "All" || apt.status === statusFilter
+  );
+
+  // Run search on the status-filtered appointments
   const {
     searchQuery,
     handleSearch,
     filteredData: filteredAppointments,
-  } = useSearch(
-    appointments.filter((apt) => apt.status !== "Cancelled"), 
-    ["doctor.name", "appointment_date", "notes"]
-  );
+  } = useSearch(statusFilteredAppointments, ["doctor.name", "appointment_date", "notes", "status"]);
 
   // Modals
   const bookAppointmentModal = useModal();
@@ -114,6 +132,7 @@ export default function PatientDashboard() {
   };
 
   return (
+<<<<<<< Updated upstream
     <div className="h-full rounded-2xl overflow-hidden">
       <div className="max-w-7xl mx-auto h-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
@@ -140,8 +159,42 @@ export default function PatientDashboard() {
               />
             </div>
           </main>
+=======
+    <div className="h-full rounded-2xl ">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
+      {/* Main: Appointment History */}
+      <main className="lg:col-span-9 h-full overflow-y-auto">
+        <div className="h-full flex flex-col">
+          <AppointmentHistory
+            appointments={filteredAppointments}
+            loading={appointmentsLoading}
+            searchTerm={searchQuery}
+            setSearchTerm={handleSearch}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            onNewAppointment={handleOpenBookModal}
+            onAppointmentClick={handleAppointmentClick}
+          />
+>>>>>>> Stashed changes
         </div>
-      </div>
+      </main>
+
+      {/* Sidebar: Profile + Calendar */}
+      <aside className="lg:col-span-3 flex flex-col gap-4 h-full">
+        <div className="h-[38%] min-h-0">
+          <PatientProfile user={user} />
+        </div>
+        <div className="flex-1 min-h-0">
+          <Calendar
+            appointments={appointments}
+            onDateClick={setDateFilter}
+            selectedDate={dateFilter}
+          />
+        </div>
+      </aside>
+    </div>
 
       {/* Modals */}
       <BookAppointmentModal
