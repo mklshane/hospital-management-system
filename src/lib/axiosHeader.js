@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://final-project-group1-webdevt-backend.onrender.com/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 /* 
 const BASE_URL = "https://final-project-group1-webdevt-backend.onrender.com/api"; */
  /* "http://localhost:3000/api"; */
@@ -27,7 +27,6 @@ axiosHeader.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 → auto logout
 axiosHeader.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -36,13 +35,11 @@ axiosHeader.interceptors.response.use(
       localStorage.removeItem("user");
       localStorage.removeItem("userType");
     }
-    return Promise.reject({
-      message: error.response?.data?.message || "An error occurred",
-      status: error.response?.status,
-    });
+
+    // DO NOT rewrap the error → preserve original error.response
+    return Promise.reject(error); // ← THIS IS THE KEY FIX
   }
 );
-
 export const api = {
   get: (url, config = {}) => axiosHeader.get(url, config),
   post: (url, data = {}, config = {}) => axiosHeader.post(url, data, config),
