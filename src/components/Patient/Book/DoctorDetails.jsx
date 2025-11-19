@@ -32,12 +32,18 @@ const DoctorDetails = ({ doctor, onBook }) => {
     : "";
 
   if (!doctor) {
-    return (
-      <div className="bg-ui-card dark:bg-gray-800 rounded-xl p-6 text-center text-gray-500 dark:text-gray-400 h-full border-2">
-        Select a doctor to view details
-      </div>
-    );
-  }
+  return (
+    <div className="bg-ui-card dark:bg-gray-800 rounded-xl p-6 h-full border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center">
+      <div className="text-6xl mb-4">👨🏻‍⚕️</div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        No doctor selected
+      </h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400">
+        Click on any doctor card to view details.
+      </p>
+    </div>
+  );
+}
 
   const avatarColor = doctor
     ? getSpecializationColor(doctor.specialization)
