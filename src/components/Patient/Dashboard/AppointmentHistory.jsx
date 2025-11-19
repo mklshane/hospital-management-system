@@ -2,11 +2,8 @@ import { Search, Plus, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import AppointmentCard from "./AppointmentCard";
 import ThemeToggle from "@/components/ThemeToggle";
-<<<<<<< Updated upstream:src/components/Patient/Dashboard/AppointmentHistory.jsx
 import EmptyState from "@/components/Common/EmptyState";
-=======
 
->>>>>>> Stashed changes:src/components/Patient/AppointmentHistory.jsx
 export default function AppointmentHistory({
   appointments,
   loading,
@@ -53,7 +50,9 @@ export default function AppointmentHistory({
                     onChange(opt);
                     setOpen(false);
                   }}
-                  className={`w-full flex items-center h-10 text-left px-3 hover:bg-gray-100 dark:hover:bg-gray-600 ${opt === value ? "bg-gray-100 dark:bg-gray-600" : ""} text-gray-900 dark:text-white text-base font-normal`}
+                  className={`w-full flex items-center h-10 text-left px-3 hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                    opt === value ? "bg-gray-100 dark:bg-gray-600" : ""
+                  } text-gray-900 dark:text-white text-base font-normal`}
                 >
                   {opt}
                 </button>

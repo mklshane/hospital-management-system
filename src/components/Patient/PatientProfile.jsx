@@ -1,11 +1,8 @@
 import { User, Mail, Phone, MapPin } from "lucide-react";
 export default function PatientProfile({ user }) {
   return (
-<<<<<<< Updated upstream
-    <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-4 shadow-lg h-full flex flex-col min-h-0">
-=======
     <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 shadow-lg h-full flex flex-col">
->>>>>>> Stashed changes
+
       {/* Avatar + name */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">

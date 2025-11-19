@@ -130,89 +130,67 @@ export default function PatientDashboard() {
       });
     }
   };
-
+  
   return (
-<<<<<<< Updated upstream
-    <div className="h-full rounded-2xl overflow-hidden">
-      <div className="max-w-7xl mx-auto h-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
-          <aside className="lg:col-span-3 gap-4 flex flex-col h-full overflow-hidden">
-            <div className="flex-[0_0_36%] min-h-0">
-              <PatientProfile user={user} />
-            </div>
-            <div className="flex-1 min-h-0 overflow-hidden">
-              <div className="h-full">
-              <Calendar appointments={appointments} />
-              </div>
-            </div>
-          </aside>
-
-          <main className="lg:col-span-9 h-full overflow-y-auto">
-            <div className="h-full flex flex-col">
-              <AppointmentHistory
-                appointments={filteredAppointments}
-                loading={appointmentsLoading}
-                searchTerm={searchQuery}
-                setSearchTerm={handleSearch}
-                onNewAppointment={handleOpenBookModal}
-                onAppointmentClick={handleAppointmentClick}
-              />
-            </div>
-          </main>
-=======
-    <div className="h-full rounded-2xl ">
+  <div className="h-full rounded-2xl overflow-hidden">
+    <div className="max-w-7xl mx-auto h-full">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-full">
-      {/* Main: Appointment History */}
-      <main className="lg:col-span-9 h-full overflow-y-auto">
-        <div className="h-full flex flex-col">
-          <AppointmentHistory
-            appointments={filteredAppointments}
-            loading={appointmentsLoading}
-            searchTerm={searchQuery}
-            setSearchTerm={handleSearch}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            dateFilter={dateFilter}
-            setDateFilter={setDateFilter}
-            onNewAppointment={handleOpenBookModal}
-            onAppointmentClick={handleAppointmentClick}
-          />
->>>>>>> Stashed changes
-        </div>
-      </main>
 
-      {/* Sidebar: Profile + Calendar */}
-      <aside className="lg:col-span-3 flex flex-col gap-4 h-full">
-        <div className="h-[38%] min-h-0">
-          <PatientProfile user={user} />
-        </div>
-        <div className="flex-1 min-h-0">
-          <Calendar
-            appointments={appointments}
-            onDateClick={setDateFilter}
-            selectedDate={dateFilter}
-          />
-        </div>
-      </aside>
+        {/* Main Content */}
+        <main className="lg:col-span-9 h-full overflow-y-auto">
+          <div className="h-full flex flex-col">
+            <AppointmentHistory
+              appointments={filteredAppointments}
+              loading={appointmentsLoading}
+              searchTerm={searchQuery}
+              setSearchTerm={handleSearch}
+              onNewAppointment={handleOpenBookModal}
+              onAppointmentClick={handleAppointmentClick}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
+            />
+          </div>
+        </main>
+
+        {/* Sidebar */}
+        <aside className="lg:col-span-3 gap-4 flex flex-col h-full overflow-hidden">
+          <div className="flex-[0_0_36%] min-h-0">
+            <PatientProfile user={user} />
+          </div>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="h-full">
+              <Calendar
+                appointments={appointments}
+                selectedDate={dateFilter}
+                onDateClick={setDateFilter}
+              />
+
+            </div>
+          </div>
+        </aside>
+
+      </div>
     </div>
 
-      {/* Modals */}
-      <BookAppointmentModal
-        isOpen={bookAppointmentModal.isOpen}
-        onClose={bookAppointmentModal.close}
-        doctors={doctors}
-        form={form}
-        onChange={handleFormChange}
-        onSubmit={handleSubmitAppointment}
-        submitting={submitting}
-      />
+    {/* Modals */}
+    <BookAppointmentModal
+      isOpen={bookAppointmentModal.isOpen}
+      onClose={bookAppointmentModal.close}
+      doctors={doctors}
+      form={form}
+      onChange={handleFormChange}
+      onSubmit={handleSubmitAppointment}
+      submitting={submitting}
+    />
 
-      <PatientAppointmentDetailsModal
-        isOpen={appointmentDetailsModal.isOpen}
-        onClose={handleCloseDetailsModal}
-        appointment={appointmentDetailsModal.selectedItem}
-        onUpdate={handleAppointmentUpdate}
-      />
-    </div>
-  );
+    <PatientAppointmentDetailsModal
+      isOpen={appointmentDetailsModal.isOpen}
+      onClose={handleCloseDetailsModal}
+      appointment={appointmentDetailsModal.selectedItem}
+      onUpdate={handleAppointmentUpdate}
+    />
+  </div>
+);
 }
