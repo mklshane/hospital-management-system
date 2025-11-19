@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   Clock,
-  MapPin,
   Phone,
   Mail,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
 import { generateTimeSlots } from "@/utils/timeSlots";
+import { getSpecializationColor } from "@/utils/statusColors";
 
 const DoctorDetails = ({ doctor, onBook }) => {
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -39,19 +39,26 @@ const DoctorDetails = ({ doctor, onBook }) => {
     );
   }
 
+  const avatarColor = doctor
+    ? getSpecializationColor(doctor.specialization)
+    : "bg-gray-600";
+
   return (
     <div className="bg-ui-card dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-full flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-xl font-bold text-gray-600 dark:text-gray-300">
+        <div className="flex items-center gap-5">
+          <div
+            className={`w-13 h-13 ${avatarColor} rounded-full flex items-center justify-center text-white font-bold text-xl ring-4 ring-inset ring-white/20 shadow-lg`}
+          >
             {initials}
           </div>
+
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Dr. {doctor.name}
             </h2>
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+            <p className="text-base font-medium text-gray-600 dark:text-gray-300">
               {doctor.specialization}
             </p>
           </div>
@@ -115,16 +122,14 @@ const DoctorDetails = ({ doctor, onBook }) => {
           <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-gray-400 dark:text-gray-500" />
-              <span>{doctor.contact|| "Not provided"}</span>
+              <span>{doctor.contact || "Not provided"}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-gray-400 dark:text-gray-500" />
               <span>{doctor.email || "Not provided"}</span>
             </div>
-           
           </div>
         </div>
-
       </div>
 
       {/* Book CTA */}

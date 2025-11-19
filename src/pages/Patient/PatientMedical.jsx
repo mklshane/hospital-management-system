@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { FileText, AlertCircle } from "lucide-react";
 import { api } from "@/lib/axiosHeader";
 import ThemeToggle from "@/components/ThemeToggle";
-import CompletedAppointmentCard from "@/components/Patient/CompletedAppointmentCard";
+import CompletedAppointmentCard from "@/components/Patient/Records/CompletedAppointmentCard";
 import SearchBar from "@/components/Common/SearchBar";
 import EmptyState from "@/components/Common/EmptyState";
 
@@ -161,7 +161,7 @@ const PatientMedical = () => {
               <SearchBar
                 onSearch={handleSearch}
                 placeholder="Search doctor, diagnosis, medicine..."
-                className="flex-1 sm:flex-initial sm:min-w-80"
+                className="flex-1 sm:flex-initial sm:min-w-100"
               />
               <ThemeToggle />
             </div>

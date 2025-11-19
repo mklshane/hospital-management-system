@@ -17,9 +17,9 @@ const CompletedAppointmentCard = ({ appointment, records = [] }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-11 h-11 bg-linear-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center shadow-md shrink-0">
+         {/*  <div className="w-11 h-11 bg-linear-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-full flex items-center justify-center shadow-md shrink-0">
             <Stethoscope className="w-6 h-6 text-white" />
-          </div>
+          </div> */}
           <div className="min-w-0">
             <h3 className="font-bold text-gray-900 dark:text-gray-100 text-lg truncate">
               Dr. {doctor.name}
